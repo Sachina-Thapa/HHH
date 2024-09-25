@@ -101,20 +101,22 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form class="border shadow p-3 rounded">
+        <form class="border shadow p-3 rounded" 
+        action="php/checklogin.php"
+        method="post">
           <h1 class="text-center p-3">User Login</h1>
           <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" required placeholder="Enter correct Username">
+            <label class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" required placeholder="Enter correct E-mail">
           </div>
           <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
+            <label class="form-label">Password</label>
             <input type="password" class="form-control" id="password" required placeholder="Enter Correct Password">
-          </div>
+          </div> 
           <div class="mb-0">
             <label class="form-label">Select User Type</label>
           </div>
-          <select class="form-select mb-3" aria-label="Default select example">
+          <select class="form-select mb-3" name="role"  aria-label="Default select example">
             <option selected>Admin</option>
             <option value="1">Staff</option>
             <option value="2">Hosteler</option>
