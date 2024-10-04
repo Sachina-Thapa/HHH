@@ -1,3 +1,60 @@
+<?php
+session_start();
+$host = 'localhost';
+$user = 'root'; 
+$password = ''; 
+$database = 'hhh'; 
+$errorMessage = '';
+$conn = new mysqli($host, $user, $password, $database);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    $userType = $_POST['user_type'];
+
+    switch ($userType) {
+        case 'Admin':
+            $table = 'adminlogin';
+            $dashboard = 'admin/addash.php';
+            break;
+        case 'Staff':
+            $table = 'stafflogin';
+            $dashboard = 'staffdash.php';
+            break;
+        case 'Hosteler':
+            $table = 'hostelerlogin';
+            $dashboard = 'hostelerdash.php';
+            break;
+        default:
+            $errorMessage = "Invalid user type selected";
+            break;
+    }
+
+    if (empty($errorMessage)) {
+        $stmt = $conn->prepare("SELECT * FROM $table WHERE username = ? AND password = ?");
+        $stmt->bind_param("ss", $username, $password);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            
+            $_SESSION['username'] = $username; 
+            header("Location: $dashboard");
+            exit();
+        } else {
+            $errorMessage = "Invalid username or password.";
+               }
+
+        $stmt->close();
+    }
+}
+$conn->close();
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,43 +151,45 @@
 
 <!-- Login Modal -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="loginModalLabel">Login</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form class="border shadow p-3 rounded" 
-        action="php/checklogin.php"
-        method="post">
-          <h1 class="text-center p-3">User Login</h1>
-          <div class="mb-3">
-            <label class="form-label">Email address</label>
-            <input type="email" class="form-control" id="email" required placeholder="Enter correct E-mail">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" required placeholder="Enter Correct Password">
-          </div> 
-          <div class="mb-0">
-            <label class="form-label">Select User Type</label>
-          </div>
-          <select class="form-select mb-3" name="role"  aria-label="Default select example">
-            <option selected>Admin</option>
-            <option value="1">Staff</option>
-            <option value="2">Hosteler</option>
-          </select>
-          <div class="d-flex align-items-center jsutify-content-between mb-2"> 
-          <button type="submit" class="btn btn-primary">LOGIN</button>
-          <a href="javascript: void(0)"class="text-secondary text-decoration-none ms-auto">Forgot Password?</a>
-        </form>
-          </div>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form class="border shadow p-3 rounded" method="POST" action="">
+                        <h1 class="text-center p-3">User Login</h1>
+                        <?php if (!empty($errorMessage)): ?>
+                            <div class="alert alert-danger"><?php echo $errorMessage; ?></div>
+                        <?php endif; ?>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" name="username" id="username" required placeholder="Enter Username">
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" name="password" id="password" required placeholder="Enter Password">
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label">Select User Type</label>
+                        </div>
+                        <select class="form-select mb-3" name="user_type" required>
+                            <option selected disabled>Select User Type</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Staff">Staff</option>
+                            <option value="Hosteler">Hosteler</option>
+                        </select>
+                        <div class="d-flex align-items-center justify-content-between mb-2"> 
+                            <button type="submit" class="btn btn-primary">LOGIN</button>
+                            <a href="javascript: void(0)" class="text-secondary text-decoration-none ms-auto">Forgot Password?</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-
+    
   <!-- Register Modal -->
   <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
   <div class="modal-dialog">
