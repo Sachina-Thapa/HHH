@@ -188,67 +188,7 @@ $conn->close();
     </div>
   </div>
  </section>
-
- <!-- CONTACT SECTION -->
-  <section id="contact" class="contact-section-padding mt-5">
-  <h2 class=" mt-5 pt-4 mb-4 text-center">Contact Us</h2>
-  <div class="container">
-    <div class="row align-items-center">
-      <!-- Contact Image on the Left -->
-      <div class="col-lg-4 col-md-12 col-12">
-        <div class="contact-img">
-          <img src="images/contactus.jpg" alt=" " class="img-fluid">
-        </div>
-      </div>
-      <!-- Contact Form on the Right -->
-      <div class="col-lg-8 col-md-12 col-12">
-        <div class="contact-form p-4">
-          <form action="#" class="m-auto">
-            <div class="row">
-              <div class="col-md-12">
-                <div class="mb-3">
-                  <input type="text" class="form-control" required placeholder="Your Full Name">
-                </div>
-              </div>
-              <div class="col-md-12">
-                <div class="mb-3">
-                  <input type="email" class="form-control" required placeholder="Your Email Here">
-                </div>
-              </div>
-              <div class="col-md-12">
-                <div class="mb-3">
-                  <textarea rows="3" required class="form-control" placeholder="Your Query Here"></textarea>
-                </div>
-              </div>
-              <div class="col-md-12">
-                <button class="btn btn-warning btn-lg btn-block mt-3">Send Now</button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <h2 class="mt-5 pt-4 mb-4 text-center fw-bold h-font">Our Facilities</h2>
-<div class="container">
-  <div class="row justify-content-center"> <!-- Ensures alignment -->
-    <div class="col-lg-2 col-md-4 col-sm-6 text-center bg-white rounded shadow py-4 my-3 mx-3"> 
-      <img src="images/features/wifi.svg" width="100px">
-      <h5 class="mt-3">Wifi</h5>
-    </div>
-    <div class="col-lg-2 col-md-4 col-sm-6 text-center bg-white rounded shadow py-4 my-3 mx-3"> 
-      <img src="images/food.jpg" width="100px">
-      <h5 class="mt-3">Food</h5>
-    </div>
-    <div class="col-lg-2 col-md-4 col-sm-6 text-center bg-white rounded shadow py-4 my-3 mx-3"> 
-      <img src="images/laundry.png" width="80px">
-      <h5 class="mt-3">Laundry</h5>
-    </div>
-  </div>
-</div>
-
-
+ 
 <!-- REACH US -->
 <h2 class=" mt-5 pt-4 mb-4 text-center">Reach Us</h2>
 <div class="container">
