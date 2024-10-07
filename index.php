@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             break;
         case 'Staff':
             $table = 'stafflogin';
-            $dashboard = 'staffdash.php';
+            $dashboard = 'staff/staffdash.php';
             break;
         case 'Hosteler':
             $table = 'hostelerlogin';
