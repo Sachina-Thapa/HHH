@@ -214,13 +214,13 @@ $result = $conn->query($sql);
             </div>
      <div class="col-md-10">
        <h1>Room Management</h1>
-     <h2><?php echo isset($room_to_update) ? 'Update Room' : 'Add New Room'; ?></h2>
+     <h2>Add New Room</h2>
      <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
         <?php if (isset($room_to_update)) echo "<input type='hidden' name='rid' value='" . $room_to_update['rid'] . "'>"; ?>
         <input type="text" name="room_number" placeholder="Room Number" required value="<?php echo isset($room_to_update) ? $room_to_update['rno'] : ''; ?>">
         <input type="text" name="room_type" placeholder="Room Type" required value="<?php echo isset($room_to_update) ? $room_to_update['rtype'] : ''; ?>">
         <input type="number" name="room_price" step="0.01" placeholder="Room Price" required value="<?php echo isset($room_to_update) ? $room_to_update['rprice'] : ''; ?>">
-        <input type="submit" name="<?php echo isset($room_to_update) ? 'update' : 'add'; ?>" value="<?php echo isset($room_to_update) ? 'Update Room' : 'Add Room'; ?>">
+        <input type="submit" name= "add" value= "Add Room" >
      </form>
      <div id="message" >   <?php
      if (isset($_GET['success']) && $_GET['success'] == 1) {
