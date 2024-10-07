@@ -43,15 +43,15 @@
         }
     </style>
 </head>
-    </div>
+    <body>
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
             <div class="col-md-2 sidebar">
                 <h3 class="text-white text-center">Her Home Hostel</h3>
                 <a href="#">Dashboard</a>
-                <a href="#">Room Management</a>
-                <a href="#">Staff management</a>
+                <a href="roomManagement.php">Room Management</a>
+                <a href="staffmanagement.php">Staff management</a>
                 <a href="#">Hosteller</a>
                 <a href="#">Settings</a>
                 <button class="logout-btn w-100">LOG OUT</button>

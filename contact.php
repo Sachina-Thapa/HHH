@@ -60,7 +60,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HerHomeHostel</title>
+    <title>HerHomeHostel-About US</title>
     <?php require('inc/links.php'); ?>
     <style>
   body {
@@ -168,26 +168,6 @@ $conn->close();
   </button>
 </div>  
 
-<!-- ABOUT US SECTION -->
- <section id="about" class="about-section-padding mt-5">
-  <div class="container">
-    <div class="row align-items-top">
-      <div class="col-lg-3 col-md-12 col-12">
-        <div class="about-img">
-        <img src="images/logo.png" alt="" class="img-fluid">
-        </div>
-      </div>
-      <div class="col-lg-9 col-md-12 col-12 ps-lg-0 mt-md-5">
-        <div class="about-text">
-        <h1>About Us</h1>
-        <p class="about-paragraph" >
-          Welcome to Her Home Hostel, your trusted online platform for hassle-free hostel bookings. We are committed to providing a convenient, secure, and efficient way for students, travelers, and working professionals to find and book hostel room according to their choice. 
-          Our mission is to simplify the process of finding and booking hostels, ensuring a seamless experience for users seeking affordable and comfortable accommodation. Whether you're a student looking for a long-term stay or a traveler needing short-term accommodation, we have a solution for you.</p>
-        </div>
-      </div>
-    </div>
-  </div>
- </section>
 
  <!-- CONTACT SECTION -->
   <section id="contact" class="contact-section-padding mt-5">
@@ -230,23 +210,7 @@ $conn->close();
     </div>
   </div>
 
-  <h2 class="mt-5 pt-4 mb-4 text-center fw-bold h-font">Our Facilities</h2>
-<div class="container">
-  <div class="row justify-content-center"> <!-- Ensures alignment -->
-    <div class="col-lg-2 col-md-4 col-sm-6 text-center bg-white rounded shadow py-4 my-3 mx-3"> 
-      <img src="images/features/wifi.svg" width="100px">
-      <h5 class="mt-3">Wifi</h5>
-    </div>
-    <div class="col-lg-2 col-md-4 col-sm-6 text-center bg-white rounded shadow py-4 my-3 mx-3"> 
-      <img src="images/food.jpg" width="100px">
-      <h5 class="mt-3">Food</h5>
-    </div>
-    <div class="col-lg-2 col-md-4 col-sm-6 text-center bg-white rounded shadow py-4 my-3 mx-3"> 
-      <img src="images/laundry.png" width="80px">
-      <h5 class="mt-3">Laundry</h5>
-    </div>
-  </div>
-</div>
+
 
 
 <!-- REACH US -->
