@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Pannel - Dashboard </title>
+    <title>Staff Panel - Dashboard </title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -43,36 +43,25 @@
         }
     </style>
 </head>
-    <body>
+    </div>
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
             <div class="col-md-2 sidebar">
                 <h3 class="text-white text-center">Her Home Hostel</h3>
                 <a href="#">Dashboard</a>
-                <a href="roomManagement.php">Room Management</a>
-                <a href="staffmanagement.php">Staff management</a>
-                <a href="#">Hosteller</a>
-                <a href="#">Settings</a>
-                <a href="logout.php" class="logout-btn w-100">LOG OUT</button>
+                <a href="#">Manage Hosteler</a>
+                <a href="#">Manage Booking</a>
+                <a href="#">View Feedback</a>
+                <a href="#">Manage Visitor Form</a>
+                <a href="#">Services</a>
+                <a href="#">Fee</a>
+                <a href="#">Report</a>
+                <button class="logout-btn w-100">LOG OUT</button>
             </div>
             <!-- Main content -->
             <div class="col-md-10">
-                <h3 class="ab-0 h-font">Admin Pannel</h3>
-                <button class="btn btn-primary mb-3">+ Add</button>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Total  Hostellers/Staff</th>
-                            <th>Bedoom occupancy</th>
-                            <th>Guests</th>
-                            <th>Price</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Dynamic rows will go here -->
-                    </tbody>
-                </table>
+                <h3 class="ab-0 h-font">Staff Pannel</h3>
             </div>
         </div>
     </div>
