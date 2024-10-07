@@ -210,23 +210,7 @@ $conn->close();
     </div>
   </div>
 
-  <h2 class="mt-5 pt-4 mb-4 text-center fw-bold h-font">Our Facilities</h2>
-<div class="container">
-  <div class="row justify-content-center"> <!-- Ensures alignment -->
-    <div class="col-lg-2 col-md-4 col-sm-6 text-center bg-white rounded shadow py-4 my-3 mx-3"> 
-      <img src="images/features/wifi.svg" width="100px">
-      <h5 class="mt-3">Wifi</h5>
-    </div>
-    <div class="col-lg-2 col-md-4 col-sm-6 text-center bg-white rounded shadow py-4 my-3 mx-3"> 
-      <img src="images/food.jpg" width="100px">
-      <h5 class="mt-3">Food</h5>
-    </div>
-    <div class="col-lg-2 col-md-4 col-sm-6 text-center bg-white rounded shadow py-4 my-3 mx-3"> 
-      <img src="images/laundry.png" width="80px">
-      <h5 class="mt-3">Laundry</h5>
-    </div>
-  </div>
-</div>
+
 
 
 <!-- REACH US -->
