@@ -62,20 +62,6 @@
             <!-- Main content -->
             <div class="col-md-10">
                 <h3 class="ab-0 h-font">Staff Pannel</h3>
-                <button class="btn btn-primary mb-3">+ Add</button>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Total  Hostellers/Staff</th>
-                            <th>Bedoom occupancy</th>
-                            <th>Guests</th>
-                            <th>Price</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Dynamic rows will go here -->
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
