@@ -58,7 +58,7 @@
         <div class="col-md-2 sidebar">
             <h4 class="text-white text-center">Her Home Hostel</h4>
             <a href="#">Dashboard</a>
-            <a href="#">Room Management</a>
+            <a href="roomManagement.php">Room Management</a>
             <a href="staffmanagement.php">Staff management</a>
             <a href="#">Hosteller</a>
             <a href="#">Settings</a>
