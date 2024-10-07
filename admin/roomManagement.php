@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
     $room_number = $_POST['rno'];
     $room_type = $_POST['rtype'];
     $room_price = $_POST['rprice'];
-//updated
+
     $update_sql = "UPDATE room SET rno=?, rtype=?, rprice=? WHERE rid=?";
     $stmt = $conn->prepare($update_sql);
     $stmt->bind_param("ssdi", $room_number, $room_type, $room_price, $rid);
@@ -289,7 +289,7 @@ function enableEdit(rid) {
 function saveEdit(rid) {
     var rno = document.getElementById('rno_' + rid).innerText;
     var rtype = document.getElementById('rtype_' + rid).innerText;
-    var rprice = document.getElementById('rprice_' + rid).innerText;
+    var rprice = document.getElementById('rprice_' + rid).innerText.replace('रु ', '').replace(',', '');
 
     // Send AJAX request to update the room
     var xhr = new XMLHttpRequest();
@@ -304,6 +304,5 @@ function saveEdit(rid) {
             document.getElementById('save_' + rid).style.display = 'none';
         }
     };
-    xhr.send('update=1&rid=' + rid + '&rno=' + rno + '&rtype=' + rtype + '&rprice=' + rprice);
-}
-</script>
+    xhr.send('update=1&rid=' + rid + '&rno=' + encodeURIComponent(rno) + '&rtype=' + encodeURIComponent(rtype) + '&rprice=' + encodeURIComponent(rprice));
+}</script>
