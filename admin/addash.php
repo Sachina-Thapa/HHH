@@ -54,7 +54,7 @@
                 <a href="staffmanagement.php">Staff management</a>
                 <a href="#">Hosteller</a>
                 <a href="#">Settings</a>
-                <button class="logout-btn w-100">LOG OUT</button>
+                <a href="logout.php" class="logout-btn w-100">LOG OUT</button>
             </div>
             <!-- Main content -->
             <div class="col-md-10">
