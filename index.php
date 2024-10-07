@@ -66,7 +66,6 @@ $conn->close();
   body {
     background-color: #909EC1; 
   }
-
   .contact-img img {
     border-radius: 10px; /* Optional: for rounded corners */
     width: 100%; /* Ensure it scales with the container */
@@ -190,7 +189,7 @@ $conn->close();
  </section>
 
  <!-- CONTACT SECTION -->
-  <section id="contact" class="contact-section-padding mt-5">
+  <section id="contact" class="contact-section-padding mt-20">
   <h2 class=" mt-5 pt-4 mb-4 text-center">Contact Us</h2>
   <div class="container">
     <div class="row align-items-center">

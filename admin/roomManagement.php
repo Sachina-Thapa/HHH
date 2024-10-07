@@ -210,7 +210,7 @@ $result = $conn->query($sql);
                 <a href="staffmanagement.php">Staff management</a>
                 <a href="#">Hosteller</a>
                 <a href="#">Settings</a>
-                <button class="logout-btn w-100">LOG OUT</button>
+                <button class="btn w-100" ><a href="../index.php">LOG OUT</a></button>
             </div>
      <div class="col-md-10">
        <h1>Room Management</h1>
