@@ -49,11 +49,11 @@
             <!-- Sidebar -->
             <div class="col-md-2 sidebar">
                 <h3 class="text-white text-center">Her Home Hostel</h3>
-                <a href="#">Dashboard</a>
+                <a href="addash.php">Dashboard</a>
                 <a href="roomManagement.php">Room Management</a>
                 <a href="staffmanagement.php">Staff management</a>
-                <a href="#">Hosteller</a>
-                <a href="#">Settings</a>
+                <a href="hostelerManagement.php">Hosteller</a>
+                <a href="setting.php">Settings</a>
                 <button class="btn w-100" ><a href="../index.php">LOG OUT</a></button>
             </div>
             <!-- Main content -->

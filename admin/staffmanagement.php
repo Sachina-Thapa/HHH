@@ -12,20 +12,31 @@
         body {
             background-color: #f8f9fa;
         }
-        .sidebar {
-            height: 131vh;
-            background-color: #19191a;
-            padding: 1rem;
+ /*sidebar css*/
+ .sidebar {
+            margin:0px;
+            height: 100vh;
+            background-color: #343a40;
+            padding-top: 10px;
         }
         .sidebar a {
             color: #fff;
-            margin-bottom: 1.5rem;
-            text-decoration: none;
+            padding: 15px;
             display: block;
+            text-decoration: none;
+            
         }
         .sidebar a:hover {
-            color: #ddd;
+            background-color: #495057;
         }
+        .logout-btn {
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            border: none;
+            color: #000;
+            padding: 10px;
+        }
+
         .user-table {
             background-color: white;
             padding: 1rem;
@@ -54,17 +65,19 @@
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-2 sidebar">
-            <h4 class="text-white text-center">Her Home Hostel</h4>
-            <a href="#">Dashboard</a>
-            <a href="roomManagement.php">Room Management</a>
-            <a href="staffmanagement.php">Staff management</a>
-            <a href="#">Hosteller</a>
-            <a href="#">Settings</a>
-            <button class="logout-btn w-100">LOG OUT</button>
 
-        </div>
+
+              <!-- Sidebar -->
+     <div class="col-md-2 sidebar">
+     <h3 class="text-white text-center">Her Home Hostel</h3>
+                <a href="addash.php">Dashboard</a>
+                <a href="roomManagement.php">Room Management</a>
+                <a href="staffmanagement.php">Staff management</a>
+                <a href="hostelerManagement.php">Hosteller</a>
+                <a href="setting.php">Settings</a>
+                <button class="btn w-100" ><a href="../index.php">LOG OUT</a></button>
+            </div>
+
 
         <!-- Main Content -->
         <div class="col-md-10 p-4">

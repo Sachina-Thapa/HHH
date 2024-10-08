@@ -69,13 +69,13 @@
         <!-- Sidebar -->
         <div class="col-md-2 sidebar">
             <h4 class="text-white text-center">Her Home Hostel</h4>
-            <a href="#">Dashboard</a>
-            <a href="#">Room Management</a>
-            <a href="#">Staff management</a>
-            <a href="#">Hosteller</a>
-            <a href="#">Settings</a>
+            <a href="addash.php">Dashboard</a>
+            <a href="roomManagement.php">Room Management</a>
+            <a href="staffmanagement.php">Staff management</a>
+            <a href="hostelerManagement.php">Hosteller</a>
+            <a href="setting.php">Settings</a>
             
-            <button class="logout-btn w-100">LOG OUT</button>
+           <button class="btn w-100" ><a href="../index.php">LOG OUT</a></button>
         </div>
 
       <!-- Main Content -->
@@ -100,14 +100,19 @@
 
           <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-              <strong>Site Title:</strong> Her Home Hostel
+              <strong>Change Password</strong>
+              <form action="" class="d-flex align-items-center">
+                <input type="password" class="form-control mr-5" id="currentPassword" placeholder="Current Password">
+                <input type="password" class="form-control" id="newPassword" placeholder="New Password">
+                <button type="submit" class="btn btn-primary ">Submit</button>
+              </form>
             </div>
-            <button class="btn btn-outline-secondary">Edit</button>
+          
            
 
           </div>
-          <p><strong>About us:</strong> <p>Welcome to Her Home Hostel, your trusted online platform for hassle-free hostel bookings. We are committed to providing a convenient, secure, and efficient way for students, travelers, and working professionals to find and book hostel room according to their choice. 
-            Our mission is to simplify the process of finding and booking hostels, ensuring a seamless experience for users seeking affordable and comfortable accommodation. Whether you're a student looking for a long-term stay or a traveler needing short-term accommodation, we have a solution for you.</p>
+          <!-- <p><strong>About us:</strong> <p>Welcome to Her Home Hostel, your trusted online platform for hassle-free hostel bookings. We are committed to providing a convenient, secure, and efficient way for students, travelers, and working professionals to find and book hostel room according to their choice. 
+            Our mission is to simplify the process of finding and booking hostels, ensuring a seamless experience for users seeking affordable and comfortable accommodation. Whether you're a student looking for a long-term stay or a traveler needing short-term accommodation, we have a solution for you.</p> -->
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
