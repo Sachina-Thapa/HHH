@@ -7,7 +7,6 @@
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-<<<<<<< HEAD
    body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
@@ -17,11 +16,6 @@
             padding: 0;
             background-color: #f4f4f4;
         }
-=======
-    body {
-      background-color: #f5f5f5;
-    }
->>>>>>> 5d4f584d001869c933183a50edd24d3ba2bd99bc
     .sidebar {
             height: 100vh;
             background-color: #343a40;
@@ -85,10 +79,7 @@
             <a href="roomManagement.php">Room Management</a>
             <a href="staffmanagement.php">Staff management</a>
             <a href="hostelerManagement.php">Hosteller</a>
-<<<<<<< HEAD
             <a href="usersquery.php">Queries</a>
-=======
->>>>>>> 5d4f584d001869c933183a50edd24d3ba2bd99bc
             <a href="setting.php">Settings</a>
             
            <button class="btn w-100" ><a href="../index.php">LOG OUT</a></button>
