@@ -11,12 +11,15 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+<<<<<<< HEAD
             line-height: 1.6;
             color: #333;
             max-width: 100%;
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
+=======
+>>>>>>> 5d4f584d001869c933183a50edd24d3ba2bd99bc
         }
         .sidebar {
             height: 100vh;
@@ -59,7 +62,10 @@
                 <a href="roomManagement.php">Room Management</a>
                 <a href="staffmanagement.php">Staff management</a>
                 <a href="hostelerManagement.php">Hosteller</a>
+<<<<<<< HEAD
                 <a href="usersquery.php">Queries</a>
+=======
+>>>>>>> 5d4f584d001869c933183a50edd24d3ba2bd99bc
                 <a href="setting.php">Settings</a>
                 <button class="btn w-100" ><a href="../index.php">LOG OUT</a></button>
             </div>

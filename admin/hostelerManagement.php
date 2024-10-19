@@ -138,7 +138,10 @@ $result = $conn->query($sql);
                 <a href="roomManagement.php">Room Management</a>
                 <a href="staffmanagement.php">Staff management</a>
                 <a href="hostelerManagement.php">Hosteller</a>
+<<<<<<< HEAD
                 <a href="usersquery.php">Queries</a>
+=======
+>>>>>>> 5d4f584d001869c933183a50edd24d3ba2bd99bc
                 <a href="setting.php">Settings</a>
                 <button class="btn w-100" ><a href="../index.php">LOG OUT</a></button>
             </div>

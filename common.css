@@ -48,8 +48,11 @@ body{
     font-weight: 700;
     letter-spacing: 2px;
 }
+<<<<<<< HEAD
 .custom-alert{
     position:fixed;
     top:80px;
     right:25;
 }
+=======
+>>>>>>> 5d4f584d001869c933183a50edd24d3ba2bd99bc

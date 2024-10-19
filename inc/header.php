@@ -11,7 +11,11 @@
           <a class="nav-link me-2" href="#about">About Us</a>
         </li>
         <li class="nav-item">
+<<<<<<< HEAD
           <a class="nav-link me-2" href="contact.php">Contact Us</a>
+=======
+          <a class="nav-link me-2" href="#contact">Contact Us</a>
+>>>>>>> 5d4f584d001869c933183a50edd24d3ba2bd99bc
         </li>
         <li class="nav-item">
           <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
@@ -123,4 +127,8 @@
       </form>
     </div>
   </div>
+<<<<<<< HEAD
 </div>
+=======
+</div>
+>>>>>>> 5d4f584d001869c933183a50edd24d3ba2bd99bc
