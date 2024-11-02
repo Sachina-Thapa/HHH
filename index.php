@@ -10,48 +10,83 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-    $userType = $_POST['user_type'];
+    if(isset($_POST['form_type'])) {
+        if($_POST['form_type'] === 'login') {
+            $username = $_POST['username'];
+            $password = $_POST['password'];
+            $userType = $_POST['user_type'];
 
-    switch ($userType) {
-        case 'Admin':
-            $table = 'adminlogin';
-            $dashboard = 'admin/addash.php';
-            break;
-        case 'Staff':
-            $table = 'stafflogin';
-            $dashboard = 'staff/staffdash.php';
-            break;
-        case 'Hosteler':
-            $table = 'hostelerlogin';
-            $dashboard = 'hostelerdash.php';
-            break;
-        default:
-            $errorMessage = "Invalid user type selected";
-            break;
-    }
+            switch ($userType) {
+                case 'Admin':
+                    $table = 'adminlogin';
+                    $dashboard = 'admin/addash.php';
+                    break;
+                case 'Staff':
+                    $table = 'stafflogin';
+                    $dashboard = 'staff/staffdash.php';
+                    break;
+                case 'Hosteler':
+                    $table = 'hostelers';
+                    $dashboard = 'hostelerdash.php';
+                    break;
+                default:
+                    $errorMessage = "Invalid user type selected";
+                    break;
+            }
 
-    if (empty($errorMessage)) {
-        $stmt = $conn->prepare("SELECT * FROM $table WHERE username = ? AND password = ?");
-        $stmt->bind_param("ss", $username, $password);
-        $stmt->execute();
-        $result = $stmt->get_result();
+            if (empty($errorMessage)) {
+                $stmt = $conn->prepare("SELECT * FROM $table WHERE username = ? AND password = ?");
+                $stmt->bind_param("ss", $username, $password);
+                $stmt->execute();
+                $result = $stmt->get_result();
 
-        if ($result->num_rows > 0) {
+                if ($result->num_rows > 0) {
+                    $_SESSION['username'] = $username; 
+                    header("Location: $dashboard");
+                    exit();
+                } else {
+                    $errorMessage = "Invalid username or password.";
+                }
+            }
+            $stmt->close();
+        }
+        else if($_POST['form_type'] === 'register') {
+            $name = $_POST['name'];
+            $email = $_POST['email'];
+            $phone = $_POST['phone'];
+            $address = $_POST['address'];
+            $pincode = $_POST['pincode'];
+            $dob = $_POST['dob'];
+            $username = $_POST['username'];
+           // $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+            $password = $_POST['password'];
+           
+           
+            // Handle file upload
+            $picture = '';
+            if(isset($_FILES['picture']) && $_FILES['picture']['error'] == 0) {
+                $target_dir = "uploads/";
+                $picture = $target_dir . time() . '_' . basename($_FILES["picture"]["name"]);
+                move_uploaded_file($_FILES["picture"]["tmp_name"], $picture);
+            }
             
-            $_SESSION['username'] = $username; 
-            header("Location: $dashboard");
-            exit();
-        } else {
-            $errorMessage = "Invalid username or password.";
-               }
-
-        $stmt->close();
+            $sql = "INSERT INTO hostelers (name, email, phone_number, picture_path, address, pincode, date_of_birth,username, password) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?,?,?)";
+                    
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sssssssss", $name, $email, $phone, $picture, $address, $pincode, $dob,$username, $password);
+            
+            if ($stmt->execute()) {
+                echo "<script>alert('Registration successful!');</script>";
+            } else {
+                echo "<script>alert('Error: " . $stmt->error . "');</script>";
+            }
+            
+            $stmt->close();
+        }
     }
 }
-$conn->close();
+    $conn->close();
 ?>
 
 

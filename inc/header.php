@@ -33,7 +33,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form class="border shadow p-3 rounded" method="POST" action="">
+                    <form class="border shadow p-3 rounded" method="POST" action="index.php">
                         <h1 class="text-center p-3">User Login</h1>
                         <?php if (!empty($errorMessage)): ?>
                             <div class="alert alert-danger"><?php echo $errorMessage; ?></div>
@@ -55,6 +55,8 @@
                             <option value="Staff">Staff</option>
                             <option value="Hosteler">Hosteler</option>
                         </select>
+                        <input type="hidden" name="form_type" value="login">
+
                         <div class="d-flex align-items-center justify-content-between mb-2"> 
                             <button type="submit" class="btn btn-primary">LOGIN</button>
                             <a href="javascript: void(0)" class="text-secondary text-decoration-none ms-auto">Forgot Password?</a>
@@ -69,7 +71,8 @@
   <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form>
+
+    <form method="POST" action="index.php" enctype="multipart/form-data">
         <div class="modal-header">
           <h5 class="modal-title" id="registerModalLabel">Register Hosteler</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -80,40 +83,45 @@
             <div class="row">
               <div class="col-md-6 ps-0 mb-3">
                 <label class="form-label">Name</label>
-                <input type="text" class="form-control shadow-none">
+                <input type="text" name="name" class="form-control shadow-none">
               </div>
               <div class="col-md-6 p-0">
                 <label class="form-label">Email</label>
-                <input type="email" class="form-control shadow-none">
+                <input type="email" name="email" class="form-control shadow-none">
               </div>
               <div class="col-md-6 ps-0 mb-3">
                 <label class="form-label">Phone Number</label>
-                <input type="number" class="form-control shadow-none">
+                <input type="number" name="phone" class="form-control shadow-none">
               </div>
               <div class="col-md-6 p-0 mb-3">
                 <label class="form-label">Picture</label>
-                <input type="file" class="form-control shadow-none">
+                <input type="file" name="picture" class="form-control shadow-none">
               </div>
               <div class="col-md-12 ps-6 mb-3">
                 <label class="form-label">Address</label>
-                <textarea class="form-control shadow" rows="1"></textarea>
+                <textarea name="address" class="form-control shadow" rows="1"></textarea>
               </div>
               <div class="col-md-6 p-0 mb-3">
                 <label class="form-label">Pincode</label>
-                <input type="number" class="form-control shadow-none">
+                <input type="number" name="pincode" class="form-control shadow-none">
               </div>
               <div class="col-md-6 ps-0 mb-3">
                 <label class="form-label">Date of Birth</label>
-                <input type="date" class="form-control shadow-none">
+                <input type="date" name="dob" class="form-control shadow-none">
+              </div>
+              <div class="col-md-6 p-0 mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control shadow-none">
               </div>
               <div class="col-md-6 p-0 mb-3">
                 <label class="form-label">Password</label>
-                <input type="password" class="form-control shadow-none">
+                <input type="password" name="password" class="form-control shadow-none">
               </div>
               <div class="col-md-6 p-0 mb-3">
                 <label class="form-label">Confirm Password</label>
-                <input type="password" class="form-control shadow-none">
+                <input type="password" name="confirm_password" class="form-control shadow-none">
               </div>
+              <input type="hidden" name="form_type" value="register">
             </div>
           </div>
         </div>
