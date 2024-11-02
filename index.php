@@ -5,10 +5,12 @@ $user = 'root';
 $password = ''; 
 $database = 'hhh'; 
 $errorMessage = '';
+
 $conn = new mysqli($host, $user, $password, $database);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if(isset($_POST['form_type'])) {
         if($_POST['form_type'] === 'login') {
@@ -41,28 +43,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $result = $stmt->get_result();
 
                 if ($result->num_rows > 0) {
-                    $_SESSION['username'] = $username; 
-                    header("Location: $dashboard");
-                    exit();
+                    $row = $result->fetch_assoc();
+                    if ($row['status'] == '1') {
+                        $_SESSION['username'] = $username;
+                        header("Location: $dashboard");
+                        exit();
+                    } else {
+                        $errorMessage = "Account is not active.";
+              
+                    }
                 } else {
                     $errorMessage = "Invalid username or password.";
+              
                 }
+                $stmt->close();
             }
-            $stmt->close();
         }
         else if($_POST['form_type'] === 'register') {
             $name = $_POST['name'];
             $email = $_POST['email'];
             $phone = $_POST['phone'];
             $address = $_POST['address'];
-            $pincode = $_POST['pincode'];
             $dob = $_POST['dob'];
             $username = $_POST['username'];
-           // $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
             $password = $_POST['password'];
-           
-           
-            // Handle file upload
+            
             $picture = '';
             if(isset($_FILES['picture']) && $_FILES['picture']['error'] == 0) {
                 $target_dir = "uploads/";
@@ -70,11 +75,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 move_uploaded_file($_FILES["picture"]["tmp_name"], $picture);
             }
             
-            $sql = "INSERT INTO hostelers (name, email, phone_number, picture_path, address, pincode, date_of_birth,username, password) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?,?,?)";
+            $sql = "INSERT INTO hostelers (name, email, phone_number, picture_path, address, date_of_birth, username, password) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                     
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sssssssss", $name, $email, $phone, $picture, $address, $pincode, $dob,$username, $password);
+            $stmt->bind_param("ssssssss", $name, $email, $phone, $picture, $address, $dob, $username, $password);
             
             if ($stmt->execute()) {
                 echo "<script>alert('Registration successful!');</script>";
@@ -86,10 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-    $conn->close();
+$conn->close();
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
