@@ -61,8 +61,11 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HerHomeHostel-About US</title>
-    <?php require('inc/links.php'); ?>
+    <?php require('inc/links.php');
+          require('../admin/inc/essentials.php');
+    ?>
     <style>
+     
   body {
     background-color: #909EC1; 
   }
@@ -183,25 +186,28 @@ $conn->close();
       <!-- Contact Form on the Right -->
       <div class="col-lg-8 col-md-12 col-12">
         <div class="contact-form p-4">
-          <form action="#" class="m-auto">
+          <form method ="POST">
             <div class="row">
               <div class="col-md-12">
                 <div class="mb-3">
-                  <input type="text" class="form-control" required placeholder="Your Full Name">
+                  <label class="form-label" style="font-weight:500;"> Your Full Name</label>
+                  <input name="name" required type="text" class="form-control shadow-none">
                 </div>
               </div>
               <div class="col-md-12">
                 <div class="mb-3">
-                  <input type="email" class="form-control" required placeholder="Your Email Here">
+                <label class="form-label" style="font-weight:500;"> Your Email </label>
+                <input name="email" required type="email" class="form-control shadow-none">
                 </div>
               </div>
               <div class="col-md-12">
                 <div class="mb-3">
-                  <textarea rows="3" required class="form-control" placeholder="Your Query Here"></textarea>
+                <label class="form-label" style="font-weight:500;"> Messsage</label>
+                <textarea name="message" required  class="form-control shadow-none" rows="4" style="resize:none;"></textarea>
                 </div>
               </div>
               <div class="col-md-12">
-                <button class="btn btn-warning btn-lg btn-block mt-3">Send Now</button>
+              <button name="send" class="btn btn-warning btn-lg btn-block mt-3">Send Now</button>
               </div>
             </div>
           </form>
@@ -210,6 +216,24 @@ $conn->close();
     </div>
   </div>
 
+  <?php
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_REQUEST['send'])) {
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $message = $_POST['message'];
+    
+    $stmt = $conn->prepare("INSERT INTO `queries` (`name`, `email`, `message`) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $name, $email, $message);
+    
+    if ($stmt->execute()) {
+        echo "<script>alert('Message sent successfully!');</script>";
+    } else {
+        echo "<script>alert('Error: " . $stmt->error . "');</script>";
+    }
+    $stmt->close();
+}
+?>
 
 
 

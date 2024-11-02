@@ -21,5 +21,6 @@
 
         </form>
     </div>
+    <?php require('inc/script.php')?>
 </body>
 </html>

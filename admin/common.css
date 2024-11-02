@@ -48,3 +48,8 @@ body{
     font-weight: 700;
     letter-spacing: 2px;
 }
+.custom-alert{
+    position:fixed;
+    top:25px;
+    right:25px;
+}
