@@ -62,7 +62,9 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HerHomeHostel-About US</title>
     <?php require('inc/links.php');
-          require('../admin/inc/essentials.php');
+          require('inc/db.php');
+          require('inc/essentials.php');
+          
     ?>
     <style>
      
@@ -216,24 +218,26 @@ $conn->close();
     </div>
   </div>
 
-  <?php
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_REQUEST['send'])) {
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $message = $_POST['message'];
-    
-    $stmt = $conn->prepare("INSERT INTO `queries` (`name`, `email`, `message`) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $name, $email, $message);
-    
-    if ($stmt->execute()) {
-        echo "<script>alert('Message sent successfully!');</script>";
-    } else {
-        echo "<script>alert('Error: " . $stmt->error . "');</script>";
-    }
-    $stmt->close();
-}
-?>
+      <?php
+    require('inc/db.php'); 
+    require('inc/essentials.php');
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $frm_data = filteration($_POST);
+  
+      $q = "INSERT INTO `queries` (`name`, `email`, `message`) VALUES (?, ?, ?)";
+      $values = [$frm_data['name'], $frm_data['email'], $frm_data['message']];
+      
+      $res = insert($q, $values, 'sss');
+      if ($res == 1) {
+          alert('success', 'Mail sent!');
+      } else {
+          alert('error', 'Server Down! Try again later');
+      }
+  }
+  
+    ?>
+
 
 
 
