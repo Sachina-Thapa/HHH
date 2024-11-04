@@ -1,43 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-   body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 100%;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-    .sidebar {
-            height: 100vh;
-            background-color: #343a40;
-            padding-top: 10px;
-        }
-        .sidebar a {
-            color: #ffffff;
-            padding: 15px;
-            display: block;
-            text-decoration: none;
-            
-        }
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-        .logout-btn {
-            margin-top: 20px;
-            background-color: #f8f9fa;
-            border: none;
-            color: #000;
-            padding: 10px;
-        }
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Dashboard</title>
+ 
+     <!-- Bootstrap CSS -->
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+ 
+     <!-- Chart.js -->
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ 
+     <!-- Custom CSS -->
+     <style>
+         body {
+             background-color: #f5f5f5;
+             font-family: Arial, sans-serif;
+         }
+ 
+         /* Sidebar CSS */
+         .sidebar {
+             margin: 0px;
+             height: 140vh;
+             background-color: #343a40;
+             padding-top: 10px;
+         }
+ 
+         .sidebar a {
+             color: #fff;
+             padding: 25px;
+             display: block;
+             text-decoration: none;
+         }
+ 
+         .sidebar a:hover {
+             background-color: #495057;
+         }
+ 
+         .logout-btn {
+             margin-top: 30px;
+             background-color: #f8f9fa;
+             border: none;
+             color: #000;
+             padding: 6px;
+         }
         .table thead {
             background-color: #000;
             color: #a06666;
@@ -72,18 +78,16 @@
 </div>
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-2 sidebar">
-            <h4 class="text-white text-center">Her Home Hostel</h4>
-            <a href="addash.php">Dashboard</a>
-            <a href="roomManagement.php">Room Management</a>
-            <a href="staffmanagement.php">Staff management</a>
-            <a href="hostelerManagement.php">Hosteller</a>
-            <a href="usersquery.php">Queries</a>
-            <a href="setting.php">Settings</a>
-            
-           <button class="btn w-100" ><a href="../index.php">LOG OUT</a></button>
-        </div>
+       <!-- Sidebar -->
+       <div class="col-md-2 sidebar">
+                 <h4 class="text-white text-center">Her Home Hostel</h4>
+                 <a href="addash.php">Dashboard</a>
+                 <a href="admanagement.php">Room Management</a>
+                 <a href="adstaff.php">Staff management</a>
+                 <a href="adhosteller.php">Hosteller</a>
+                 <a href="setting.php">Settings</a>
+                 <button class="logout-btn w-100">LOG OUT</button>
+             </div>
 
       <!-- Main Content -->
       <div class="col-md-10 p-4">
@@ -107,20 +111,18 @@
 
           <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-              <strong>Change Password</strong>
-              <form action="" class="d-flex align-items-center">
-                <input type="password" class="form-control mr-5" id="currentPassword" placeholder="Current Password">
-                <input type="password" class="form-control" id="newPassword" placeholder="New Password">
-                <button type="submit" class="btn btn-primary ">Submit</button>
-              </form>
+              <strong>Site Title:</strong> Her Home Hostel
             </div>
-          
-           
+            <button class="btn btn-outline-secondary">Edit</button>
 
           </div>
-          <!-- <p><strong>About us:</strong> <p>Welcome to Her Home Hostel, your trusted online platform for hassle-free hostel bookings. We are committed to providing a convenient, secure, and efficient way for students, travelers, and working professionals to find and book hostel room according to their choice. 
-            Our mission is to simplify the process of finding and booking hostels, ensuring a seamless experience for users seeking affordable and comfortable accommodation. Whether you're a student looking for a long-term stay or a traveler needing short-term accommodation, we have a solution for you.</p> -->
-
+          <p><strong>About us:</strong>  <p class="text-muted mb-4">
+            Her Home Hostel is more than just a place to stay; it's a community where travelers from all over the world come
+            together. Our modern facilities and welcoming atmosphere ensure that your stay is comfortable, memorable, and full of new experiences.
+          </p>
+          <p class="text-muted mb-4">
+           We are committed to providing a convenient, secure, and efficient way for students, travelers, and working professionals to find and book hostel room according to their choice. 
+          Our mission is to simplify the process of finding and booking hostels, ensuring a seamless experience for users seeking affordable and comfortable accommodation.
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
   

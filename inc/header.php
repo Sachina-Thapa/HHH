@@ -1,32 +1,36 @@
-<!-- NAVIGATION BAR -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white px-lg-3 py-lg-2 fixed-top">
-  <div class="container-fluid">
-    <a class="navbar-brand me-6 fq-bold fs-3" href="index.html">Her Home Hostel</a>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link me-2" aria-current="page" href="index.php">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link me-2" href="#about">About Us</a>
-        </li>
-        <li class="nav-item">
-<<<<<<< HEAD
-          <a class="nav-link me-2" href="contact.php">Contact Us</a>
-=======
-          <a class="nav-link me-2" href="#contact">Contact Us</a>
->>>>>>> 5d4f584d001869c933183a50edd24d3ba2bd99bc
-        </li>
-        <li class="nav-item">
-          <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
-        </li>
-        <li class="nav-item">
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerModal">Register</button>
-        </li>
-      </ul>
+ <!-- Navbar -->
+ <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom fixed-top">
+    <div class="container-fluid">
+      <a href="#" class="navbar-brand d-flex align-items-center">
+        <span class="ms-2 fs-4"> Her Home Hostel</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-sticky" aria-controls="navbar-sticky" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar-sticky">
+        <div class="collapse navbar-collapse justify-content-center" id="navbarCenter">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a href="Home" class="nav-link">Home</a>
+          </li>
+          <li class="nav-item">
+            <a href="about" class="nav-link">About</a>
+          </li>
+          <li class="nav-item">
+            <a href="rooms" class="nav-link">Rooms</a>
+          </li>
+          <li class="nav-item">
+            <a href="contact" class="nav-link">Contact</a>
+          </li>
+        </ul>
+        </div>
+        <div class="d-flex">
+          <button class="btn btn-primary me-2">Login</button>
+          <button class="btn btn-primary">Register</button>
+        </div>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
 <!-- Login Modal -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">

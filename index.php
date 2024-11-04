@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             break;
         case 'Hosteler':
             $table = 'hostelerlogin';
-            $dashboard = 'hostelerdash.php';
+            $dashboard = 'hosteler/overview.php';
             break;
         default:
             $errorMessage = "Invalid user type selected";
@@ -54,204 +54,450 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $conn->close();
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HerHomeHostel</title>
-    <?php require('inc/links.php'); ?>
-    <style>
-  body {
-    background-color: #909EC1; 
-  }
-  .contact-img img {
-    border-radius: 10px; /* Optional: for rounded corners */
-    width: 100%; /* Ensure it scales with the container */
-    height: auto; /* Maintain aspect ratio */
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HerHomeHostel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .carousel-img {
+      transition: opacity 1s ease-in-out;
+    }
 
-  /* Contact Form Background and Text Color */
-  .contact-form {
-    background-color: beige; /* Light grayish blue background */
-    color: #333; /* Text color */
-    border-radius: 10px; /* Rounded corners */
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
-  }
+    .hidden-menu {
+      display: none;
+    }
 
-  /* Customize Input Fields */
-  .contact-form input, 
-  .contact-form textarea {
-    background-color: #ffffff; /* White background for inputs */
-    border: 1px solid #ccc; /* Light gray border */
-    border-radius: 5px;
-    padding: 10px;
-    color: #333; /* Text color */
-    width: 100%;
-    margin-bottom: 15px;
-  }
+    .active-slide {
+      opacity: 1;
+    }
 
-  /* Change Placeholder Color */
-  .contact-form input::placeholder,
-  .contact-form textarea::placeholder {
-    color: #888; /* Light gray placeholder text */
-  }
+    .inactive-slide {
+      opacity: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+     /* Navbar Customizations */
+    .navbar {
+      background-color:#36454F!important;
+    }
+    .navbar-brand img {
+      height: 40px;
+      width: auto;
+      margin-right: 10px;
+    }
+    .navbar-nav .nav-link {
+      color: #fff;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      transition: color 0.3s ease-in-out;
+    }
+    .navbar-nav .nav-link:hover {
+      color: #0d6efd;
+    }
 
-  /* Customize Submit Button */
-  .contact-form button {
-    background-color: #007bff; /* Blue background for button */
-    color: white; /* White text */
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
+    /* Carousel and content styling */
+    .carousel-img {
+      transition: opacity 1s ease-in-out;
+    }
 
-  /* Hover Effect for Submit Button */
-  .contact-form button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
-  }
-</style>
+    .hidden-menu {
+      display: none;
+    }
 
+    .active-slide {
+      opacity: 1;
+    }
+
+    .inactive-slide {
+      opacity: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  </style>
 </head>
-<body>
-<?php require('inc/header.php'); ?>
+<body class="min-vh-100 bg-light">
 
-    <!-- FOR IMAGE SLIDE  -->
-<div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
-  <div class="carousel-indicators">
-    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" class="active" aria-current="true" aria-label="Slide 2"></button>
-    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" class="active" aria-current="true" aria-label="Slide 3"></button>
-    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="3" class="active" aria-current="true" aria-label="Slide 4"></button>
-</div>
-
-  <div class="carousel-inner">
-    <div class="carousel-item active">
-      <img src="images/hostelroom.jpg" class="d-block w-100" alt="...">
-      <div class="carousel-caption d-none d-md-block">
-        <h5>Hostel Picture</h5>
-      </div>
-    </div>
-    <div class="carousel-item">
-      <img src="images/singleroom.jpg" class="d-block w-100" alt="...">
-      <div class="carousel-caption d-none d-md-block">
-        <h5>Single Bed Room</h5>
-        <p>Simple single room</p>
-      </div>
-    </div>
-    <div class="carousel-item">
-      <img src="images/doublebed.jpg" class="d-block w-100" alt="...">
-      <div class="carousel-caption d-none d-md-block">
-        <h5>Double Bed Room</h5>
-        <p>Some representative placeholder content for the second slide.</p>
-      </div>
-    </div>
-    <div class="carousel-item">
-      <img src="images/triplebed.jpg" class="d-block w-100" alt="...">
-      <div class="carousel-caption d-none d-md-block">
-        <h5>Triple Bed Room</h5>
-        <p>Some representative placeholder content for the second slide.</p>
-      </div>
+  <!-- NAVIGATION BAR -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+  <div class="container-fluid">
+    <!-- Logo in the Navbar -->
+    <a class="navbar-brand d-flex align-items-center" href="index.php">
+      <img src="images/logoo.png" alt="Logo"> 
+      <span>Her Home Hostel</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link me-2" aria-current="page" href="index.php">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link me-2" href="#about">About Us</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link me-2" href="#contact">Contact Us</a>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerModal">Register</button>
+        </li>
+      </ul>
     </div>
   </div>
-  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Previous</span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Next</span>
-  </button>
-</div>  
+</nav>
 
-<!-- ABOUT US SECTION -->
- <section id="about" class="about-section-padding mt-5">
-  <div class="container">
-    <div class="row align-items-top">
-      <div class="col-lg-3 col-md-12 col-12">
-        <div class="about-img">
-        <img src="images/logo.png" alt="" class="img-fluid">
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form class="border shadow p-3 rounded" method="POST" action="">
+                        <h1 class="text-center p-3">User Login</h1>
+                        <?php if (!empty($errorMessage)): ?>
+                            <div class="alert alert-danger"><?php echo $errorMessage; ?></div>
+                        <?php endif; ?>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" name="username" id="username" required placeholder="Enter Username">
+                        </div>
+                        <div class="mb-3">
+
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" name="password" id="password" required placeholder="Enter Password">
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label">Select User Type</label>
+                        </div>
+                        <select class="form-select mb-3" name="user_type" required>
+                            <option selected disabled>Select User Type</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Staff">Staff</option>
+                            <option value="Hosteler">Hosteler</option>
+                        </select>
+                        <div class="d-flex align-items-center justify-content-between mb-2"> 
+                            <button type="submit" class="btn btn-primary">LOGIN</button>
+                            <a href="javascript: void(0)" class="text-secondary text-decoration-none ms-auto">Forgot Password?</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="col-lg-9 col-md-12 col-12 ps-lg-0 mt-md-5">
-        <div class="about-text">
-        <h1>About Us</h1>
-        <p class="about-paragraph" >
-          Welcome to Her Home Hostel, your trusted online platform for hassle-free hostel bookings. We are committed to providing a convenient, secure, and efficient way for students, travelers, and working professionals to find and book hostel room according to their choice. 
-          Our mission is to simplify the process of finding and booking hostels, ensuring a seamless experience for users seeking affordable and comfortable accommodation. Whether you're a student looking for a long-term stay or a traveler needing short-term accommodation, we have a solution for you.</p>
-        </div>
-      </div>
     </div>
-  </div>
- </section>
-
- <!-- CONTACT SECTION -->
-  <section id="contact" class="contact-section-padding mt-20">
-  <h2 class=" mt-5 pt-4 mb-4 text-center">Contact Us</h2>
-  <div class="container">
-    <div class="row align-items-center">
-      <!-- Contact Image on the Left -->
-      <div class="col-lg-4 col-md-12 col-12">
-        <div class="contact-img">
-          <img src="images/contactus.jpg" alt=" " class="img-fluid">
+    
+  <!-- Register Modal -->
+  <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form>
+        <div class="modal-header">
+          <h5 class="modal-title" id="registerModalLabel">Register Hosteler</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-      </div>
-      <!-- Contact Form on the Right -->
-      <div class="col-lg-8 col-md-12 col-12">
-        <div class="contact-form p-4">
-          <form action="#" class="m-auto">
+        <div class="modal-body">
+          <span class="badge rounded-pill bg-light text-dark mb-3 text-wrap th-base"></span>
+          <div class="container-fluid">
             <div class="row">
-              <div class="col-md-12">
-                <div class="mb-3">
-                  <input type="text" class="form-control" required placeholder="Your Full Name">
-                </div>
+              <div class="col-md-6 ps-0 mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-control shadow-none">
               </div>
-              <div class="col-md-12">
-                <div class="mb-3">
-                  <input type="email" class="form-control" required placeholder="Your Email Here">
-                </div>
+              <div class="col-md-6 p-0">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control shadow-none">
               </div>
-              <div class="col-md-12">
-                <div class="mb-3">
-                  <textarea rows="3" required class="form-control" placeholder="Your Query Here"></textarea>
-                </div>
+              <div class="col-md-6 ps-0 mb-3">
+                <label class="form-label">Phone Number</label>
+                <input type="number" class="form-control shadow-none">
               </div>
-              <div class="col-md-12">
-                <button class="btn btn-warning btn-lg btn-block mt-3">Send Now</button>
+              <div class="col-md-6 p-0 mb-3">
+                <label class="form-label">Picture</label>
+                <input type="file" class="form-control shadow-none">
+              </div>
+              <div class="col-md-12 ps-6 mb-3">
+                <label class="form-label">Address</label>
+                <textarea class="form-control shadow" rows="1"></textarea>
+              </div>
+              <div class="col-md-6 p-0 mb-3">
+                <label class="form-label">Pincode</label>
+                <input type="number" class="form-control shadow-none">
+              </div>
+              <div class="col-md-6 ps-0 mb-3">
+                <label class="form-label">Date of Birth</label>
+                <input type="date" class="form-control shadow-none">
+              </div>
+              <div class="col-md-6 p-0 mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control shadow-none">
+              </div>
+              <div class="col-md-6 p-0 mb-3">
+                <label class="form-label">Confirm Password</label>
+                <input type="password" class="form-control shadow-none">
               </div>
             </div>
-          </form>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Register</button>
+        </div>
+      </form>
+    </div>
+        </div>
+        <div class="d-flex">
+          <button class="btn btn-primary me-2">Login</button>
+          <button class="btn btn-primary">Register</button>
         </div>
       </div>
     </div>
-  </div>
+  </nav>
 
-  <h2 class="mt-5 pt-4 mb-4 text-center fw-bold h-font">Our Facilities</h2>
-<div class="container">
-  <div class="row justify-content-center"> <!-- Ensures alignment -->
-    <div class="col-lg-2 col-md-4 col-sm-6 text-center bg-white rounded shadow py-4 my-3 mx-3"> 
-      <img src="images/features/wifi.svg" width="100px">
-      <h5 class="mt-3">Wifi</h5>
+  <!-- Hero Section with Gallery -->
+  <section class="position-relative vh-100">
+  <div class="position-absolute w-100 h-100">
+      <img id="slide1" src="images/Hostel.jpg?height=600&width=800" class="carousel-img active-slide w-100 h-100 object-cover" alt="Slide 1">
+      <img id="slide2" src="images/single.jpg?height=600&width=800" class="carousel-img active-slide w-100 h-100 object-cover" alt="Slide 2">
+      <img id="slide3" src="images/double.jpg?height=600&width=800" class="carousel-img inactive-slide w-100 h-100 object-cover" alt="Slide 3">
+      <img id="slide4" src="images/triple.jpg?height=600&width=800" class="carousel-img inactive-slide w-100 h-100 object-cover" alt="Slide 4">
     </div>
-    <div class="col-lg-2 col-md-4 col-sm-6 text-center bg-white rounded shadow py-4 my-3 mx-3"> 
-      <img src="images/food.jpg" width="100px">
-      <h5 class="mt-3">Food</h5>
+    <div class="position-absolute top-0 bottom-0 start-0 end-0 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center">
+      <div class="text-center text-white">
+        <h1 class="display-3 fw-bold mb-4">Welcome to Her Home Hostel</h1>
+        <p class="fs-4 mb-4">Experience comfort and community in our modern hostels</p>
+        <button class="btn btn-primary btn-lg">Book Now</button>
+      </div>
     </div>
-    <div class="col-lg-2 col-md-4 col-sm-6 text-center bg-white rounded shadow py-4 my-3 mx-3"> 
-      <img src="images/laundry.png" width="80px">
-      <h5 class="mt-3">Laundry</h5>
-    </div>
-  </div>
-</div>
+    <button id="prevSlide" class="position-absolute start-0 top-50 translate-middle-y btn btn-outline-light">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+    <button id="nextSlide" class="position-absolute end-0 top-50 translate-middle-y btn btn-outline-light">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+  </section>
 
+  <!-- About Us -->
+  <section id="about" class="py-5 bg-white">
+    <div class="container">
+      <h2 class="text-center fs-2 fw-bold mb-4">About Us</h2>
+      <div class="row align-items-center">
+        <div class="col-md-6 mb-4">
+          <img src="images/aboutus.png?height=200&width=200" alt="About Us" class="rounded shadow-lg img-fluid">
+        </div>
+        <div class="col-md-6">
+          <p class="text-muted mb-4">
+            Her Home Hostel is more than just a place to stay; it's a community where travelers from all over the world come
+            together. Our modern facilities and welcoming atmosphere ensure that your stay is comfortable, memorable, and full of new experiences.
+          </p>
+          <p class="text-muted mb-4">
+           We are committed to providing a convenient, secure, and efficient way for students, travelers, and working professionals to find and book hostel room according to their choice. 
+          Our mission is to simplify the process of finding and booking hostels, ensuring a seamless experience for users seeking affordable and comfortable accommodation.
+          <button class="btn btn-primary">Learn More</button>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- REACH US -->
-<h2 class=" mt-5 pt-4 mb-4 text-center">Reach Us</h2>
-<div class="container">
-</div>
-<?php require('inc/footer.php'); ?>
+  <!-- Facilities Section -->
+  <section id="Facilities" class="py-5 bg-light">
+    <div class="container">
+      <h2 class="text-center fs-2 fw-bold mb-4">Our Facilities</h2>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h3 class="card-title fs-5">Budget-Friendly Stays</h3>
+              <p class="card-text text-muted">Enjoy a cozy stay without breaking the bank.</p>
+              <a href="#" class="btn btn-outline-primary w-100">Learn More</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h3 class="card-title fs-5">Healthy Food</h3>
+              <p class="card-text text-muted">Healthy meals to keep you energized at the hostel.</p>
+              <a href="#" class="btn btn-outline-primary w-100">Learn More</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h3 class="card-title fs-5">Peaceful Environment</h3>
+              <p class="card-text text-muted">Experience a peaceful stay with comfort and calm all around.</p>
+              <a href="#" class="btn btn-outline-primary w-100">Learn More</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h3 class="card-title fs-5">Laundry</h3>
+              <p class="card-text text-muted">Quick and easy laundry right at the hostel.</p>
+              <a href="#" class="btn btn-outline-primary w-100">Learn More</a>
+      </div>
+    </div>      
+   </div>
+   <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h3 class="card-title fs-5">Wi-fi</h3>
+              <p class="card-text text-muted">Stay connected with fast, free Wi-Fi at the hostel.</p>
+              <a href="#" class="btn btn-outline-primary w-100">Learn More</a>
+   </div>
+   </div>  
+  </section>
+
+  <!-- Choose Your Room -->
+  <section id="rooms" class="py-5 bg-white">
+    <div class="container">
+      <h2 class="text-center fs-2 fw-bold mb-4">Choose Your Perfect Hostel Room</h2>
+      <div class="d-flex flex-wrap justify-content-center gap-4">
+        <div class="bg-primary text-white rounded-circle d-flex flex-column justify-content-center align-items-center" style="width: 150px; height: 150px;">
+          <h3 class="fs-6 mb-1">Single Bed</h3>
+          <p class="fs-7">From Rs 1000</p>
+        </div>
+        <div class="bg-primary text-white rounded-circle d-flex flex-column justify-content-center align-items-center" style="width: 150px; height: 150px;">
+          <h3 class="fs-6 mb-1">Double Bed</h3>
+          <p class="fs-7">From Rs 1200</p>
+        </div>
+        <div class="bg-primary text-white rounded-circle d-flex flex-column justify-content-center align-items-center" style="width: 150px; height: 150px;">
+          <h3 class="fs-6 mb-1">Triple Bed</h3>
+          <p class="fs-7">From Rs 1500</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Us -->
+  <section id="contact" class="py-5 bg-light">
+    <div class="container">
+      <h2 class="text-center fs-2 fw-bold mb-4">Contact Us</h2>
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <form>
+            <div class="mb-3">
+              <input type="text" class="form-control" placeholder="Your Name">
+            </div>
+            <div class="mb-3">
+              <input type="email" class="form-control" placeholder="Your Email">
+            </div>
+            <div class="mb-3">
+              <textarea class="form-control" rows="4" placeholder="Your Message"></textarea>
+            </div>
+            <button class="btn btn-primary w-100">Send Message</button>
+          </form>
+        </div>
+        <div class="col-md-6">
+          <div class="mb-4">
+            <div class="d-flex align-items-center">
+              <svg class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l9 4-9 4-9-4 9-4zm0 0v16"></path>
+              </svg>
+              <p class="mb-0">123 Hostel Street, City, Country</p>
+            </div>
+            <div class="d-flex align-items-center">
+              <svg class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7 7 7-7"></path>
+              </svg>
+              <p class="mb-0">+977 9805625634</p>
+            </div>
+            <div class="d-flex align-items-center">
+              <svg class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m4-4v8"></path>
+              </svg>
+              <p class="mb-0">info@herhomehostel.com</p>
+            </div>
+          </div>
+          <img src="images/map.png?height=300&width=400" alt="Map" class="rounded img-fluid shadow-sm">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white py-4">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h3 class="fs-5 fw-bold"> Her Home Hostel</h3>
+          <p class="mb-0">Your home away from home</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="#" class="text-white">
+            <svg class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 2h4v4M2 22h20m-2-10H8l2-5 7 5H2v2h18v-2z"></path>
+            </svg>
+          </a>
+          <a href="#" class="text-white">
+            <svg class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2h2M16 3a4 4 0 10-8 0v5h8V3z"></path>
+            </svg>
+          </a>
+          <a href="#" class="text-white">
+            <svg class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 9l10 10L22 9"></path>
+            </svg>
+          </a> 
+        </div>
+      </div>
+      <div class="container">
+      <div class="text-center mt-3">
+        <p>&copy; 2024 Her Home Hostel.</p>
+      </div>
+      
+    </div>
+  </footer>
+  
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Carousel Logic
+    const slides = document.querySelectorAll('.carousel-img');
+    let currentSlide = 0;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.add('inactive-slide');
+        slide.classList.remove('active-slide');
+        if (i === index) {
+          slide.classList.remove('inactive-slide');
+          slide.classList.add('active-slide');
+        }
+      });
+    }
+
+    document.getElementById('prevSlide').addEventListener('click', () => {
+      currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+      showSlide(currentSlide);
+    });
+
+    document.getElementById('nextSlide').addEventListener('click', () => {
+      currentSlide = (currentSlide + 1) % slides.length;
+      showSlide(currentSlide);
+    });
+
+    // Auto slide
+    setInterval(() => {
+      currentSlide = (currentSlide + 1) % slides.length;
+      showSlide(currentSlide);
+    }, 5000);
+  </script>
 </body>
 </html>
