@@ -1,6 +1,6 @@
 <?php
-require('../admin/inc/db.php');
-require('../admin/inc/essentials.php');
+require('admin/inc/db.php');
+require('admin/inc/essentials.php');
 
 // Handle AJAX delete request
 if (isset($_POST['del'])) {

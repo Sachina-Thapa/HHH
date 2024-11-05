@@ -6,7 +6,7 @@ $dbname = "hhh";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
-//$conn = new mysqli( "localhost", "root", "", "hhh");
+
 
 // Check connection
 if ($conn->connect_error) {
@@ -14,7 +14,7 @@ if ($conn->connect_error) {
 }
 
 // Insert new room
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
     $stmt = $conn->prepare("INSERT INTO room (rno, rtype, rprice) VALUES (?, ?, ?)");
     $stmt->bind_param("ssd", $room_number, $room_type, $room_price);
     
@@ -51,17 +51,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
     $stmt->bind_param("ssdi", $room_number, $room_type, $room_price, $rid);
 
     if ($stmt->execute()) {
-        echo "Updated successfully";
+        header("Location: ".$_SERVER['PHP_SELF']."?updated=1");
+        exit();
     } else {
         echo "Error updating record: " . $stmt->error;
     }
     $stmt->close();
-    exit();
-}
-
-
-
-// Delete room
+}// Delete room
 if (isset($_GET['delete'])) {
     $rid = $_GET['delete'];
     $delete_sql = "DELETE FROM room WHERE rid = $rid";
@@ -86,22 +82,45 @@ $result = $conn->query($sql);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Room Management</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 100%;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        h1, h2 {
+    
+        <!-- Custom CSS -->
+        <style>
+         body {
+             background-color: #f5f5f5;
+             font-family: Arial, sans-serif;
+         }
+ 
+         /* Sidebar CSS */
+         .sidebar {
+             margin: 0px;
+             height: 140vh;
+             background-color: #343a40;
+             padding-top: 10px;
+         }
+ 
+         .sidebar a {
+             color: #fff;
+             padding: 25px;
+             display: block;
+             text-decoration: none;
+         }
+ 
+         .sidebar a:hover {
+             background-color: #495057;
+         }
+ 
+         .logout-btn {
+             margin-top: 30px;
+             background-color: #f8f9fa;
+             border: none;
+             color: #000;
+             padding: 6px;
+         }
+ 
+        h1, h2{
             color: #2c3e50;
         }
         form {
@@ -111,12 +130,22 @@ $result = $conn->query($sql);
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
-        input[type="text"], input[type="number"] {
+        input[type="text"], input[type="number"], select {
             width: 100%;
             padding: 8px;
             margin-bottom: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            /* Make the text style consistent */
+            font-size: 16px;
+            color: #333;
+            box-sizing: border-box;
+        }
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-color: #fff;
         }
         input[type="submit"] {
             background-color: #3498db;
@@ -173,30 +202,35 @@ $result = $conn->query($sql);
            text-align: center;
            font-size: 1.2em;
         }
-        /*sidebar css*/
-        .sidebar {
-            margin:0px;
-            height: 100vh;
-            background-color: #343a40;
-            padding-top: 10px;
-        }
-        .sidebar a {
-            color: #fff;
-            padding: 15px;
-            display: block;
-            text-decoration: none;
-            
-        }
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-        .logout-btn {
-            margin-top: 20px;
-            background-color: #f8f9fa;
-            border: none;
-            color: #000;
-            padding: 10px;
-        }
+        
+
+         /* Sidebar CSS */
+         .sidebar {
+             margin: 0px;
+             height: 140vh;
+             background-color: #343a40;
+             padding-top: 10px;
+         }
+ 
+         .sidebar a {
+             color: #fff;
+             padding: 25px;
+             display: block;
+             text-decoration: none;
+         }
+ 
+         .sidebar a:hover {
+             background-color: #495057;
+         }
+ 
+         .logout-btn {
+             margin-top: 30px;
+             background-color: #f8f9fa;
+             border: none;
+             color: #000;
+             padding: 6px;
+         }
+ 
     </style>
 </head>
 <body> 
@@ -204,41 +238,51 @@ $result = $conn->query($sql);
   <div class="row">
      <!-- Sidebar -->
      <div class="col-md-2 sidebar">
-     <h3 class="text-white text-center">Her Home Hostel</h3>
-                <a href="addash.php">Dashboard</a>
-                <a href="roomManagement.php">Room Management</a>
-                <a href="staffmanagement.php">Staff management</a>
-                <a href="hostelerManagement.php">Hosteller</a>
-                <a href="queries.php">Queries</a>
-                <a href="setting.php">Settings</a>
-                <button class="btn w-100" ><a href="../index.php">LOG OUT</a></button>
-            </div>
+                 <h4 class="text-white text-center">Her Home Hostel</h4>
+                 <a href="addash.php">Dashboard</a>
+                 <a href="roomManagement.php">Room Management</a>
+                 <a href="staffmanagement.php">Staff management</a>
+                 <a href="hostelerManagement.php">Hosteller</a>
+                 <a href="queries.php">Queries</a>
+                 <a href="setting.php">Settings</a>
+                 <button class="logout-btn w-100">LOG OUT</button>
+             </div>
      <div class="col-md-10">
-       <h1>Room Management</h1>
-     <h2>Add New Room</h2>
+     <h3>Add New Room</h3>
      <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
         <?php if (isset($room_to_update)) echo "<input type='hidden' name='rid' value='" . $room_to_update['rid'] . "'>"; ?>
         <input type="text" name="room_number" placeholder="Room Number" required value="<?php echo isset($room_to_update) ? $room_to_update['rno'] : ''; ?>">
-        <input type="text" name="room_type" placeholder="Room Type" required value="<?php echo isset($room_to_update) ? $room_to_update['rtype'] : ''; ?>">
+        
+        <!-- Dropdown for Room Type -->
+        <select name="room_type" required>
+            <option value="" disabled selected>Select Room Type</option>
+            <option value="Single" <?php if (isset($room_to_update) && $room_to_update['rtype'] == 'Single') echo 'selected'; ?>>Single</option>
+            <option value="Double" <?php if (isset($room_to_update) && $room_to_update['rtype'] == 'Double') echo 'selected'; ?>>Double</option>
+            <option value="Triple" <?php if (isset($room_to_update) && $room_to_update['rtype'] == 'Triple') echo 'selected'; ?>>Triple</option>
+        </select>
+
         <input type="number" name="room_price" step="0.01" placeholder="Room Price" required value="<?php echo isset($room_to_update) ? $room_to_update['rprice'] : ''; ?>">
-        <input type="submit" name= "add" value= "Add Room" >
+        <input type="submit" name="add" value="Add Room">
      </form>
-     <div id="message" >   <?php
-     if (isset($_GET['success']) && $_GET['success'] == 1) {
-        echo "<p style='color: green;'>New room added successfully</p>";
-     }
-     if (isset($error_message)) {
-        echo "<p style='color: red;'>$error_message</p>";
-     }
-     if (isset($_GET['deleted']) && $_GET['deleted'] == 1) {
-        echo "<p style='color: green;'>Room deleted successfully and IDs reset</p>";
-     }
-     if (isset($_GET['updated']) && $_GET['updated'] == 1) {
-        echo "<p style='color: green;'>Room updated successfully</p>";
-     }
-     ?>
+
+     <div id="message">
+        <?php
+        if (isset($_GET['success']) && $_GET['success'] == 1) {
+            echo "<p style='color: green;'>New room added successfully</p>";
+        }
+        if (isset($error_message)) {
+            echo "<p style='color: red;'>$error_message</p>";
+        }
+        if (isset($_GET['deleted']) && $_GET['deleted'] == 1) {
+            echo "<p style='color: green;'>Room deleted successfully and IDs reset</p>";
+        }
+        if (isset($_GET['updated']) && $_GET['updated'] == 1) {
+            echo "<p style='color: green;'>Room updated successfully</p>";
+        }
+        ?>
      </div>
-     <h2>Room Details</h2>
+
+     <h4>Room Details</h4>
      <table>
         <tr>
             <th>Room Number</th>
@@ -275,9 +319,6 @@ $result = $conn->query($sql);
 $conn->close();
 ?>
 
-
-
-
 <script>
 function enableEdit(rid) {
     document.getElementById('rno_' + rid).contentEditable = true;
@@ -306,4 +347,5 @@ function saveEdit(rid) {
         }
     };
     xhr.send('update=1&rid=' + rid + '&rno=' + encodeURIComponent(rno) + '&rtype=' + encodeURIComponent(rtype) + '&rprice=' + encodeURIComponent(rprice));
-}</script>
+}
+</script>

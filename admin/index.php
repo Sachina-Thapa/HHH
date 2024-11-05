@@ -18,9 +18,7 @@
           </div>
             <button type="submit" class="btn text-white"> Login </button>
         </div>
-
         </form>
     </div>
-    <?php require('inc/script.php')?>
 </body>
 </html>

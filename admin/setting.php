@@ -1,135 +1,296 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #f5f5f5;
-    }
-    .sidebar {
-            height: 100vh;
-            background-color: #343a40;
-            padding-top: 10px;
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Dashboard</title>
+ 
+     <!-- Bootstrap CSS -->
+     <link rel="stylesheet" href="common.css"> <!-- Link to your CSS file -->
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css">
+
+     <!-- Chart.js -->
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ 
+     <!-- Custom CSS -->
+        <style>
+            body {
+                background-color: #f5f5f5;
+                font-family: Arial, sans-serif;
+            }
+    
+            /* Sidebar CSS */
+            .sidebar {
+                margin: 0px;
+                height: 140vh;
+                background-color: #343a40;
+                padding-top: 10px;
+            }
+    
+            .sidebar a {
+                color: #fff;
+                padding: 25px;
+                display: block;
+                text-decoration: none;
+            }
+    
+            .sidebar a:hover {
+                background-color: #495057;
+            }
+    
+            .logout-btn {
+                margin-top: 30px;
+                background-color: #f8f9fa;
+                border: none;
+                color: #000;
+                padding: 6px;
+            }
+            .table thead {
+                background-color: #000;
+                color: #a06666;
+            }
+            .table th, .table td {
+                text-align: center;
+            }
+        .settings-card {
+          background-color: rgb(255, 255, 255);
+          padding: 1.5rem;
+          border-radius: 0.5rem;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .sidebar a {
-            color: #ffffff;
-            padding: 15px;
-            display: block;
-            text-decoration: none;
-            
+        .toggle-switch {
+          display: flex;
+          align-items: center;
         }
-        .sidebar a:hover {
-            background-color: #495057;
+        .toggle-switch input[type="checkbox"] {
+          margin-left: auto;
         }
-        .logout-btn {
-            margin-top: 20px;
-            background-color: #f8f9fa;
-            border: none;
-            color: #000;
-            padding: 10px;
+        logo img {
+          width: 10%;
+          max-width: 12px;
+          margin-bottom: rem;
+          
         }
-        .table thead {
-            background-color: #000;
-            color: #a06666;
-        }
-        .table th, .table td {
-            text-align: center;
-        }
-    .settings-card {
-      background-color: rgb(255, 255, 255);
-      padding: 1.5rem;
-      border-radius: 0.5rem;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .toggle-switch {
-      display: flex;
-      align-items: center;
-    }
-    .toggle-switch input[type="checkbox"] {
-      margin-left: auto;
-    }
-    logo img {
-      width: 10%;
-      max-width: 12px;
-      margin-bottom: rem;
-      
-    }
    
   </style>
 </head>
 <body>
+  
 
 </div>
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-2 sidebar">
-            <h4 class="text-white text-center">Her Home Hostel</h4>
-            <a href="addash.php">Dashboard</a>
-            <a href="roomManagement.php">Room Management</a>
-            <a href="staffmanagement.php">Staff management</a>
-            <a href="hostelerManagement.php">Hosteller</a>
-            <a href="queries.php">Queries</a>
-            <a href="setting.php">Settings</a>
-            
-           <button class="btn w-100" ><a href="../index.php">LOG OUT</a></button>
-        </div>
+       <!-- Sidebar -->
+       <div class="col-md-2 sidebar">
+                 <h4 class="text-white text-center">Her Home Hostel</h4>
+                 <a href="addash.php">Dashboard</a>
+                 <a href="roomManagement.php">Room Management</a>
+                 <a href="staffmanagement.php">Staff management</a>
+                 <a href="hostelerManagement.php">Hosteller</a>
+                 <a href="queries.php">Queries</a>
+                 <a href="setting.php">Settings</a>
+                 <button class="logout-btn w-100">LOG OUT</button>
+             </div>
 
       <!-- Main Content -->
       <div class="col-md-10 p-4">
         <h2>Settings</h2>
-
-
         <!-- General Settings -->
-  
-        <div class="settings-card mb-4">
-          <h4>General Settings</h4>
 
-           <!-- Logo -->
+        <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="card-title m-0">General Settings</h5>
+        <button type="button" class="btn btn-dark shadow-none btn-sm" data-bs-toggle="modal" data-bs-target="#general-s">
+            <i class="bi bi-pencil-square"></i> Edit
+            </button>
+         </div>
+          <h6 class ="card-subtitle mb-1 fw-bold">Site Title</h6>
+              <p class="card-text" id="site_title"></p>
+              <h6 class ="card-subtitle mb-1 fw-bold">About US</h6>
+              <p class="card-text" id="site_about"></p>
+          
+        </div>
+        </div>
+           <!-- Logo
            <div class="logo">
             <img id="logoPreview" src="https://via.placeholder.com/120x50.png?text=Logo" alt="Logo">
-          </div>
+          </div> -->
 
-          <div class="mb-3">
+          <!-- <div class="mb-3">
             <label for="logoUpload" class="form-label"><strong>Change Logo:</strong></label>
             <input type="file" class="form-control" id="logoUpload" accept="image/*">
-          </div>
-
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <strong>Change Password</strong>
-              <form action="" class="d-flex align-items-center">
-                <input type="password" class="form-control mr-5" id="currentPassword" placeholder="Current Password">
-                <input type="password" class="form-control" id="newPassword" placeholder="New Password">
-                <button type="submit" class="btn btn-primary ">Submit</button>
-              </form>
+          </div> -->
+      
+          <!--General Setting Modal -->
+        <div class="modal fade" id="general-s" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <form id="general_s_form">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">General Setting</h5>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Site Title</label>
+                  <input type="text"  name="site_title" id="site_title_inp" class="form-control shadow-none" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">About US</label>
+                  <textarea name="site_about" id="site_about_inp" class="form-control shadow-none" rows="6" required></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" onclick="site_title.value=general_data.site_title, site_about.value=general_data.site_about" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
             </div>
-          
-           
-
+            </form>
           </div>
-          <!-- <p><strong>About us:</strong> <p>Welcome to Her Home Hostel, your trusted online platform for hassle-free hostel bookings. We are committed to providing a convenient, secure, and efficient way for students, travelers, and working professionals to find and book hostel room according to their choice. 
-            Our mission is to simplify the process of finding and booking hostels, ensuring a seamless experience for users seeking affordable and comfortable accommodation. Whether you're a student looking for a long-term stay or a traveler needing short-term accommodation, we have a solution for you.</p> -->
+        </div>
 
-  <!-- Bootstrap JS -->
+            <!-- Shutdown setting -->
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <h5 class="card-title m-0">Shutdown Website</h5>
+                    <div class="form-check form-switch">
+                      <form>
+              <input onchange="upd_shutdown(this.value)"class="form-check-input" type="checkbox" >
+              </form>
+                    </div>
+                  </div>
+              <p class="card-text" > No Customer will be able to book hostel when Shutdown Mode is On</p>
+            </div>
+            </div>
+            </div>
+          </div>
+
+
+          <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
   
+  <?php include('inc/scripts.php'); ?>
+    <!-- Script to Preview Logo and Profile Photo Image -->
+    <script>
 
-  <!-- Script to Preview Logo and Profile Photo Image -->
-   <script>
-    // Preview for Logo Upload
-    document.getElementById('logoUpload').addEventListener('change', function(event) {
-      const [file] = event.target.files;
-      if (file) {
-        const logoPreview = document.getElementById('logoPreview');
-        logoPreview.src = URL.createObjectURL(file);
+//general function
+          let general_data;
+
+          let general_s_form=document.getElementById('general_s_form');
+          let site_title_inp=document.getElementById('site_title_inp');
+          let site_about_inp=document.getElementById('site_about_inp');
+          
+
+          function get_general() 
+      {
+        let site_title=document.getElementById('site_title');
+        let site_about=document.getElementById('site_about');
+
+        let shutdownToggle=document.getElementById('shutdown-toggle')
+
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", "ajax/settings_crud.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        xhr.onload = function () 
+        {
+            general_data = JSON.parse(this.responseText);
+
+            document.getElementById("site_title").innerText = general_data.site_title;
+            document.getElementById("site_about").innerText = general_data.site_about;
+
+            document.getElementById("site_title_inp").innerText = general_data.site_title_inp;
+            document.getElementById("site_about_inp").innerText = general_data.site_about_inp;
+
+            // Adjust shutdown toggle
+            if(general_data.shutdown==0)
+            {
+              shutdown_toggle.checked=false;
+              shutdown_toggle.value=0;
+            }
+            else
+            {
+              shutdown_toggle.checked=true;
+              shutdown_toggle.value=1;
+            }
+            // let shutdownToggle = document.querySelector('.form-check-input');
+            // shutdownToggle.checked = general_data.shutdown == 1;
+            // shutdownToggle.value = general_data.shutdown;
+        }
+
+        xhr.send('get_general');
       }
+            
+      general_s_form.addEventListener('submit',function(e){
+        e.preventDefault();
+        upd_general(site_title_inp.value, site_about_inp.value)
+      })
+
+      function upd_general(site_title_val,site_about_val)
+      {
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", "ajax/settings_crud.php", true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        xhr.onload=function(){
+
+          var myModal=document.getElementById('general-s');
+          var modal=bootstrap.Modal.getInstance(myModal);
+          modal.hide();
+
+          if(this.responseText.trim()=='1')
+        {
+          alert('success','Changes Saved!');
+          get_general();
+        }
+         else
+         {
+          alert('error','No Changes Made!');
+
+         }
+         }
+        xhr.send('site_title='+site_title_val+'&site_about='+site_about_val+'&upd_general');
+      }
+
+      //Shutdown function
+      function upd_shutdown(val) 
+      {
+          // let shutdownToggle = document.querySelector('.form-check-input');
+          // shutdownToggle.value = shutdownToggle.checked ? 1 : 0;
+
+          let xhr = new XMLHttpRequest();
+          xhr.open("POST", "ajax/settings_crud.php", true);
+          xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+          xhr.onload = function () {
+              if (this.responseText.trim() === "1") {
+                  alert("success", "Site has been Shutdown!");
+                  get_general(); 
+              } else {
+                  alert("error", "Shutdown mode Off!");
+              }
+                };
+        xhr.send("upd_shutdown="+val);
+      }
+
+
+    // Preview for Logo Upload
+    // document.getElementById('logoUpload').addEventListener('change', function(event) {
+    //   const [file] = event.target.files;
+    //   if (file) {
+    //     const logoPreview = document.getElementById('logoPreview');
+    //     logoPreview.src = URL.createObjectURL(file);
+    //   }
       
-    });
+    // });
+    window.onload= function(){
+      get_general();
+}
+
+    
  </script>
+
 </body>
 </html>

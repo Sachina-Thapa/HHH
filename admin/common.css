@@ -48,8 +48,15 @@ body{
     font-weight: 700;
     letter-spacing: 2px;
 }
-.custom-alert{
-    position:fixed;
-    top:25px;
-    right:25px;
+.custom-alert {
+    position: fixed;   /* Ensure the alert is fixed in position */
+    top: 20px;        /* Position it 20 pixels from the top */
+    right: 25px;      /* Position it 25 pixels from the right */
+    background-color: green; /* Change based on type (success/error) */
+    color: white;     /* Text color */
+    padding: 10px 20px; /* Padding around the text */
+    z-index: 2000;    /* Ensure it's above other content */
+    border-radius: 5px; /* Optional: for rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Optional: for a shadow effect */
+    transition: opacity 0.3s ease; /* Optional: smooth transition */
 }
