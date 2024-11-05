@@ -1,6 +1,6 @@
 <?php
-require('admin/inc/db.php');
-require('admin/inc/essentials.php');
+require('inc/db.php');
+require('inc/essentials.php');
 
 // Handle AJAX delete request
 if (isset($_POST['del'])) {
@@ -48,6 +48,148 @@ if (isset($_POST['seen'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <style>
+         body {
+             background-color: #f5f5f5;
+             font-family: Arial, sans-serif;
+         }
+ 
+         /* Sidebar CSS */
+         .sidebar {
+             margin: 0px;
+             height: 140vh;
+             background-color: #343a40;
+             padding-top: 10px;
+         }
+ 
+         .sidebar a {
+             color: #fff;
+             padding: 25px;
+             display: block;
+             text-decoration: none;
+         }
+ 
+         .sidebar a:hover {
+             background-color: #495057;
+         }
+ 
+         .logout-btn {
+             margin-top: 30px;
+             background-color: #f8f9fa;
+             border: none;
+             color: #000;
+             padding: 6px;
+         }
+ 
+        h1, h2{
+            color: #2c3e50;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            /* Make the text style consistent */
+            font-size: 16px;
+            color: #333;
+            box-sizing: border-box;
+        }
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-color: #fff;
+        }
+        input[type="submit"] {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        input[type="submit"]:hover {
+            background-color: #2980b9;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: #fff;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .action-links a {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 2px;
+            text-decoration: none;
+            color: #fff;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        .update-link {
+            background-color: #2ecc71;
+        }
+        .update-link:hover {
+            background-color: #27ae60;
+        }
+        .delete-link {
+            background-color: #e74c3c;
+        }
+        .delete-link:hover {
+            background-color: #c0392b;
+        }
+        #message{
+           text-align: center;
+           font-size: 1.2em;
+        }
+        
+
+         /* Sidebar CSS */
+         .sidebar {
+             margin: 0px;
+             height: 140vh;
+             background-color: #343a40;
+             padding-top: 10px;
+         }
+ 
+         .sidebar a {
+             color: #fff;
+             padding: 25px;
+             display: block;
+             text-decoration: none;
+         }
+ 
+         .sidebar a:hover {
+             background-color: #495057;
+         }
+ 
+         .logout-btn {
+             margin-top: 30px;
+             background-color: #f8f9fa;
+             border: none;
+             color: #000;
+             padding: 6px;
+         }
         .seen-row {
             opacity: 0.5; /* Makes the row look shadowed when marked as read */
         }
@@ -65,7 +207,7 @@ if (isset($_POST['seen'])) {
                 <a href="hostelerManagement.php">Hosteller</a>
                 <a href="queries.php">Queries</a>
                 <a href="setting.php">Settings</a>
-                <button class="btn w-100"><a href="../index.php">LOG OUT</a></button>
+                <button class="btn w-100"><a href="index.php">LOG OUT</a></button>
             </div>
             <div class="col-md-10">
                 <h2 class="mt-4 mb-4">User Queries</h2>

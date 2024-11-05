@@ -1,3 +1,32 @@
+    <?php
+        require('inc/db.php');
+
+        // Handle form submission to add new staff
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = $_POST['name'];
+            $email = $_POST['email'];
+            $phoneno = $_POST['phoneno'];
+            $username = $_POST['username'];
+            $password = $_POST['password'];
+        
+            // Prepare and bind the statement
+            $sql = "INSERT INTO staff_data (name, email, phoneno, username, password) VALUES (?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sssss", $name, $email, $phoneno, $username, $password);
+        
+            if ($stmt->execute()) {
+                echo "success"; // Return success message
+            } else {
+                echo "Error: " . $stmt->error; // Return error message
+            }
+        
+            $stmt->close();
+            exit(); // Important to stop further execution
+        }
+        // Fetch all staff records from the database
+        $sql = "SELECT st_id, name, email, phoneno, username, password FROM staff_data";
+        $result = $conn->query($sql);
+    ?>
 <!DOCTYPE html>
  <html lang="en">
  <head>
@@ -118,85 +147,56 @@
                              </tr>
                          </thead>
                          <tbody>
-                         <tr>
-                                 <td>aakritipandit11@gmail.com</td>
-                                 <td>Aakriti pandit</td>
-                                 <td>7777777</td>
-                                 <td>Ak.riti537</td>
-                                 <td>vok layo</td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Edit</button></td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Update</button></td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Delete</button></td>
-                             </tr>
-                             <tr>
-                                 <td>anitalamichanel1@gmail.com</td>
-                                 <td>Anita Lamichane</td>
-                                 <td>254684635</td>
-                                 <td>lamichaneanita537</td>
-                                 <td>anitaanita</td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Edit</button></td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Update</button></td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Delete</button></td>
-                             </tr>
-                             <tr>
-                                 <td>ritapoudel11@gmail.com</td>
-                                 <td>Rita Poudel</td>
-                                 <td>254646</td>
-                                 <td>rita.poudel537</td>
-                                 <td>ritarita</td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Edit</button></td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Update</button></td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Delete</button></td>
-                             </tr>
-                             <tr>
-                                 <td>gitakafle00@gmail.com</td>
-                                 <td>Gita Kafle</td>
-                                 <td>7777777</td>
-                                 <td>Gita.kfle321</td>
-                                 <td>gitagita</td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Edit</button></td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Update</button></td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Delete</button></td>
-                             </tr>
-                             <tr>
-                                 <td>smupandit21@gmail.com</td>
-                                 <td>Smriti pandit</td>
-                                 <td>7777777</td>
-                                 <td>smriti537</td>
-                                 <td>hellosmu</td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Edit</button></td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Update</button></td>
-                                 <td><button class="btn btn-outline-secondary btn-sm">Delete</button></td>
-                             </tr>
-                             <!-- Add more rows as needed -->
-                         </tbody>
+            <?php
+            
+
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    echo "<tr>";
+                    echo "<td>" . $row['name'] . "</td>";
+                    echo "<td>" . $row['email'] . "</td>";
+                    echo "<td>" . $row['phoneno'] . "</td>";
+                    echo "<td>" . $row['username'] . "</td>";
+                    echo "<td>" . $row['password'] . "</td>";
+                    echo "<td>
+                        <a href='edit.php?id=" . $row['st_id'] . "'>Edit</a> |
+                        <a href='delete.php?id=" . $row['st_id'] . "' onclick='return confirm(\"Are you sure you want to delete this staff?\");'>Delete</a>
+                    </td>";
+                    echo "</tr>";
+                }
+            } else {
+                echo "<tr><td colspan='6'>No staff found</td></tr>";
+            }
+    ?>
+                    </tbody>
+
                      </table>
                      <!-- Add/Edit Staff Form -->
-                     <div class="form-wrapper d-none" id="userForm">
+                     <div class="form-wrapper d-none" id="stForm">
                          <h4>ADD New Staff</h4>
-                         <form id="hostellerForm">
+                         <form id="stForm">
                              <div class="mb-3">
-                                 <label for="HostellerName" class="form-label">Name *</label>
-                                 <input type="text" class="form-control" id="HostellerName" placeholder="Enter name" required>
+                                 <label for="stName" class="form-label">Name *</label>
+                                 <input type="text" class="form-control" id="stName" placeholder="Enter name" required>
                              </div>
                              <div class="mb-3">
-                                 <label for="HostellerEmail" class="form-label">Email *</label>
-                                 <input type="email" class="form-control" id="HostellerEmail" placeholder="Enter email" required>
+                                 <label for="stEmail" class="form-label">Email *</label>
+                                 <input type="email" class="form-control" id="stEmail" placeholder="Enter email" required>
                              </div>
                              <div class="mb-3">
-                                 <label for="HostellerPhoneNo" class="form-label">Phone no *</label>
-                                 <input type="text" class="form-control" id="HostellerPhoneNo" placeholder="Enter Phone no" required>
+                                 <label for="stPhoneNo" class="form-label">Phone no *</label>
+                                 <input type="text" class="form-control" id="stPhoneNo" placeholder="Enter Phone no" required>
                              </div>
                              <div class="mb-3">
-                                 <label for="HostellerUsername" class="form-label">Username *</label>
-                                 <input type="text" class="form-control" id="HostellerUsername" placeholder="Enter Username" required>
+                                 <label for="stUsername" class="form-label">Username *</label>
+                                 <input type="text" class="form-control" id="stUsername" placeholder="Enter Username" required>
                              </div>
                              <div class="mb-3">
-                                 <label for="HostellerPassword" class="form-label">Password *</label>
-                                 <input type="password" class="form-control" id="HostellerPassword" placeholder="Enter password" required>
+                                 <label for="stPassword" class="form-label">Password *</label>
+                                 <input type="password" class="form-control" id="stPassword" placeholder="Enter password" required>
                              </div>
-                             <button type="button" class="btn btn-primary" id="saveHostellerBtn">Save</button>
-                             <button type="button" class="btn btn-secondary" id="cancelHostellerBtn">Cancel</button>
+                             <button type="button" class="btn btn-primary" id="savestBtn">Save</button>
+                             <button type="button" class="btn btn-secondary" id="cancelstBtn">Cancel</button>
                          </form>
                      </div>
                  </div>
@@ -208,21 +208,21 @@
      <script>
          const successAlert = document.getElementById('successAlert');
          const addNewHostellerBtn = document.getElementById('addNewHosteller');
-         const userForm = document.getElementById('userForm');
-         const saveHostellerBtn = document.getElementById('saveHostellerBtn');
-         const cancelHostellerBtn = document.getElementById('cancelHostellerBtn');
+         const stForm = document.getElementById('stForm');
+         const savestBtn = document.getElementById('savestBtn');
+         const cancelstBtn = document.getElementById('cancelstBtn');
          const hostellerTable = document.getElementById('hostellerTable').getElementsByTagName('tbody')[0];
          const searchInput = document.getElementById('searchInput');
          const searchBtn = document.getElementById('searchBtn');
  
          // Show form when clicking 'Add New Hosteller'
          addNewHostellerBtn.addEventListener('click', () => {
-             userForm.classList.remove('d-none');
+             stForm.classList.remove('d-none');
          });
  
          // Hide form when clicking 'Cancel'
-         cancelHostellerBtn.addEventListener('click', () => {
-             userForm.classList.add('d-none');
+         cancelstBtn.addEventListener('click', () => {
+             stForm.classList.add('d-none');
          });
  
          // Function to dynamically add a new row in the table
@@ -261,21 +261,46 @@
          }
  
          // Save the new hosteller to the table
-         saveHostellerBtn.addEventListener('click', () => {
-             const email = document.getElementById('HostellerEmail').value;
-             const name = document.getElementById('HostellerName').value;
-             const phoneNo = document.getElementById('HostellerPhoneNo').value;
-             const username = document.getElementById('HostellerUsername').value;
-             const password = document.getElementById('HostellerPassword').value;
- 
-             if (email && name && phoneNo && username && password) {
-                 addHostellerToTable(email, name, phoneNo, username, password); // Add to table
-                 showSuccessNotification(); // Show success alert
-                 userForm.classList.add('d-none'); // Hide form after saving
-             } else {
-                 alert('Please fill in all required fields.');
-             }
-         });
+        savestBtn.addEventListener('click', () => 
+{
+            const email = document.getElementById('stEmail').value;
+            const name = document.getElementById('stName').value;
+            const phoneNo = document.getElementById('stPhoneNo').value;
+            const username = document.getElementById('stUsername').value;
+            const password = document.getElementById('stPassword').value;
+
+            if (email && name && phoneNo && username && password) {
+                // Send data to the server using AJAX
+                fetch('staffmanagement.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'name': name,
+                        'email': email,
+                        'phoneno': phoneNo,
+                        'username': username,
+                        'password': password
+                    })
+                })
+                .then(response => response.text())
+                .then(data => {
+                    if (data.includes("success")) {
+                        addHostellerToTable(email, name, phoneNo, username, password); // Add to table
+                        showSuccessNotification(); // Show success alert
+                        stForm.classList.add('d-none'); // Hide form after saving
+                    } else {
+                        alert('Error saving data: ' + data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            } else {
+                alert('Please fill in all required fields.');
+            }
+});
  
          // Function to search and filter the table based on user input
          function searchHosteller() {
