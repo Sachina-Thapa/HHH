@@ -175,15 +175,38 @@
                  <div class="table-wrapper">
                      <h5>Room Occupancy and Pricing</h5>
                      <table class="table table-bordered">
-                         <thead class="table-dark">
+                     
+         <?php
+            require('inc/db.php');
+
+            // Query to select room data
+                $sql = "SELECT rid, rno, rtype, rprice FROM room"; 
+                $result = $conn->query($sql);
+                     
+                if ($result && $result->num_rows > 0) 
+                {
+                    while ($row = $result->fetch_assoc()) {
+                        echo "<tr>";
+                        echo "<td id='rno_" . $row["rid"] . "'>" . $row["rno"] . "</td>";
+                        echo "<td id='rtype_" . $row["rid"] . "'>" . $row["rtype"] . "</td>";
+                        echo "<td id='rprice_" . $row["rid"] . "'> रु " . number_format($row["rprice"], 2) . "</td>";
+                        echo "</tr>";
+                    }
+                }
+            
+                else {
+                echo "<tr><td colspan='4'>No rooms found</td></tr>";
+                }
+        ?>
+                         <!-- <thead class="table-dark">
                              <tr>
                                  <th>Room Type</th>
                                  <th>Occupancy</th>
                                  <th>Guests</th>
                                  <th>Total Price</th>
-                             </tr>
-                         </thead>
-                         <tbody>
+                                </tr>
+                                </thead>
+                                <tbody>
                              <tr>
                                  <td>Single Room</td>
                                  <td>80%</td>
@@ -202,7 +225,7 @@
                                  <td>0</td>
                                  <td>Rs.1500</td>
                              </tr>
-                         </tbody>
+                         </tbody> -->
                      </table>
                  </div>
  
