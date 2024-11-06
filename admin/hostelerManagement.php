@@ -105,7 +105,6 @@ if ($conn->connect_error) {
                               <th>Phone Number</th>
                               <th>Address</th>
                               <th>Email</th>
-                              <th>Actions</th>
                           </tr>
                       </thead>
                       <tbody>
@@ -118,14 +117,6 @@ if ($conn->connect_error) {
                               echo "<td>" . htmlspecialchars($row['phone_number']) . "</td>";
                               echo "<td>" . htmlspecialchars($row['address']) . "</td>";
                               echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                              echo "<td>";
-                              if($row['status'] == 0) {
-                                  echo "<button class='btn btn-success btn-sm accept-btn' data-id='" . $row['id'] . "'>Accept</button> ";
-                                  echo "<button class='btn btn-danger btn-sm remove-btn' data-id='" . $row['id'] . "'>Remove</button>";
-                              } else {
-                                  echo "<span class='badge bg-success'>Verified</span>";
-                              }
-                              echo "</td>";
                               echo "</tr>";
                           }
                       } else {
@@ -138,42 +129,6 @@ if ($conn->connect_error) {
           </div>
     </div>
 </div>
-
-<script>
-$(document).ready(function() {
-    $('.accept-btn').click(function() {
-        let id = $(this).data('id');
-        $.ajax({
-            url: 'update_status.php',
-            type: 'POST',
-            data: {
-                id: id,
-                action: 'accept'
-            },
-            success: function(response) {
-                location.reload();
-            }
-        });
-    });
-
-    $('.remove-btn').click(function() {
-        if(confirm('Are you sure you want to remove this hosteler?')) {
-            let id = $(this).data('id');
-            $.ajax({
-                url: 'update_status.php',
-                type: 'POST',
-                data: {
-                    id: id,
-                    action: 'remove'
-                },
-                success: function(response) {
-                    location.reload();
-                }
-            });
-        }
-    });
-});
-</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
