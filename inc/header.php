@@ -66,64 +66,63 @@
             </div>
         </div>
     </div>
+
         <!-- Register Modal -->
         <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
-
-            <form method="POST" action="index.php" enctype="multipart/form-data" id="registerForm">
+              <form method="POST" action="index.php" enctype="multipart/form-data" id="registerForm">
                 <div class="modal-header">
                   <h5 class="modal-title" id="registerModalLabel">Register Hosteler</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <span class="badge rounded-pill bg-light text-dark mb-3 text-wrap th-base"></span>
                   <div class="container-fluid">
                     <div class="row">
-                      <div class="col-md-6 ps-0 mb-3">
+                      <div class="col-md-6 mb-3">
                         <label class="form-label">Name</label>
-                        <input type="text" name="name" class="form-control shadow-none">
+                        <input type="text" name="name" class="form-control shadow-none" required>
                       </div>
-                      <div class="col-md-6 ps-0 mb-3">
+                      <div class="col-md-6 mb-3">
                         <label class="form-label">Phone Number</label>
-                        <input type="tel" pattern="(\+977?)?[9][6-9]\d{8}"
-                        maxLength="10" name="phone" class="form-control shadow-none">
+                        <input type="tel" pattern="(\+977?)?[9][6-9]\d{8}" maxLength="10" name="phone" class="form-control shadow-none" required>
                       </div>
-                      <div class="col-md-6 p-0 mb-3">
+                      <div class="col-md-6 mb-3">
                         <label class="form-label">Picture</label>
-                        <input type="file" name="picture" class="form-control shadow-none">
+                        <input type="file" name="picture" class="form-control shadow-none" required>
                       </div>
-                      <div class="col-md-12 ps-6 mb-3">
+                      <div class="col-md-12 mb-3">
                         <label class="form-label">Address</label>
-                        <textarea name="address" class="form-control shadow" rows="1"></textarea>
+                        <textarea name="address" class="form-control shadow-none" rows="2" required></textarea>
                       </div>
-                      <div class="col-md-6 ps-0 mb-3">
+                      <div class="col-md-6 mb-3">
                         <label class="form-label">Date of Birth</label>
-                        <input type="date" name="dob" class="form-control shadow-none">
+                        <input type="date" name="dob" class="form-control shadow-none" required>
                       </div>
-                      <div class="col-md-6 p-0 mb-3">
+                      <div class="col-md-6 mb-3">
                         <label class="form-label">Username</label>
-                        <input type="text" name="username" class="form-control shadow-none">
+                        <input type="text" name="username" class="form-control shadow-none" required>
                       </div>
-                      <div class="col-md-6 p-0 mb-3">
+                      <div class="col-md-6 mb-3">
                         <label class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control shadow-none">
+                        <input type="password" name="password" class="form-control shadow-none" required>
                       </div>
-                      <div class="col-md-6 p-0 mb-3">
+                      <div class="col-md-6 mb-3">
                         <label class="form-label">Confirm Password</label>
-                        <input type="password" name="confirm_password" class="form-control shadow-none">
+                        <input type="password" name="confirm_password" class="form-control shadow-none" required>
                       </div>
-                      <div class="col-md-6 p-0">
+                      <div class="col-md-12 mb-3">
                         <label class="form-label">Email</label>
                         <div class="input-group">
-                            <input type="email" name="email" id="register-email" class="form-control shadow-none">
-                            <button type="button" class="btn btn-primary" id="sendOtpBtn" onclick="sendOTP()">Send OTP</button>
+                          <input type="email" name="email" id="register-email" class="form-control shadow-none" required>
+                          <button type="button" class="btn btn-primary" id="sendOtpBtn" onclick="sendOTP()">Send OTP</button>
                         </div>
-                      <div class="col-md-6 p-0 mb-3 mt-3" id="otpSection" style="display:none;">
+                      </div>
+                      <div class="col-md-12 mb-3" id="otpSection" style="display:none;">
                         <label class="form-label">Enter OTP</label>
                         <div class="input-group">
-                            <input type="text" maxLength="6" id="otp-input" class="form-control shadow-none" maxlength="6">
-                            <button type="button" class="btn btn-success" onclick="verifyOTP()">Verify OTP</button>
+                          <input type="text" maxLength="6" id="otp-input" class="form-control shadow-none">
+                          <button type="button" class="btn btn-success" onclick="verifyOTP()">Verify OTP</button>
                         </div>
                       </div>
                       <input type="hidden" name="form_type" value="register">
