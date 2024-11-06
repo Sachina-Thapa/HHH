@@ -84,16 +84,10 @@
                         <label class="form-label">Name</label>
                         <input type="text" name="name" class="form-control shadow-none">
                       </div>
-                      <div class="col-md-6 p-0">
-                        <label class="form-label">Email</label>
-                        <div class="input-group">
-                            <input type="email" name="email" id="register-email" class="form-control shadow-none">
-                            <button type="button" class="btn btn-primary" id="sendOtpBtn" onclick="sendOTP()">Send OTP</button>
-                        </div>
-                      </div>
+
                       <div class="col-md-6 ps-0 mb-3">
                         <label class="form-label">Phone Number</label>
-                        <input type="number" pattern="(\+977?)?[9][6-9]\d{8}"
+                        <input type="tel" pattern="(\+977?)?[9][6-9]\d{8}"
                         maxLength="10" name="phone" class="form-control shadow-none">
                       </div>
                       <div class="col-md-6 p-0 mb-3">
@@ -120,6 +114,12 @@
                         <label class="form-label">Confirm Password</label>
                         <input type="password" name="confirm_password" class="form-control shadow-none">
                       </div>
+                      <div class="col-md-6 p-0">
+                        <label class="form-label">Email</label>
+                        <div class="input-group">
+                            <input type="email" name="email" id="register-email" class="form-control shadow-none">
+                            <button type="button" class="btn btn-primary" id="sendOtpBtn" onclick="sendOTP()">Send OTP</button>
+                        </div>
                       <div class="col-md-6 p-0 mb-3 mt-3" id="otpSection" style="display:none;">
                         <label class="form-label">Enter OTP</label>
                         <div class="input-group">
