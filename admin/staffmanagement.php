@@ -23,10 +23,56 @@
             $stmt->close();
             exit(); // Important to stop further execution
         }
-        // Fetch all staff records from the database
+            // Update staff
+            if (isset($_GET['update'])) {
+                $rid = $_GET['update'];
+                $fetch_sql = "SELECT * FROM staff_data WHERE st_id = $st_id";
+                $fetch_result = $conn->query($fetch_sql);
+                $staff_to_update = $fetch_result->fetch_assoc();
+            }
+
+            if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
+                // $st_id = $_POST['st_id'];
+                $staff_name = $_POST['name'];
+                $staff_email = $_POST['email'];
+                $room_phone = $_POST['phoneno'];
+                $staff_uname = $_POST['username'];
+                $staff_pass = $_POST['password'];
+
+                $update_sql = "UPDATE staff_data SET name=?, email=?, phoneno=?, username=?, password=? WHERE st_id=?";
+                $stmt = $conn->prepare($update_sql);
+                $stmt->bind_param("sssss", $staff_name, $staff_email, $staff_phone, $staff_uname, $staff_pass );
+
+                if ($stmt->execute()) {
+                    header("Location: ".$_SERVER['PHP_SELF']."?updated=1");
+                    exit();
+                } else {
+                    echo "Error updating record: " . $stmt->error;
+                }
+                $stmt->close();
+            }// Delete staff
+            if (isset($_GET['delete'])) {
+                $st_id = $_GET['delete'];
+                $delete_sql = "DELETE FROM staff_data WHERE st_id = $st_id";
+                if ($conn->query($delete_sql) === TRUE) {
+                    // Reset auto-increment
+                    $reset_sql = "ALTER TABLE staff_data AUTO_INCREMENT = 1";
+                    $conn->query($reset_sql);
+                    header("Location: ".$_SERVER['PHP_SELF']."?deleted=1");
+                    exit();
+                } else {
+                    $error_message = "Error deleting record: " . $conn->error;
+                }
+            }
+
+            // Fetch all staffs
+            $sql = "SELECT * FROM staff_data";
+            $result = $conn->query($sql);
+?>
+        <!-- // Fetch all staff records from the database
         $sql = "SELECT st_id, name, email, phoneno, username, password FROM staff_data";
         $result = $conn->query($sql);
-    ?>
+    ?> -->
 <!DOCTYPE html>
  <html lang="en">
  <head>
@@ -119,7 +165,7 @@
              <div class="col-md-10 p-4">
                  <!-- Success Notification -->
                  <div id="successAlert" class="alert alert-success d-none">
-                     Well done! Staff added successfully.
+                      Staff added successfully.
                  </div>
                  <!-- Staff Table -->
                  <div class="Staff">
@@ -141,9 +187,8 @@
                                  <th>Phone No</th>
                                  <th>Username</th>
                                  <th>Password</th>
-                                 <th>Edit</th>
-                                 <th>Update</th>
-                                 <th>Delete</th>
+                                 <th>Action</th>
+                                 
                              </tr>
                          </thead>
                          <tbody>
@@ -158,15 +203,16 @@
                     echo "<td>" . $row['phoneno'] . "</td>";
                     echo "<td>" . $row['username'] . "</td>";
                     echo "<td>" . $row['password'] . "</td>";
-                    echo "<td>
-                        <a href='edit.php?id=" . $row['st_id'] . "'>Edit</a> |
-                        <a href='delete.php?id=" . $row['st_id'] . "' onclick='return confirm(\"Are you sure you want to delete this staff?\");'>Delete</a>
-                    </td>";
-                    echo "</tr>";
-                }
-            } else {
-                echo "<tr><td colspan='6'>No staff found</td></tr>";
+                    echo "<td class='action-links'>
+                    <a href='#' id='edit_" . $row["st_id"] . "' class='update-link' onclick='enableEdit(" . $row["st_id"] . ")'>Edit</a>
+                    <a href='#' id='save_" . $row["st_id"] . "' class='update-link' onclick='saveEdit(" . $row["st_id"] . ")' style='display:none;'>Save</a>
+                    <a href='?delete=" . $row["st_id"] . "' class='delete-link' onclick='return confirm(\"Are you sure you want to delete this staff?\");'>Delete</a>
+                </td>";
+                echo "</tr>";
             }
+        } else {
+            echo "<tr><td colspan='4'>No staff found</td></tr>";
+        }
     ?>
                     </tbody>
 
@@ -225,32 +271,26 @@
              stForm.classList.add('d-none');
          });
  
-         // Function to dynamically add a new row in the table
-         function addHostellerToTable(email, name, phoneNo, username, password) {
-             const newRow = hostellerTable.insertRow(); // Create new row
+        //  // Function to dynamically add a new row in the table
+        //  function addHostellerToTable(email, name, phoneNo, username, password) {
+        //      const newRow = hostellerTable.insertRow(); // Create new row
  
-             // Insert new cells in the row
-             const emailCell = newRow.insertCell(0);
-             const nameCell = newRow.insertCell(1);
-             const phoneNoCell = newRow.insertCell(2);
-             const usernameCell = newRow.insertCell(3);
-             const passwordCell = newRow.insertCell(4);
-             const editCell = newRow.insertCell(5);
-             const updateCell = newRow.insertCell(6);
-             const deleteCell = newRow.insertCell(7);
+        //      // Insert new cells in the row
+        //      const emailCell = newRow.insertCell(0);
+        //      const nameCell = newRow.insertCell(1);
+        //      const phoneNoCell = newRow.insertCell(2);
+        //      const usernameCell = newRow.insertCell(3);
+        //      const passwordCell = newRow.insertCell(4);
+            
  
-             // Set cell values
-             emailCell.innerText = email;
-             nameCell.innerText = name;
-             phoneNoCell.innerText = phoneNo;
-             usernameCell.innerText = username;
-             passwordCell.innerText = password;
+        //      // Set cell values
+        //      emailCell.innerText = email;
+        //      nameCell.innerText = name;
+        //      phoneNoCell.innerText = phoneNo;
+        //      usernameCell.innerText = username;
+        //      passwordCell.innerText = password;
  
-             // Add buttons for edit, update, and delete (currently, they are non-functional)
-             editCell.innerHTML = `<button class="btn btn-outline-secondary btn-sm">Edit</button>`;
-             updateCell.innerHTML = `<button class="btn btn-outline-secondary btn-sm">Update</button>`;
-             deleteCell.innerHTML = `<button class="btn btn-outline-secondary btn-sm">Delete</button>`;
-         }
+        //  }
  
          // Show notification
          function showSuccessNotification() {
@@ -260,7 +300,7 @@
              }, 3000); // Hide after 3 seconds
          }
  
-         // Save the new hosteller to the table
+         // Save the new staff to the table
         savestBtn.addEventListener('click', () => 
 {
             const email = document.getElementById('stEmail').value;
@@ -287,7 +327,7 @@
                 .then(response => response.text())
                 .then(data => {
                     if (data.includes("success")) {
-                        addHostellerToTable(email, name, phoneNo, username, password); // Add to table
+                        addstaffToTable(email, name, phoneNo, username, password); // Add to table
                         showSuccessNotification(); // Show success alert
                         stForm.classList.add('d-none'); // Hide form after saving
                     } else {
@@ -331,6 +371,7 @@
  
          // Optionally, you can also trigger the search as the user types:
          searchInput.addEventListener('keyup', searchHosteller);
+
      </script>
  </body>
  
