@@ -123,6 +123,19 @@ $conn->close();
     .navbar {
       background-color:#36454F!important;
     }
+    .navbar {
+    transition: all 0.3s ease;
+    background-color:#36454F!important;
+
+   
+}
+
+.navbar.scrolled {
+  color:#36454F !important ;
+  background-color: transparent !important;
+    backdrop-filter: blur(3px);
+
+}
     .navbar-brand img {
       height: 40px;
       width: auto;
@@ -133,6 +146,7 @@ $conn->close();
       font-weight: 500;
       padding: 0.5rem 1rem;
       transition: color 0.3s ease-in-out;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
     .navbar-nav .nav-link:hover {
       color: #0d6efd;
@@ -398,6 +412,17 @@ $conn->close();
       currentSlide = (currentSlide + 1) % slides.length;
       showSlide(currentSlide);
     }, 5000);
+
+    document.addEventListener('DOMContentLoaded', function() {
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+});
   </script>
 </body>
 </html>

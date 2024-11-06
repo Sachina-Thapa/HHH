@@ -1,7 +1,15 @@
-<!-- NAVIGATION BAR -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white px-lg-3 py-lg-2 fixed-top">
+
+ <!-- NAVIGATION BAR -->
+ <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
   <div class="container-fluid">
-    <a class="navbar-brand me-6 fq-bold fs-3" href="index.html">Her Home Hostel</a>
+    <!-- Logo in the Navbar -->
+    <a class="navbar-brand d-flex align-items-center" href="index.php">
+      <img src="images/logoo.png" alt="Logo"> 
+      <span>Her Home Hostel</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
         <li class="nav-item">
@@ -23,6 +31,7 @@
     </div>
   </div>
 </nav>
+
 
 <!-- Login Modal -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
@@ -209,3 +218,7 @@
             }
         });
         </script>
+
+
+
+
