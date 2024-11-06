@@ -84,7 +84,6 @@
                         <label class="form-label">Name</label>
                         <input type="text" name="name" class="form-control shadow-none">
                       </div>
-
                       <div class="col-md-6 ps-0 mb-3">
                         <label class="form-label">Phone Number</label>
                         <input type="tel" pattern="(\+977?)?[9][6-9]\d{8}"
