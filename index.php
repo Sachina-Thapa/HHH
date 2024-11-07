@@ -131,9 +131,9 @@ $conn->close();
 }
 
 .navbar.scrolled {
-  color:#36454F !important ;
+
   background-color: transparent !important;
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(2px);
 
 }
     .navbar-brand img {
@@ -146,7 +146,7 @@ $conn->close();
       font-weight: 500;
       padding: 0.5rem 1rem;
       transition: color 0.3s ease-in-out;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      text-shadow: 2px 2px 4px rgba(0, 0, 0.5, 1);
     }
     .navbar-nav .nav-link:hover {
       color: #0d6efd;

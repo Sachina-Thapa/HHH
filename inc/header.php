@@ -4,8 +4,11 @@
   <div class="container-fluid">
     <!-- Logo in the Navbar -->
     <a class="navbar-brand d-flex align-items-center" href="index.php">
-      <img src="images/logoo.png" alt="Logo"> 
-      <span>Her Home Hostel</span>
+
+    <img src="images/logoo.png" alt="Logo" style="filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));">
+
+      <span style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 1.5);"
+      >Her Home Hostel</span>
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
