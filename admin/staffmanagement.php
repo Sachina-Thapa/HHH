@@ -1,25 +1,39 @@
 <?php
-        require('inc/db.php');
-        require ('inc/essentials.php'); // Include the essentials file
+require('inc/db.php');
+require('inc/essentials.php'); // Include the essentials file
 
-        // Handle form submission to add new staff
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add'])) {
-            $stmt = $conn->prepare("INSERT INTO staff_data (name, email, phoneno, username, password) VALUES (?, ?, ?,?,?)");
-            $stmt->bind_param("sssss", $staff_name, $staff_email, $staff_phoneno,$staff_uname,$staff_pass);
-            
-            $staff_name = $_POST['name'];
-            $staff_email = $_POST['email'];
-            $staff_phoneno = $_POST['phoneno'];
-            $staff_uname = $_POST['username'];
-            $staff_pass = $_POST['password'];
-        
-            if ($stmt->execute()) {
-                redirect($_SERVER['PHP_SELF']); // Redirect to the same page
-                alert("success", "New staff added successfully."); // Display success alert
-                exit();
-            }
-            $stmt->close();
+// Handle form submission to add new staff
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add'])) {
+    $staff_name = $_POST['name'];
+    $staff_email = $_POST['email'];
+    $staff_phoneno = $_POST['phoneno'];
+    $staff_uname = $_POST['username'];
+    $staff_pass = $_POST['password'];
+
+    // Check if the username already exists
+    $check_sql = "SELECT COUNT(*) as count FROM staff_data WHERE username = ?";
+    $check_stmt = $conn->prepare($check_sql);
+    $check_stmt->bind_param("s", $staff_uname);
+    $check_stmt->execute();
+    $check_result = $check_stmt->get_result();
+    $check_row = $check_result->fetch_assoc();
+
+    if ($check_row['count'] > 0) {
+        // Username already exists
+        $error_message = "This username already exists. Please choose another username.";
+    } else {
+        // Proceed to insert the new staff
+        $stmt = $conn->prepare("INSERT INTO staff_data (name, email, phoneno, username, password) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssss", $staff_name, $staff_email, $staff_phoneno, $staff_uname, $staff_pass);
+
+        if ($stmt->execute()) {
+            redirect($_SERVER['PHP_SELF']); // Redirect to the same page
+            alert("success", "New staff added successfully."); // Display success alert
+            exit();
         }
+        $stmt->close();
+    }
+}
             // Update staff
             if (isset($_GET['update'])) {
                 $st_id = $_GET['update'];
@@ -64,10 +78,6 @@
             $sql = "SELECT * FROM staff_data";
             $result = $conn->query($sql);
 ?>
-        <!-- // Fetch all staff records from the database
-        $sql = "SELECT st_id, name, email, phoneno, username, password FROM staff_data";
-        $result = $conn->query($sql);
-    ?> -->
 <!DOCTYPE html>
  <html lang="en">
  <head>
@@ -323,21 +333,21 @@
 }
 
 
-        //     fetch('staffmanagement.php', {
-        //         method: 'POST',
-        //         body: data,
-        //     }).then(response => response.text()).then(data => {
-        //         if (data.includes("success")) {
-        //             alert("Staff added successfully!");
-        //             location.reload(); // Reload page after successful staff addition
-        //         } else {
-        //             alert("Error: " + data); // Handle error if there's an issue
-        //         }
-        //     }).catch(error => {
-        //         console.error('Error:', error);
-        //         alert('Error occurred while adding staff!');
-        //     });
-        // }
+            fetch('staffmanagement.php', {
+                method: 'POST',
+                body: data,
+            }).then(response => response.text()).then(data => {
+                if (data.includes("success")) {
+                    alert("Staff added successfully!");
+                    location.reload(); // Reload page after successful staff addition
+                } else {
+                    alert("Error: " + data); // Handle error if there's an issue
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('Error occurred while adding staff!');
+            });
+        
 
 
          // Function to search and filter the table based on user input

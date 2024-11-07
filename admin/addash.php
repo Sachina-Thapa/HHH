@@ -170,35 +170,7 @@
                 echo "<tr><td colspan='4'>No rooms found</td></tr>";
                 }
         ?>
-                         <!-- <thead class="table-dark">
-                             <tr>
-                                 <th>Room Type</th>
-                                 <th>Occupancy</th>
-                                 <th>Guests</th>
-                                 <th>Total Price</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                             <tr>
-                                 <td>Single Room</td>
-                                 <td>80%</td>
-                                 <td>2</td>
-                                 <td>Rs.2000</td>
-                             </tr>
-                             <tr>
-                                 <td>Double Room</td>
-                                 <td>75%</td>
-                                 <td>3</td>
-                                 <td>Rs.3000</td>
-                             </tr>
-                             <tr>
-                                 <td>Dormitory</td>
-                                 <td>85%</td>
-                                 <td>0</td>
-                                 <td>Rs.1500</td>
-                             </tr>
-                         </tbody> -->
-                     </table>
+                         
                  </div>
  
                  <!-- Chart Section -->

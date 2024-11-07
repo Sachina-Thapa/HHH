@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $dashboard = 'admin/addash.php';
                     break;
                 case 'Staff':
-                    $table = 'stafflogin';
+                    $table = 'staff_data';
                     $dashboard = 'staff/staffdash.php';
                     break;
                 case 'Hosteler':
