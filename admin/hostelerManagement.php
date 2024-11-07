@@ -1,3 +1,19 @@
+<?php
+session_start();
+$servername = "localhost";
+$username = "root";
+$password = '';
+$dbname = "hhh";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,43 +22,71 @@
     <title>Hosteler Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        .sidebar {
-            margin:0px;
-            height: 100vh;
-            background-color: #343a40;
-            padding-top: 10px;
-        }
-        .sidebar a {
-            color: #fff;
-            padding: 15px;
-            display: block;
-            text-decoration: none;
-        }
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-    </style>
+    
 </head>
 <body>
+<style>
+.search-form {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+}
+
+.search-form .form-control {
+    border: 1px solid #ced4da;
+    padding: 10px 15px;
+    transition: all 0.3s ease;
+}
+
+.search-form .form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+.search-form .btn {
+    padding: 10px 20px;
+    margin-right: 10px;
+    font-weight: 500;
+}
+
+.search-form .btn-primary {
+    background-color: #0d6efd;
+    border: none;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+.search-form .btn-primary:hover {
+    background-color: #0b5ed7;
+    transform: translateY(-1px);
+}
+
+.search-form .btn-secondary {
+    background-color: #6c757d;
+    border: none;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+.search-form .btn-secondary:hover {
+    background-color: #5c636a;
+    transform: translateY(-1px);
+}
+
+</style>
+
 <div class="container-fluid m-0">
     <div class="row">
         <!-- Sidebar -->
-        <div class="col-md-2 sidebar">
-            <h3 class="text-white text-center">Her Home Hostel</h3>
-            <a href="addash.php">Dashboard</a>
-            <a href="roomManagement.php">Room Management</a>
-            <a href="staffmanagement.php">Staff Management</a>
-            <a href="hostelerManagement.php">Hosteller</a>
-            <a href="setting.php">Settings</a>
-            <button class="btn w-100"><a href="../index.php">LOG OUT</a></button>
-        </div>
+        <?php require('inc/sideMenu.php'); ?>
 
         <!-- Main Content -->
         <div class="col-md-10">
             <h2 class="mt-4 mb-4">Hosteler Management</h2>
               <!-- Advanced Search Bar -->
-              <form method="GET" action="">
+              <form method="GET" action="" class="search-form">
                   <div class="row mb-3">
                       <div class="col-md-3">
                           <input type="text" class="form-control" name="search_term" placeholder="Search by Name, Phone or Email" value="<?php echo isset($_GET['search_term']) ? htmlspecialchars($_GET['search_term']) : ''; ?>">
@@ -63,7 +107,7 @@
                           WHERE name LIKE CONCAT('%', ?, '%') 
                           OR phone_number LIKE CONCAT('%', ?, '%') 
                           OR email LIKE CONCAT('%', ?, '%')";
-                        
+
                   $stmt = $conn->prepare($sql);
                   $stmt->bind_param("sss", $search_term, $search_term, $search_term);
                   $stmt->execute();

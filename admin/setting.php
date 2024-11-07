@@ -20,32 +20,6 @@
                 font-family: Arial, sans-serif;
             }
     
-            /* Sidebar CSS */
-            .sidebar {
-                margin: 0px;
-                height: 140vh;
-                background-color: #343a40;
-                padding-top: 10px;
-            }
-    
-            .sidebar a {
-                color: #fff;
-                padding: 25px;
-                display: block;
-                text-decoration: none;
-            }
-    
-            .sidebar a:hover {
-                background-color: #495057;
-            }
-    
-            .logout-btn {
-                margin-top: 30px;
-                background-color: #f8f9fa;
-                border: none;
-                color: #000;
-                padding: 6px;
-            }
             .table thead {
                 background-color: #000;
                 color: #a06666;
@@ -81,18 +55,8 @@
 </div>
 <div class="container-fluid">
     <div class="row">
-       <!-- Sidebar -->
-       <div class="col-md-2 sidebar">
-                 <h4 class="text-white text-center">Her Home Hostel</h4>
-                 <a href="addash.php">Dashboard</a>
-                 <a href="roomManagement.php">Room Management</a>
-                 <a href="staffmanagement.php">Staff management</a>
-                 <a href="hostelerManagement.php">Hosteller</a>
-                 <a href="queries.php">Queries</a>
-                 <a href="setting.php">Settings</a>
-                 <button class="logout-btn w-100">LOG OUT</button>
-             </div>
-
+      <!-- Sidebar -->
+      <?php require('inc/sideMenu.php'); ?>
       <!-- Main Content -->
       <div class="col-md-10 p-4">
         <h2>Settings</h2>

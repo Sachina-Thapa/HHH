@@ -81,32 +81,7 @@ $result = $conn->query($sql);
              font-family: Arial, sans-serif;
          }
  
-         /* Sidebar CSS */
-         .sidebar {
-             margin: 0px;
-             height: 140vh;
-             background-color: #343a40;
-             padding-top: 10px;
-         }
- 
-         .sidebar a {
-             color: #fff;
-             padding: 25px;
-             display: block;
-             text-decoration: none;
-         }
- 
-         .sidebar a:hover {
-             background-color: #495057;
-         }
- 
-         .logout-btn {
-             margin-top: 30px;
-             background-color: #f8f9fa;
-             border: none;
-             color: #000;
-             padding: 6px;
-         }
+        
  
         h1, h2{
             color: #2c3e50;
@@ -192,50 +167,15 @@ $result = $conn->query($sql);
         }
         
 
-         /* Sidebar CSS */
-         .sidebar {
-             margin: 0px;
-             height: 140vh;
-             background-color: #343a40;
-             padding-top: 10px;
-         }
- 
-         .sidebar a {
-             color: #fff;
-             padding: 25px;
-             display: block;
-             text-decoration: none;
-         }
- 
-         .sidebar a:hover {
-             background-color: #495057;
-         }
- 
-         .logout-btn {
-             margin-top: 30px;
-             background-color: #f8f9fa;
-             border: none;
-             color: #000;
-             padding: 6px;
-         }
- 
+         
     </style>
 </head>
 <body> 
 <div class="container-fluid m-0">
   <div class="row">
-     <!-- Sidebar -->
-     <div class="col-md-2 sidebar">
-                 <h4 class="text-white text-center">Her Home Hostel</h4>
-                 <a href="addash.php">Dashboard</a>
-                 <a href="roomManagement.php">Room Management</a>
-                 <a href="staffmanagement.php">Staff management</a>
-                 <a href="hostelerManagement.php">Hosteller</a>
-                 <a href="queries.php">Queries</a>
-                 <a href="setting.php">Settings</a>
-                 <button class="logout-btn w-100">LOG OUT</button>
-             </div>
-     <div class="col-md-10">
+  <!-- Sidebar -->
+  <?php require('inc/sideMenu.php'); ?>  
+  <div class="col-md-10">
      <h3>Add New Room</h3>
      <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
         <?php if (isset($room_to_update)) echo "<input type='hidden' name='rid' value='" . $room_to_update['rid'] . "'>"; ?>
