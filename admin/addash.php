@@ -105,12 +105,21 @@
    <div class="container-fluid">
          <div class="row">
  <!-- Sidebar -->
- <?php require('inc/sideMenu.php'); ?>
+ <?php require('inc/sideMenu.php'); 
+        $sql = "SELECT COUNT(*) FROM staff_data;";
+        $result = $conn->query($sql);
+        $total_staff = 0; // Initialize the variable
+
+            if ($result) 
+            {
+                $row = $result->fetch_assoc();
+                $total_staff = $row['total']; // Get the total count
+            }
+ ?>
              <!-- Main Content -->
              <div class="col-md-10 p-4">
                  <!-- Success Notification -->
                  <div id="successAlert" class="alert alert-success d-none">
-                     Well done! Staff added successfully.
                  </div>
  
                  <!-- Statistics Section -->
@@ -124,8 +133,7 @@
                      <div class="col-md-4 mb-4">
                          <div class="card stats-card">
                              <h5>Total Staff</h5>
-                             <h3>10</h3>
-                         </div>
+                             <h3><?php echo $total_staff; ?></h3> <!-- Display the total staff count -->                         </div>
                      </div>
                      <div class="col-md-4 mb-4">
                          <div class="card stats-card">
