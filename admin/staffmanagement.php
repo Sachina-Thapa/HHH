@@ -1,53 +1,49 @@
-    <?php
+<?php
         require('inc/db.php');
+        require ('inc/essentials.php'); // Include the essentials file
 
         // Handle form submission to add new staff
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name = $_POST['name'];
-            $email = $_POST['email'];
-            $phoneno = $_POST['phoneno'];
-            $username = $_POST['username'];
-            $password = $_POST['password'];
-        
-            // Prepare and bind the statement
-            $sql = "INSERT INTO staff_data (name, email, phoneno, username, password) VALUES (?, ?, ?, ?, ?)";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sssss", $name, $email, $phoneno, $username, $password);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add'])) {
+            $stmt = $conn->prepare("INSERT INTO staff_data (name, email, phoneno, username, password) VALUES (?, ?, ?,?,?)");
+            $stmt->bind_param("sssss", $staff_name, $staff_email, $staff_phoneno,$staff_uname,$staff_pass);
+            
+            $staff_name = $_POST['name'];
+            $staff_email = $_POST['email'];
+            $staff_phoneno = $_POST['phoneno'];
+            $staff_uname = $_POST['username'];
+            $staff_pass = $_POST['password'];
         
             if ($stmt->execute()) {
-                echo "success"; // Return success message
-            } else {
-                echo "Error: " . $stmt->error; // Return error message
+                redirect($_SERVER['PHP_SELF']); // Redirect to the same page
+                alert("success", "New staff added successfully."); // Display success alert
+                exit();
             }
-        
             $stmt->close();
-            exit(); // Important to stop further execution
         }
             // Update staff
             if (isset($_GET['update'])) {
-                $rid = $_GET['update'];
+                $st_id = $_GET['update'];
                 $fetch_sql = "SELECT * FROM staff_data WHERE st_id = $st_id";
                 $fetch_result = $conn->query($fetch_sql);
                 $staff_to_update = $fetch_result->fetch_assoc();
             }
 
             if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
-                // $st_id = $_POST['st_id'];
+                $st_id = $_POST['st_id'];
                 $staff_name = $_POST['name'];
                 $staff_email = $_POST['email'];
-                $room_phone = $_POST['phoneno'];
+                $staff_phone = $_POST['phoneno'];
                 $staff_uname = $_POST['username'];
                 $staff_pass = $_POST['password'];
 
                 $update_sql = "UPDATE staff_data SET name=?, email=?, phoneno=?, username=?, password=? WHERE st_id=?";
                 $stmt = $conn->prepare($update_sql);
-                $stmt->bind_param("sssss", $staff_name, $staff_email, $staff_phone, $staff_uname, $staff_pass );
+                $stmt->bind_param("sssssi", $staff_name, $staff_email, $staff_phone, $staff_uname, $staff_pass, $st_id );
 
                 if ($stmt->execute()) {
-                    header("Location: ".$_SERVER['PHP_SELF']."?updated=1");
+                    redirect($_SERVER['PHP_SELF']); // Redirect to the same page
+                    alert("success", "Staff updated successfully."); // Display success alert
                     exit();
-                } else {
-                    echo "Error updating record: " . $stmt->error;
                 }
                 $stmt->close();
             }// Delete staff
@@ -58,10 +54,9 @@
                     // Reset auto-increment
                     $reset_sql = "ALTER TABLE staff_data AUTO_INCREMENT = 1";
                     $conn->query($reset_sql);
-                    header("Location: ".$_SERVER['PHP_SELF']."?deleted=1");
+                    redirect($_SERVER['PHP_SELF']); // Redirect to the same page
+                    alert("success", "Staff deleted successfully."); // Display success alert
                     exit();
-                } else {
-                    $error_message = "Error deleting record: " . $conn->error;
                 }
             }
 
@@ -137,6 +132,31 @@
              box-shadow: 0 2px 4px rgba(97, 57, 57, 0.1);
              margin-top: 2rem;
          }
+         .action-links a {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 2px;
+            text-decoration: none;
+            color: #fff;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        .update-link {
+            background-color: #2ecc71;
+        }
+        .update-link:hover {
+            background-color: #27ae60;
+        }
+        .delete-link {
+            background-color: #e74c3c;
+        }
+        .delete-link:hover {
+            background-color: #c0392b;
+        }
+        #message{
+           text-align: center;
+           font-size: 1.2em;
+        }
  
          .alert-success {
              position: fixed;
@@ -150,6 +170,14 @@
  <body>
      <div class="container-fluid">
          <div class="row">
+            <!-- Alert Messages -->
+            <?php
+            // Check for any alert messages
+            if (isset($_SESSION['alert'])) {
+                echo $_SESSION['alert'];
+                unset($_SESSION['alert']); // Clear alert after displaying
+            }
+            ?>
              <!-- Sidebar -->
              <div class="col-md-2 sidebar">
                  <h4 class="text-white text-center">Her Home Hostel</h4>
@@ -197,18 +225,18 @@
 
             if ($result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
-                    echo "<tr>";
-                    echo "<td>" . $row['name'] . "</td>";
-                    echo "<td>" . $row['email'] . "</td>";
-                    echo "<td>" . $row['phoneno'] . "</td>";
-                    echo "<td>" . $row['username'] . "</td>";
-                    echo "<td>" . $row['password'] . "</td>";
+                    echo "<tr id='staff_" . $row['st_id'] . "'>";
+                    echo "<td id='name_" . $row['st_id'] . "'>" . $row['name'] . "</td>";
+                    echo "<td id='email_" . $row['st_id'] . "'>" . $row['email'] . "</td>";
+                    echo "<td id='phoneno_" . $row['st_id'] . "'>" . $row['phoneno'] . "</td>";
+                    echo "<td id='username_" . $row['st_id'] . "'>" . $row['username'] . "</td>";
+                    echo "<td id='password_" . $row['st_id'] . "'>" . $row['password'] . "</td>";
                     echo "<td class='action-links'>
-                    <a href='#' id='edit_" . $row["st_id"] . "' class='update-link' onclick='enableEdit(" . $row["st_id"] . ")'>Edit</a>
-                    <a href='#' id='save_" . $row["st_id"] . "' class='update-link' onclick='saveEdit(" . $row["st_id"] . ")' style='display:none;'>Save</a>
-                    <a href='?delete=" . $row["st_id"] . "' class='delete-link' onclick='return confirm(\"Are you sure you want to delete this staff?\");'>Delete</a>
-                </td>";
-                echo "</tr>";
+                        <a href='#' id='edit_" . $row["st_id"] . "' class='update-link' onclick='enableEdit(" . $row["st_id"] . ")'>Edit</a>
+                        <a href='#' id='save_" . $row["st_id"] . "' class='update-link' onclick='saveEdit(" . $row["st_id"] . ")' style='display:none;'>Save</a>
+                        <a href='?delete=" . $row["st_id"] . "' class='delete-link' onclick='return confirm(\"Are you sure you want to delete this staff?\");'>Delete</a>
+                    </td>";
+                    echo "</tr>";
             }
         } else {
             echo "<tr><td colspan='4'>No staff found</td></tr>";
@@ -218,161 +246,171 @@
 
                      </table>
                      <!-- Add/Edit Staff Form -->
-                     <div class="form-wrapper d-none" id="stForm">
+                     <div class="form-wrapper d-none" id="staffFormContent">
                          <h4>ADD New Staff</h4>
-                         <form id="stForm">
-                             <div class="mb-3">
-                                 <label for="stName" class="form-label">Name *</label>
-                                 <input type="text" class="form-control" id="stName" placeholder="Enter name" required>
-                             </div>
-                             <div class="mb-3">
-                                 <label for="stEmail" class="form-label">Email *</label>
-                                 <input type="email" class="form-control" id="stEmail" placeholder="Enter email" required>
-                             </div>
-                             <div class="mb-3">
-                                 <label for="stPhoneNo" class="form-label">Phone no *</label>
-                                 <input type="text" class="form-control" id="stPhoneNo" placeholder="Enter Phone no" required>
-                             </div>
-                             <div class="mb-3">
-                                 <label for="stUsername" class="form-label">Username *</label>
-                                 <input type="text" class="form-control" id="stUsername" placeholder="Enter Username" required>
-                             </div>
-                             <div class="mb-3">
-                                 <label for="stPassword" class="form-label">Password *</label>
-                                 <input type="password" class="form-control" id="stPassword" placeholder="Enter password" required>
-                             </div>
-                             <button type="button" class="btn btn-primary" id="savestBtn">Save</button>
-                             <button type="button" class="btn btn-secondary" id="cancelstBtn">Cancel</button>
-                         </form>
+        <form id="staffFormContent" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+                <div class="mb-3">
+                    <label for="staff_name" class="form-label">Name *</label>
+                    <input type="text" class="form-control" id="staff_name" name="name" placeholder="Enter name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="staff_email" class="form-label">Email *</label>
+                    <input type="email" class="form-control" id="staff_email" name="email" placeholder="Enter email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="staff_phoneno" class="form-label">Phone no *</label>
+                    <input type="text" class="form-control" id="staff_phoneno" name="phoneno" placeholder="Enter Phone no" required>
+                </div>
+                <div class="mb-3">
+                    <label for="staff_uname" class="form-label">Username *</label>
+                    <input type="text" class="form-control" id="staff_uname" name="username" placeholder="Enter Username" required>
+                </div>
+                <div class="mb-3">
+                    <label for="staff_pass" class="form-label">Password *</label>
+                    <input type="password" class="form-control" id="staff_pass" name="password" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" name="add">Save</button>
+                <button type="button" class="btn btn-secondary" id="cancelstBtn">Cancel</button>
+        </form>
+
                      </div>
                  </div>
              </div>
          </div>
      </div>
+     <div id="message">
+        <?php
+        if (isset($_GET['success']) && $_GET['success'] == 1) {
+            echo "<p style='color: green;'>New staff added successfully</p>";
+        }
+        if (isset($error_message)) {
+            echo "<p style='color: red;'>$error_message</p>";
+        }
+        if (isset($_GET['deleted']) && $_GET['deleted'] == 1) {
+            echo "<p style='color: green;'>Staff deleted successfully and IDs reset</p>";
+        }
+        if (isset($_GET['updated']) && $_GET['updated'] == 1) {
+            echo "<p style='color: green;'>Staff updated successfully</p>";
+        }
+        ?>
+     </div>
+
      <!-- Bootstrap JS -->
      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
      <script>
-         const successAlert = document.getElementById('successAlert');
-         const addNewHostellerBtn = document.getElementById('addNewHosteller');
-         const stForm = document.getElementById('stForm');
-         const savestBtn = document.getElementById('savestBtn');
-         const cancelstBtn = document.getElementById('cancelstBtn');
-         const hostellerTable = document.getElementById('hostellerTable').getElementsByTagName('tbody')[0];
-         const searchInput = document.getElementById('searchInput');
-         const searchBtn = document.getElementById('searchBtn');
- 
-         // Show form when clicking 'Add New Hosteller'
-         addNewHostellerBtn.addEventListener('click', () => {
-             stForm.classList.remove('d-none');
-         });
- 
-         // Hide form when clicking 'Cancel'
-         cancelstBtn.addEventListener('click', () => {
-             stForm.classList.add('d-none');
-         });
- 
-        //  // Function to dynamically add a new row in the table
-        //  function addHostellerToTable(email, name, phoneNo, username, password) {
-        //      const newRow = hostellerTable.insertRow(); // Create new row
- 
-        //      // Insert new cells in the row
-        //      const emailCell = newRow.insertCell(0);
-        //      const nameCell = newRow.insertCell(1);
-        //      const phoneNoCell = newRow.insertCell(2);
-        //      const usernameCell = newRow.insertCell(3);
-        //      const passwordCell = newRow.insertCell(4);
-            
- 
-        //      // Set cell values
-        //      emailCell.innerText = email;
-        //      nameCell.innerText = name;
-        //      phoneNoCell.innerText = phoneNo;
-        //      usernameCell.innerText = username;
-        //      passwordCell.innerText = password;
- 
-        //  }
- 
-         // Show notification
-         function showSuccessNotification() {
-             successAlert.classList.remove('d-none');
-             setTimeout(() => {
-                 successAlert.classList.add('d-none');
-             }, 3000); // Hide after 3 seconds
-         }
- 
-         // Save the new staff to the table
-        savestBtn.addEventListener('click', () => 
-{
-            const email = document.getElementById('stEmail').value;
-            const name = document.getElementById('stName').value;
-            const phoneNo = document.getElementById('stPhoneNo').value;
-            const username = document.getElementById('stUsername').value;
-            const password = document.getElementById('stPassword').value;
+        
+        // Select the button and the form content
+            const addNewstaffBtn = document.getElementById('addNewHosteller');
+            const staffFormContent = document.getElementById('staffFormContent');
+            const cancelstBtn = document.getElementById('cancelstBtn');
 
-            if (email && name && phoneNo && username && password) {
-                // Send data to the server using AJAX
-                fetch('staffmanagement.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        'name': name,
-                        'email': email,
-                        'phoneno': phoneNo,
-                        'username': username,
-                        'password': password
-                    })
-                })
-                .then(response => response.text())
-                .then(data => {
-                    if (data.includes("success")) {
-                        addstaffToTable(email, name, phoneNo, username, password); // Add to table
-                        showSuccessNotification(); // Show success alert
-                        stForm.classList.add('d-none'); // Hide form after saving
-                    } else {
-                        alert('Error saving data: ' + data);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            } else {
-                alert('Please fill in all required fields.');
-            }
-});
- 
+            // Show form when clicking 'Add New Staff'
+            addNewstaffBtn.addEventListener('click', () => {
+                staffFormContent.classList.remove('d-none');
+            });
+
+            // Hide form when clicking 'Cancel'
+            cancelstBtn.addEventListener('click', () => {
+                staffFormContent.classList.add('d-none');
+            });
+            // Show notification
+                function showSuccessNotification() {
+                    successAlert.classList.remove('d-none');
+                    setTimeout(() => {
+                        successAlert.classList.add('d-none');
+                    }, 3000); // Hide after 3 seconds
+                }
+
+                function enableEdit(st_id)                 
+{
+            document.getElementById('name_' + st_id).contentEditable = true;
+            document.getElementById('email_' + st_id).contentEditable = true;
+            document.getElementById('phoneno_' + st_id).contentEditable = true;
+            document.getElementById('username_' + st_id).contentEditable = true;
+            document.getElementById('password_' + st_id).contentEditable = true;
+            document.getElementById('edit_' + st_id).style.display = 'none';
+            document.getElementById('save_' + st_id).style.display = 'inline';
+}
+
+    function saveEdit(st_id) 
+    {
+    var staff_name = document.getElementById('name_' + st_id).innerText;
+    var staff_email = document.getElementById('email_' + st_id).innerText;
+    var staff_phoneno = document.getElementById('phoneno_' + st_id).innerText;
+    var staff_uname = document.getElementById('username_' + st_id).innerText;
+    var staff_pass = document.getElementById('password_' + st_id).innerText;
+
+    // Send AJAX request to update staff
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '<?php echo $_SERVER["PHP_SELF"]; ?>', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function() {
+        if (this.status == 200) {
+            alert('Staff updated successfully');
+            document.getElementById('edit_' + st_id).style.display = 'inline';
+            document.getElementById('save_' + st_id).style.display = 'none';
+        } else {
+            alert('Error updating staff');
+        }
+    };
+    xhr.send('update=1&st_id=' + st_id + '&name=' + staff_name + '&email=' + staff_email + '&phoneno=' + staff_phoneno + '&username=' + staff_uname + '&password=' + staff_pass);
+}
+
+
+        //     fetch('staffmanagement.php', {
+        //         method: 'POST',
+        //         body: data,
+        //     }).then(response => response.text()).then(data => {
+        //         if (data.includes("success")) {
+        //             alert("Staff added successfully!");
+        //             location.reload(); // Reload page after successful staff addition
+        //         } else {
+        //             alert("Error: " + data); // Handle error if there's an issue
+        //         }
+        //     }).catch(error => {
+        //         console.error('Error:', error);
+        //         alert('Error occurred while adding staff!');
+        //     });
+        // }
+
+
          // Function to search and filter the table based on user input
-         function searchHosteller() {
-             const filter = searchInput.value.toLowerCase();
-             const rows = hostellerTable.getElementsByTagName('tr');
- 
-             for (let i = 0; i < rows.length; i++) {
-                 const emailCell = rows[i].getElementsByTagName('td')[0];
-                 const nameCell = rows[i].getElementsByTagName('td')[1];
-                 const phoneCell = rows[i].getElementsByTagName('td')[2];
- 
-                 if (emailCell || nameCell || phoneCell) {
-                     const emailText = emailCell.textContent || emailCell.innerText;
-                     const nameText = nameCell.textContent || nameCell.innerText;
-                     const phoneText = phoneCell.textContent || phoneCell.innerText;
- 
-                     if (emailText.toLowerCase().indexOf(filter) > -1 || nameText.toLowerCase().indexOf(filter) > -1 || phoneText.toLowerCase().indexOf(filter) > -1) {
-                         rows[i].style.display = '';
-                     } else {
-                         rows[i].style.display = 'none';
-                     }
-                 }
-             }
-         }
- 
-         // Attach search function to search button click
-         searchBtn.addEventListener('click', searchHosteller);
- 
-         // Optionally, you can also trigger the search as the user types:
-         searchInput.addEventListener('keyup', searchHosteller);
+         // Select the search input and button
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+const hostellerTable = document.getElementById('hostellerTable');
+
+// Function to search and filter the table based on user input
+    function searchHosteller() 
+{
+    const filter = searchInput.value.toLowerCase();
+    const rows = hostellerTable.getElementsByTagName('tr');
+
+    for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
+        const emailCell = rows[i].getElementsByTagName('td')[0];
+        const nameCell = rows[i].getElementsByTagName('td')[1];
+        const phoneCell = rows[i].getElementsByTagName('td')[2];
+
+        if (emailCell || nameCell || phoneCell) {
+            const emailText = emailCell.textContent || emailCell.innerText;
+            const nameText = nameCell.textContent || nameCell.innerText;
+            const phoneText = phoneCell.textContent || phoneCell.innerText;
+
+            if (emailText.toLowerCase().indexOf(filter) > -1 || nameText.toLowerCase().indexOf(filter) > -1 || phoneText.toLowerCase().indexOf(filter) > -1) {
+                rows[i].style.display = '';
+            } else {
+                rows[i].style.display = 'none';
+            }
+        }
+    }
+}
+
+            // Attach search function to search button click
+            searchBtn.addEventListener('click', searchHosteller);
+
+            // Optionally, you can also trigger the search as the user types:
+            searchInput.addEventListener('keyup', searchHosteller);
 
      </script>
  </body>
- 
  </html>
