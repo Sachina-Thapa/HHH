@@ -1,6 +1,7 @@
 <?php
 require('inc/db.php');
 require('inc/essentials.php');
+require('inc/sideMenu.php');
 
 // Handle AJAX delete request
 if (isset($_POST['del'])) {
