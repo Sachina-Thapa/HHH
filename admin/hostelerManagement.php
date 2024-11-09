@@ -50,30 +50,18 @@ if ($conn->connect_error) {
     margin-right: 10px;
     font-weight: 500;
 }
-
-.search-form .btn-primary {
-    background-color: #0d6efd;
-    border: none;
-    color: #fff;
-    transition: all 0.3s ease;
-}
-
+  .search-form .btn-primary {
+    background-color: #4169E1 !important;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      transition: all 0.3s ease;
+  }
 .search-form .btn-primary:hover {
     background-color: #0b5ed7;
     transform: translateY(-1px);
 }
 
-.search-form .btn-secondary {
-    background-color: #6c757d;
-    border: none;
-    color: #fff;
-    transition: all 0.3s ease;
-}
-
-.search-form .btn-secondary:hover {
-    background-color: #5c636a;
-    transform: translateY(-1px);
-}
 
 </style>
 
@@ -93,8 +81,7 @@ if ($conn->connect_error) {
                       </div>
                       <div class="col-md-3">
                           <button type="submit" class="btn btn-primary">Search</button>
-                          <a href="hostelerManagement.php" class="btn btn-secondary">Clear</a>
-                      </div>
+                     </div>
                   </div>
               </form>
 
