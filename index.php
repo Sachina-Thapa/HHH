@@ -24,12 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $dashboard = 'admin/addash.php';
                     break;
                 case 'Staff':
-                    $table = 'stafflogin';
+                    $table = 'staff_data';
                     $dashboard = 'staff/staffdash.php';
                     break;
                 case 'Hosteler':
                     $table = 'hostelers';
-                    $dashboard = 'hostelerdash.php';
+                    $dashboard = 'hosteler/index/overview.php';
                     break;
                 default:
                     $errorMessage = "Invalid user type selected";

@@ -1,3 +1,5 @@
+<?php 
+        require('inc/db.php');?>
 <!DOCTYPE html>
  <html lang="en">
  <head>
@@ -105,12 +107,38 @@
    <div class="container-fluid">
          <div class="row">
  <!-- Sidebar -->
- <?php require('inc/sideMenu.php'); ?>
+ <?php 
+         // Ensure this is included only once
+        require_once('inc/sideMenu.php'); 
+
+        // Query to count total staff
+        $sql = "SELECT COUNT(*) as total FROM staff_data;";
+        $result = $conn->query($sql);
+        $total_staff = 0; // Initialize the variable
+
+        if ($result) {
+            $row = $result->fetch_assoc();
+            $total_staff = $row['total']; // Get the total count
+        } else {
+            echo "Error in query: " . $conn->error; // Handle query error
+        }
+
+         // Query to count total Hosteler
+         $sql = "SELECT COUNT(*) as total FROM hostelers;";
+         $result = $conn->query($sql);
+         $total_hostelers = 0; // Initialize the variable
+ 
+         if ($result) {
+             $row = $result->fetch_assoc();
+             $total_hostelers= $row['total']; // Get the total count
+         } else {
+             echo "Error in query: " . $conn->error; // Handle query error
+         }
+?>
              <!-- Main Content -->
              <div class="col-md-10 p-4">
                  <!-- Success Notification -->
                  <div id="successAlert" class="alert alert-success d-none">
-                     Well done! Staff added successfully.
                  </div>
  
                  <!-- Statistics Section -->
@@ -118,14 +146,13 @@
                      <div class="col-md-4 mb-4">
                          <div class="card stats-card">
                              <h5>Total Hostellers</h5>
-                             <h3>50</h3>
+                             <h3><?php echo $total_hostelers; ?></h3>
                          </div>
                      </div>
                      <div class="col-md-4 mb-4">
                          <div class="card stats-card">
                              <h5>Total Staff</h5>
-                             <h3>10</h3>
-                         </div>
+                             <h3><?php echo $total_staff; ?></h3> <!-- Display the total staff count -->                         </div>
                      </div>
                      <div class="col-md-4 mb-4">
                          <div class="card stats-card">
@@ -141,8 +168,6 @@
                      <table class="table table-bordered">
                      
          <?php
-            require('inc/db.php');
-
             // Query to select room data
                 $sql = "SELECT rid, rno, rtype, rprice FROM room"; 
                 $result = $conn->query($sql);
@@ -162,35 +187,7 @@
                 echo "<tr><td colspan='4'>No rooms found</td></tr>";
                 }
         ?>
-                         <!-- <thead class="table-dark">
-                             <tr>
-                                 <th>Room Type</th>
-                                 <th>Occupancy</th>
-                                 <th>Guests</th>
-                                 <th>Total Price</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                             <tr>
-                                 <td>Single Room</td>
-                                 <td>80%</td>
-                                 <td>2</td>
-                                 <td>Rs.2000</td>
-                             </tr>
-                             <tr>
-                                 <td>Double Room</td>
-                                 <td>75%</td>
-                                 <td>3</td>
-                                 <td>Rs.3000</td>
-                             </tr>
-                             <tr>
-                                 <td>Dormitory</td>
-                                 <td>85%</td>
-                                 <td>0</td>
-                                 <td>Rs.1500</td>
-                             </tr>
-                         </tbody> -->
-                     </table>
+                  </table>       
                  </div>
  
                  <!-- Chart Section -->

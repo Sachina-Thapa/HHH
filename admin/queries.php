@@ -2,6 +2,7 @@
 require('inc/db.php');
 require('inc/essentials.php');
 
+
 // Handle AJAX delete request
 if (isset($_POST['del'])) {
     $sr_no = $_POST['del'];

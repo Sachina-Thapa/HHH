@@ -30,6 +30,16 @@
         $res = update($q, $values, 'ii');
         echo $res;
     }
+
+    if(isset($_POST['get_contact']))
+    {
+        $q="SELECT * FROM `contact_info` WHERE `sr_no`=?";
+        $values=[1];
+        $res= select($q,$values,"i");
+        $data=mysqli_fetch_assoc($res);
+        $json_data= json_encode($data);
+        echo $json_data;
+    }
     
 
 ?>
