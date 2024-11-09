@@ -34,49 +34,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add'])) {
         $stmt->close();
     }
 }
-            // Update staff
-            if (isset($_GET['update'])) {
-                $st_id = $_GET['update'];
-                $fetch_sql = "SELECT * FROM staff_data WHERE st_id = $st_id";
-                $fetch_result = $conn->query($fetch_sql);
-                $staff_to_update = $fetch_result->fetch_assoc();
-            }
 
-            if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
-                $st_id = $_POST['st_id'];
-                $staff_name = $_POST['name'];
-                $staff_email = $_POST['email'];
-                $staff_phone = $_POST['phoneno'];
-                $staff_uname = $_POST['username'];
-                $staff_pass = $_POST['password'];
+// Update staff
+if (isset($_GET['update'])) {
+    $st_id = $_GET['update'];
+    $fetch_sql = "SELECT * FROM staff_data WHERE st_id = $st_id";
+    $fetch_result = $conn->query($fetch_sql);
+    $staff_to_update = $fetch_result->fetch_assoc();
+}
 
-                $update_sql = "UPDATE staff_data SET name=?, email=?, phoneno=?, username=?, password=? WHERE st_id=?";
-                $stmt = $conn->prepare($update_sql);
-                $stmt->bind_param("sssssi", $staff_name, $staff_email, $staff_phone, $staff_uname, $staff_pass, $st_id );
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
+    $st_id = $_POST['st_id'];
+    $staff_name = $_POST['name'];
+    $staff_email = $_POST['email'];
+    $staff_phone = $_POST['phoneno'];
+    $staff_uname = $_POST['username'];
+    $staff_pass = $_POST['password'];
 
-                if ($stmt->execute()) {
-                    redirect($_SERVER['PHP_SELF']); // Redirect to the same page
-                    alert("success", "Staff updated successfully."); // Display success alert
-                    exit();
-                }
-                $stmt->close();
-            }// Delete staff
-            if (isset($_GET['delete'])) {
-                $st_id = $_GET['delete'];
-                $delete_sql = "DELETE FROM staff_data WHERE st_id = $st_id";
-                if ($conn->query($delete_sql) === TRUE) {
-                    // Reset auto-increment
-                    $reset_sql = "ALTER TABLE staff_data AUTO_INCREMENT = 1";
-                    $conn->query($reset_sql);
-                    redirect($_SERVER['PHP_SELF']); // Redirect to the same page
-                    alert("success", "Staff deleted successfully."); // Display success alert
-                    exit();
-                }
-            }
+    $update_sql = "UPDATE staff_data SET name=?, email=?, phoneno=?, username=?, password=? WHERE st_id=?";
+    $stmt = $conn->prepare($update_sql);
+    $stmt->bind_param("sssssi", $staff_name, $staff_email, $staff_phone, $staff_uname, $staff_pass, $st_id);
 
-            // Fetch all staffs
-            $sql = "SELECT * FROM staff_data";
-            $result = $conn->query($sql);
+    if ($stmt->execute()) {
+        redirect($_SERVER['PHP_SELF']); // Redirect to the same page
+        alert("success", "Staff updated successfully."); // Display success alert
+        exit();
+    }
+    $stmt->close();
+}
+
+// Delete staff
+if (isset($_GET['delete'])) {
+    $st_id = $_GET['delete'];
+    $delete_sql = "DELETE FROM staff_data WHERE st_id = $st_id";
+    if ($conn->query($delete_sql) === TRUE) {
+        // Reset auto-increment
+        $reset_sql = "ALTER TABLE staff_data AUTO_INCREMENT = 1";
+        $conn->query($reset_sql);
+        redirect($_SERVER['PHP_SELF']); // Redirect to the same page
+        alert("success", "Staff deleted successfully."); // Display success alert
+        exit();
+    }
+}
+
+// Fetch all staffs
+$sql = "SELECT * FROM staff_data";
+$result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
  <html lang="en">
@@ -175,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add'])) {
                  <div class="Staff">
                      <div class="d-flex justify-content-between align-items-center">
                          <h4>Total Staff</h4>
-                         <button class="btn btn-primary" id="addNewHosteller">Add New Staff</button>
+                         <button class="btn btn-outline-primary" id="addNewHosteller">Add New Staff</button>
                      </div>
                      <!-- Search and Filters -->
                      <div class="d-flex justify-content-between align-items-center mt-3">
@@ -240,13 +243,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add'])) {
                 <div class="mb-3">
                     <label for="staff_uname" class="form-label">Username *</label>
                     <input type="text" class="form-control" id="staff_uname" name="username" placeholder="Enter Username" required>
+                    <span id="usernameError" class="text-danger" style="display: none;"></span> <!-- Error message span -->
                 </div>
                 <div class="mb-3">
                     <label for="staff_pass" class="form-label">Password *</label>
                     <input type="password" class="form-control" id="staff_pass" name="password" placeholder="Enter password" required>
                 </div>
-                <button type="submit" class="btn btn-primary" name="add">Save</button>
-                <button type="button" class="btn btn-secondary" id="cancelstBtn">Cancel</button>
+                <button type="submit" class="btn btn-outline-primary" name="add">Save</button>
+                <button type="button" class="btn btn-outline-secondary" id="cancelstBtn">Cancel</button>
         </form>
 
                      </div>
@@ -386,6 +390,29 @@ const hostellerTable = document.getElementById('hostellerTable');
 
             // Optionally, you can also trigger the search as the user types:
             searchInput.addEventListener('keyup', searchHosteller);
+
+
+        const usernameInput = document.getElementById('staff_uname');
+        const usernameError = document.getElementById('usernameError');
+
+    usernameInput.addEventListener('input', function() {
+    const username = usernameInput.value;
+
+    // Make an AJAX call to check the username
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'check_username.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function() {
+        if (this.responseText === 'exists') {
+            usernameError.innerText = "This username already exists. Please choose another username.";
+            usernameError.style.display = 'block';
+        } else {
+            usernameError.innerText = ""; // Clear the error message
+            usernameError.style.display = 'none';
+        }
+    };
+    xhr.send('username=' + encodeURIComponent(username));
+});
 
      </script>
  </body>

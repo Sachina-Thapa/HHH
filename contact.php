@@ -1,59 +1,3 @@
-<?php
-session_start();
-$host = 'localhost';
-$user = 'root'; 
-$password = ''; 
-$database = 'hhh'; 
-$errorMessage = '';
-$conn = new mysqli($host, $user, $password, $database);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-    $userType = $_POST['user_type'];
-
-    switch ($userType) {
-        case 'Admin':
-            $table = 'adminlogin';
-            $dashboard = 'admin/addash.php';
-            break;
-        case 'Staff':
-            $table = 'stafflogin';
-            $dashboard = 'staffdash.php';
-            break;
-        case 'Hosteler':
-            $table = 'hostelerlogin';
-            $dashboard = 'hostelerdash.php';
-            break;
-        default:
-            $errorMessage = "Invalid user type selected";
-            break;
-    }
-
-    if (empty($errorMessage)) {
-        $stmt = $conn->prepare("SELECT * FROM $table WHERE username = ? AND password = ?");
-        $stmt->bind_param("ss", $username, $password);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) {
-            
-            $_SESSION['username'] = $username; 
-            header("Location: $dashboard");
-            exit();
-        } else {
-            $errorMessage = "Invalid username or password.";
-               }
-
-        $stmt->close();
-    }
-}
-$conn->close();
-?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -188,7 +132,7 @@ $conn->close();
       <!-- Contact Form on the Right -->
       <div class="col-lg-8 col-md-12 col-12">
         <div class="contact-form p-4">
-          <form method ="POST">
+          <form method ="POST" action="queries.php" id ="contactForm">
             <div class="row">
               <div class="col-md-12">
                 <div class="mb-3">
@@ -209,7 +153,7 @@ $conn->close();
                 </div>
               </div>
               <div class="col-md-12">
-              <button name="send" class="btn btn-warning btn-lg btn-block mt-3">Send Now</button>
+              <button type="submit" id="sendMessage" class="btn btn-warning btn-lg btn-block mt-3">Send Now</button>
               </div>
             </div>
           </form>
@@ -217,26 +161,56 @@ $conn->close();
       </div>
     </div>
   </div>
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#sendMessage').click(function() {
+            // Get form data
+            var formData = $('#contactForm').serialize();
 
-      <?php
+            // Send AJAX request
+            $.ajax({
+                type: 'POST',
+                url: 'queries.php', 
+                data: formData,
+                success: function(response) {
+                    // Handle success response
+                    alert('Mail sent!');
+                    $('#contactForm')[0].reset(); // Reset the form
+                },
+                error: function() {
+                    // Handle error response
+                    alert('Server Down! Try again later');
+                }
+            });
+        });
+    });
+</script>
+
+<?php
     require('inc/db.php'); 
     require('inc/essentials.php');
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-      $frm_data = filteration($_POST);
-  
-      $q = "INSERT INTO `queries` (`name`, `email`, `message`) VALUES (?, ?, ?)";
-      $values = [$frm_data['name'], $frm_data['email'], $frm_data['message']];
-      
-      $res = insert($q, $values, 'sss');
-      if ($res == 1) {
-          alert('success', 'Mail sent!');
-      } else {
-          alert('error', 'Server Down! Try again later');
-      }
-  }
-  
-    ?>
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name']) && isset($_POST['email']) && isset($_POST['message'])) {
+        $frm_data = filteration($_POST);
+
+        // Prepare the SQL query
+        $q = "INSERT INTO `queries` (`name`, `email`, `message`, `date`, `seen`) VALUES (?, ?, ?, NOW(), 0)";
+        $values = [$frm_data['name'], $frm_data['email'], $frm_data['message']];
+        
+        // Execute the insert function
+        $res = insert($q, $values, 'sss');
+        
+        // Check the result
+        if ($res > 0) {
+            echo json_encode(['status' => 'success', 'message' => 'Mail sent!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Server Down! Try again later']);
+        }
+        exit(); // Make sure to exit after handling the AJAX request
+    }
+?>
 
 
 

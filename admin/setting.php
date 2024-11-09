@@ -61,12 +61,11 @@
       <div class="col-md-10 p-4">
         <h2>Settings</h2>
         <!-- General Settings -->
-
         <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
         <div class="d-flex align-items-center justify-content-between mb-3">
         <h5 class="card-title m-0">General Settings</h5>
-        <button type="button" class="btn btn-dark shadow-none btn-sm" data-bs-toggle="modal" data-bs-target="#general-s">
+        <button type="button" class="btn btn-outline-dark shadow-none btn-sm" data-bs-toggle="modal" data-bs-target="#general-s">
             <i class="bi bi-pencil-square"></i> Edit
             </button>
          </div>
@@ -78,14 +77,15 @@
         </div>
         </div>
            <!-- Logo
-           <div class="logo">
-            <img id="logoPreview" src="https://via.placeholder.com/120x50.png?text=Logo" alt="Logo">
-          </div> -->
+              <div class="logo">
+                <img id="logoPreview" src="https://via.placeholder.com/120x50.png?text=Logo" alt="Logo">
+              </div> -->
 
-          <!-- <div class="mb-3">
-            <label for="logoUpload" class="form-label"><strong>Change Logo:</strong></label>
-            <input type="file" class="form-control" id="logoUpload" accept="image/*">
-          </div> -->
+              <!-- <div class="mb-3">
+                <label for="logoUpload" class="form-label"><strong>Change Logo:</strong></label>
+                <input type="file" class="form-control" id="logoUpload" accept="image/*">
+              </div>
+               -->
       
           <!--General Setting Modal -->
         <div class="modal fade" id="general-s" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -106,8 +106,8 @@
                 </div>
               </div>
               <div class="modal-footer">
-                <button type="button" onclick="site_title.value=general_data.site_title, site_about.value=general_data.site_about" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="button" onclick="site_title.value=general_data.site_title, site_about.value=general_data.site_about" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-outline-primary">Submit</button>
                 </div>
             </div>
             </form>
@@ -127,10 +127,38 @@
                   </div>
               <p class="card-text" > No Customer will be able to book hostel when Shutdown Mode is On</p>
             </div>
+
+        <!-- contact detail setting -->
+<div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="card-title m-0">Contact Settings</h5>
+        <button type="button" class="btn btn-outline-dark shadow-none btn-sm" data-bs-toggle="modal" data-bs-target="#contacts-s">
+            <i class="bi bi-pencil-square"></i> Edit
+            </button>
+</div>
+         <div class="row">
+          <div class="col-lg-6">
+            <div class="mb-4">
+          <h6 class ="card-subtitle mb-1 fw-bold">Address</h6>
+          <p class="card-text" id="address"></p>
             </div>
+        <div class="mb-4">
+          <h6 class ="card-subtitle mb-1 fw-bold">Phone Number</h6>
+          <p class="card-text mb-1" id="phoneno">
+            <i class="bi bi-telephone-fill"></i>
+          </p>
+        </div>
+            <div class="mb-4">
+          <h6 class ="card-subtitle mb-1 fw-bold">Email</h6>
+          <p class="card-text" id="email"></p>
             </div>
           </div>
-
+         </div>
+         
+              
+        </div>
+</div>
 
           <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
@@ -139,9 +167,9 @@
     <!-- Script to Preview Logo and Profile Photo Image -->
     <script>
 
-//general function
-          let general_data;
-
+          //general function
+          let general_data, contacts_data;
+          let shutdownToggle; // Global declaration
           let general_s_form=document.getElementById('general_s_form');
           let site_title_inp=document.getElementById('site_title_inp');
           let site_about_inp=document.getElementById('site_about_inp');
@@ -152,7 +180,7 @@
         let site_title=document.getElementById('site_title');
         let site_about=document.getElementById('site_about');
 
-        let shutdownToggle=document.getElementById('shutdown-toggle')
+        let shutdownToggle = document.getElementById('shutdown-toggle');
 
         let xhr = new XMLHttpRequest();
         xhr.open("POST", "ajax/settings_crud.php", true);
@@ -167,6 +195,8 @@
 
             document.getElementById("site_title_inp").innerText = general_data.site_title_inp;
             document.getElementById("site_about_inp").innerText = general_data.site_about_inp;
+
+            shutdownToggle = document.getElementById('shutdown-toggle');
 
             // Adjust shutdown toggle
             if(general_data.shutdown==0)
@@ -222,7 +252,7 @@
       function upd_shutdown(val) 
       {
           // let shutdownToggle = document.querySelector('.form-check-input');
-          // shutdownToggle.value = shutdownToggle.checked ? 1 : 0;
+          shutdownToggle.value = shutdownToggle.checked ? 1 : 0;
 
           let xhr = new XMLHttpRequest();
           xhr.open("POST", "ajax/settings_crud.php", true);
@@ -235,8 +265,34 @@
               } else {
                   alert("error", "Shutdown mode Off!");
               }
+              if (general_data.shutdown == 0) {
+            shutdownToggle.checked = false;
+            shutdownToggle.value = 0;
+        } else {
+            shutdownToggle.checked = true;
+            shutdownToggle.value = 1;
+        }
                 };
         xhr.send("upd_shutdown="+val);
+      }
+
+      function get_contact() 
+      {
+        
+        let contact_p_id=['address','phoneno','email'];
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", "ajax/settings_crud.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        xhr.onload = function () 
+        {
+            contacts_data=JSON.parse(this.responseText);
+            console.log(contacts_data);
+
+        }
+
+
+        xhr.send('get_contact');
       }
 
 
@@ -251,6 +307,7 @@
     // });
     window.onload= function(){
       get_general();
+      get_contact();
 }
 
     

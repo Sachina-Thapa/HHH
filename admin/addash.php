@@ -1,3 +1,5 @@
+<?php 
+        require('inc/db.php');?>
 <!DOCTYPE html>
  <html lang="en">
  <head>
@@ -105,17 +107,22 @@
    <div class="container-fluid">
          <div class="row">
  <!-- Sidebar -->
- <?php require('inc/sideMenu.php'); 
-        $sql = "SELECT COUNT(*) FROM staff_data;";
+ <?php 
+         // Ensure this is included only once
+        require_once('inc/sideMenu.php'); 
+
+        // Query to count total staff
+        $sql = "SELECT COUNT(*) as total FROM staff_data;";
         $result = $conn->query($sql);
         $total_staff = 0; // Initialize the variable
 
-            if ($result) 
-            {
-                $row = $result->fetch_assoc();
-                $total_staff = $row['total']; // Get the total count
-            }
- ?>
+        if ($result) {
+            $row = $result->fetch_assoc();
+            $total_staff = $row['total']; // Get the total count
+        } else {
+            echo "Error in query: " . $conn->error; // Handle query error
+        }
+?>
              <!-- Main Content -->
              <div class="col-md-10 p-4">
                  <!-- Success Notification -->
@@ -149,8 +156,6 @@
                      <table class="table table-bordered">
                      
          <?php
-            require('inc/db.php');
-
             // Query to select room data
                 $sql = "SELECT rid, rno, rtype, rprice FROM room"; 
                 $result = $conn->query($sql);
@@ -170,7 +175,7 @@
                 echo "<tr><td colspan='4'>No rooms found</td></tr>";
                 }
         ?>
-                         
+                  </table>       
                  </div>
  
                  <!-- Chart Section -->

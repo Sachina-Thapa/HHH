@@ -7,6 +7,7 @@ require_once 'db.php'; // Ensure db.php is included only once
             <script>
             window.location.href='$url';
             </script>";
+            exit;
         }
 
 // Function to display alert messages
