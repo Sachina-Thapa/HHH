@@ -122,6 +122,18 @@
         } else {
             echo "Error in query: " . $conn->error; // Handle query error
         }
+
+         // Query to count total Hosteler
+         $sql = "SELECT COUNT(*) as total FROM hostelers;";
+         $result = $conn->query($sql);
+         $total_hostelers = 0; // Initialize the variable
+ 
+         if ($result) {
+             $row = $result->fetch_assoc();
+             $total_hostelers= $row['total']; // Get the total count
+         } else {
+             echo "Error in query: " . $conn->error; // Handle query error
+         }
 ?>
              <!-- Main Content -->
              <div class="col-md-10 p-4">
@@ -134,7 +146,7 @@
                      <div class="col-md-4 mb-4">
                          <div class="card stats-card">
                              <h5>Total Hostellers</h5>
-                             <h3>50</h3>
+                             <h3><?php echo $total_hostelers; ?></h3>
                          </div>
                      </div>
                      <div class="col-md-4 mb-4">
