@@ -36,8 +36,8 @@
                 <a href="#">Manage Booking</a>
                 <a href="feedback.php">Feedback</a>
                 <a href="visitor.php">Visitor</a>
-                <a href="#">Services</a>
+                <a href="services.php">Services</a>
                 <a href="accounts.php">My Account</a>
-                <a href="#">Fee</a>
+                <a href="fee.php">Fee</a>
                 <button class="logout-btn w-100">LOG OUT</button>
             </div>

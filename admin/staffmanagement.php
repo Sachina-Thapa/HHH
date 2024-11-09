@@ -189,8 +189,8 @@ $result = $conn->query($sql);
                      <table class="table mt-3" id="hostellerTable">
                          <thead>
                              <tr>
-                                 <th>Email</th>
                                  <th>Name</th>
+                                 <th>Email</th>
                                  <th>Phone No</th>
                                  <th>Username</th>
                                  <th>Password</th>
