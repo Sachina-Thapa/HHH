@@ -3,70 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Panel - Dashboard </title>
+    <title>Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
+        /* Sidebar styling */
         .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
             height: 100vh;
+            width: 200px;
             background-color: #343a40;
-            padding-top: 10px;
+            padding-top: 20px;
         }
+        
         .sidebar a {
             color: #fff;
             padding: 15px;
             display: block;
             text-decoration: none;
-            
         }
+
         .sidebar a:hover {
             background-color: #495057;
         }
-        .logout-btn {
-            margin-top: 20px;
+
+        /* Main content styling */
+        .main-content {
+            margin-left: 210px; /* Adjust to be a bit more than sidebar width */
+            padding: 20px;
+        }
+
+        /* Stat card styling */
+        .stat-card {
             background-color: #f8f9fa;
-            border: none;
-            color: #000;
-            padding: 10px;
-        }
-        .table thead {
-            background-color: #000;
-            color: #fff;
-        }
-        .table th, .table td {
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        .stat-card h2 {
+            font-size: 36px;
+            margin: 0;
+        }
+        .stat-card p {
+            margin: 5px 0 0;
+            color: #6c757d;
         }
     </style>
 </head>
-    </div>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-2 sidebar">
-                <h3 class="text-white text-center">Her Home Hostel</h3>
-                <a href="#">Dashboard</a>
-                <a href="#">Manage Hosteler</a>
-                <a href="#">Manage Booking</a>
-                <a href="#">View Feedback</a>
-                <a href="#">Manage Visitor Form</a>
-                <a href="#">Services</a>
-                <a href="#">Fee</a>
-                <a href="#">Report</a>
-                <button class="logout-btn w-100">LOG OUT</button>
+<body>
+<?php require('inc/sidemenu.php'); ?>
+
+<div class="main-content">
+    <?php require('inc/db.php');
+
+        // Query for Total Bookings
+        $stmt = $conn->query("SELECT COUNT(*) FROM booking");
+        $totalbooking = $stmt->fetchColumn();
+
+        // Query for Available Rooms
+        $stmt = $conn->query("SELECT COUNT(*) FROM room ");
+        // WHERE status = 'available'
+        $totalroom = $stmt->fetchColumn();
+
+        // Query for Enquiries
+        $stmt = $conn->query("SELECT COUNT(*) FROM feedback");
+        $feedback = $stmt->fetchColumn();
+
+         // Query for Available Rooms
+         $stmt = $conn->query("SELECT COUNT(*) FROM hostelers ");
+         $totalhosteler = $stmt->fetchColumn();
+ 
+         // Query for Enquiries
+         $stmt = $conn->query("SELECT COUNT(*) FROM visitorform");
+         $visitorform = $stmt->fetchColumn();
+
+         $stmt = $conn->query("SELECT COUNT(*) FROM visitorform");
+         $checkin = $stmt->fetchColumn();
+
+         $stmt = $conn->query("SELECT COUNT(*) FROM visitorform");
+         $checkout = $stmt->fetchColumn();
+
+         $stmt = $conn->query("SELECT COUNT(*) FROM visitorform");
+         $feecollected = $stmt->fetchColumn();
+    ?>
+
+    <!-- Display the stats in a row -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h2><?php echo $totalroom; ?></h2>
+                <p>Total Room</p>
             </div>
-            <!-- Main content -->
-            <div class="col-md-10">
-                <h3 class="ab-0 h-font">Staff Pannel</h3>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h2><?php echo $totalbooking; ?></h2>
+                <p>New Booking</p>
+                <!-- <i class="bi bi-person-plus"></i> -->
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h2><?php echo $feedback; ?></h2>
+                <p>Feedback</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h2><?php echo $totalhosteler; ?></h2>
+                <p>Total Hosteler</p>
+                <!-- <i class="bi bi-person-plus"></i> -->
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h2><?php echo $visitorform; ?></h2>
+                <p>Visitor Form</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h2><?php echo $checkin; ?></h2>
+                <p>Check-In</p>
+                <!-- <i class="bi bi-person-plus"></i> -->
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h2><?php echo $checkout; ?></h2>
+                <p>Check-Out</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h2><?php echo $feecollected; ?></h2>
+                <p>Fee Collected</p>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.js"></script>
 </body>
 </html>
