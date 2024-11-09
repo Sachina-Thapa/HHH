@@ -1,14 +1,14 @@
 <?php
-// db.php
 $host = 'localhost';
-$db = 'hhh'; // database name
-$user = 'root'; // database user
-$pass = ''; // database password
+$username = 'root'; // Replace with your database username
+$password = ''; // Replace with your database password
+$dbname = 'hhh';
 
-try {
-    $conn = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
+// Create a mysqli connection
+$mysqli = new mysqli($host, $username, $password, $dbname);
+
+// Check for connection errors
+if ($mysqli->connect_error) {
+    die("Connection failed: " . $mysqli->connect_error);
 }
 ?>

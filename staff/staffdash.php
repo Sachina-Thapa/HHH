@@ -61,38 +61,40 @@
 
 <div class="main-content">
     <?php require('inc/db.php');
-
+        
         // Query for Total Bookings
-        $stmt = $conn->query("SELECT COUNT(*) FROM booking");
-        $totalbooking = $stmt->fetchColumn();
-
+        $stmt = $mysqli->query("SELECT COUNT(*) FROM booking");
+        $totalbooking = $stmt->fetch_row()[0];
+        
         // Query for Available Rooms
-        $stmt = $conn->query("SELECT COUNT(*) FROM room ");
-        // WHERE status = 'available'
-        $totalroom = $stmt->fetchColumn();
-
+        $stmt = $mysqli->query("SELECT COUNT(*) FROM room");
+        $totalroom = $stmt->fetch_row()[0];
+        
         // Query for Enquiries
-        $stmt = $conn->query("SELECT COUNT(*) FROM feedback");
-        $feedback = $stmt->fetchColumn();
-
-         // Query for Available Rooms
-         $stmt = $conn->query("SELECT COUNT(*) FROM hostelers ");
-         $totalhosteler = $stmt->fetchColumn();
- 
-         // Query for Enquiries
-         $stmt = $conn->query("SELECT COUNT(*) FROM visitorform");
-         $visitorform = $stmt->fetchColumn();
-
-         $stmt = $conn->query("SELECT COUNT(*) FROM visitorform");
-         $checkin = $stmt->fetchColumn();
-
-         $stmt = $conn->query("SELECT COUNT(*) FROM visitorform");
-         $checkout = $stmt->fetchColumn();
-
-         $stmt = $conn->query("SELECT COUNT(*) FROM visitorform");
-         $feecollected = $stmt->fetchColumn();
-    ?>
-
+        $stmt = $mysqli->query("SELECT COUNT(*) FROM feedback");
+        $feedback = $stmt->fetch_row()[0];
+        
+        // Query for Hostelers
+        $stmt = $mysqli->query("SELECT COUNT(*) FROM hostelers");
+        $totalhosteler = $stmt->fetch_row()[0];
+        
+        // Query for Visitor Forms
+        $stmt = $mysqli->query("SELECT COUNT(*) FROM visitorform");
+        $visitorform = $stmt->fetch_row()[0];
+        
+        // Query for Check-In
+        $stmt = $mysqli->query("SELECT COUNT(*) FROM visitorform");
+        $checkin = $stmt->fetch_row()[0];
+        
+        // Query for Check-Out
+        $stmt = $mysqli->query("SELECT COUNT(*) FROM visitorform ");
+        $checkout = $stmt->fetch_row()[0];
+        
+        // Query for Fee Collected
+        $stmt = $mysqli->query("SELECT COUNT(*) FROM visitorform");
+        $feecollected = $stmt->fetch_row()[0];
+        ?>
+        
     <!-- Display the stats in a row -->
     <div class="row">
         <div class="col-md-4">
