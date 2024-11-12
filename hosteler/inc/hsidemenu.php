@@ -39,5 +39,5 @@
                 <a href="services.php">Services</a>
                 <a href="accounts.php">My Account</a>
                 <a href="fee.php">Fee</a>
-                <button class="logout-btn w-100">LOG OUT</button>
+                <button class="btn w-100"><a href="../index.php">LOG OUT</a></button>
             </div>

@@ -1,5 +1,22 @@
+<?php
+require('inc/hsidemenu.php');
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hosteler Panel - Feedback</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style></style>
+</head>
+<body>
+
  <!-- Food Options -->
- <div class="mb-3">
+ <div class="col-md-10 p-4">
+        <div class="row">
+        <div class="col-md-10 main-content">
                         <label class="form-label text-dark">Food Options</label>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="breakfast" value="10">
@@ -17,13 +34,13 @@
                     <hr>
 
                     <!-- Laundry Service -->
-                    <div class="mb-3">
+                    <div class="col-md-10 p-4">
                         <label class="form-label text-dark">Laundry Service</label>
                         <div id="laundryOptions"></div>
                     </div>
 
                     <!-- Other Services -->
-                    <div class="mb-3">
+                    <div class="col-md-10 p-4">
                         <label for="otherServices" class="form-label text-dark">Other Services (Optional)</label>
                         <input type="text" class="form-control" id="otherServices" placeholder="Specify any additional services">
                     </div>
@@ -90,3 +107,5 @@
                 
 
         </script>
+        </body>
+        </html>

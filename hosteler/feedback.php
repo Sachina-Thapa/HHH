@@ -92,8 +92,7 @@ require('inc/hsidemenu.php');
                   <label for="pfeedback" class="form-label">Your Feedback</label>
                   <textarea class="form-control" id="pfeedback" rows="4" placeholder="Enter your feedback here..."></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Update Feedback</button>
-                <button type="submit" class="btn btn-primary">Delete Feedback</button>
+                 <button type="submit" class="btn btn-primary">Delete Feedback</button>
               </form>
             </div>
           </div>
