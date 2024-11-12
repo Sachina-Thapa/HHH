@@ -73,6 +73,8 @@
               <p class="card-text" id="site_title"></p>
               <h6 class ="card-subtitle mb-1 fw-bold">About US</h6>
               <p class="card-text" id="site_about"></p>
+              <h6 class ="card-subtitle mb-1 fw-bold">Our Facilities</h6>
+              <p class="card-text" id="site_about"></p>
           
         </div>
         </div>
@@ -101,12 +103,16 @@
                   <input type="text"  name="site_title" id="site_title_inp" class="form-control shadow-none" required>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label fw-bold">About US</label>
+                  <label class="form-label fw-bold">About Us</label>
                   <textarea name="site_about" id="site_about_inp" class="form-control shadow-none" rows="6" required></textarea>
+                </div>
+               <div class="mb-3">
+                  <label class="form-label fw-bold">Our Facilities</label>
+                  <textarea name="site_facilities" id="site_facilities_inp" class="form-control shadow-none" rows="6" required></textarea>
                 </div>
               </div>
               <div class="modal-footer">
-                <button type="button" onclick="site_title.value=general_data.site_title, site_about.value=general_data.site_about" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" onclick="site_title.value=general_data.site_title, site_about.value=general_data.site_about,site_facilities.value=general_data.site_facilities" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-outline-primary">Submit</button>
                 </div>
             </div>

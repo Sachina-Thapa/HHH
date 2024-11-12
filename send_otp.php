@@ -36,7 +36,7 @@ if(isset($_POST['email'])) {
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Email Verification OTP';
-        $mail->Body = "Your OTP for email verification is: <b>$otp</b>";
+        $mail->Body = "Your OTP for email verification is: $otp";
 
         $mail->send();
         die(json_encode([
