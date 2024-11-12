@@ -111,14 +111,14 @@ if (isset($_POST['seen'])) {
             color: #fff;
         }
         tr:nth-child(even) {
-            background-color: #f2f2f2;
+            background-color: #f2f2f2 !important;
         }
         .action-links a {
             display: inline-block;
             padding: 5px 10px;
             margin: 2px;
             text-decoration: none;
-            color: #fff;
+            color: #fff !important;
             border-radius: 3px;
             transition: background-color 0.3s;
         }
@@ -138,8 +138,9 @@ if (isset($_POST['seen'])) {
            text-align: center;
            font-size: 1.2em;
         }
-        
-
+        #ok{
+            color: #2ecc71;
+        }
                 .seen-row {
             opacity: 0.5; /* Makes the row look shadowed when marked as read */
         }
@@ -179,9 +180,8 @@ if (isset($_POST['seen'])) {
 
                                         while ($row = mysqli_fetch_assoc($data)) {
                                             $row_class = $row['seen'] ? 'seen-row' : '';
-                                            $seen_button = $row['seen'] ? '' : "<button onclick='markAsRead({$row['sr_no']})' class='btn btn-sm rounded-pill btn-primary'>Mark as Read</button>";
-                                            $delete_button = "<button onclick='deleteRecord({$row['sr_no']})' class='btn btn-sm rounded-pill btn-danger'>Delete</button>";
-
+                                            $seen_button = $row['seen'] ? '' : "<button onclick='markAsRead({$row['sr_no']})' id='ok'  class='btn btn-sm rounded-pill btn-success'>Mark as Read</button>";
+                                            $delete_button = "<button onclick='deleteRecord({$row['sr_no']})' class='btn btn-sm rounded-pill btn-warning'>Delete</button>";
                                             echo <<<query
                                             <tr id="row-{$row['sr_no']}" class="$row_class">
                                                 <td>$i</td>
@@ -234,7 +234,7 @@ if (isset($_POST['seen'])) {
                 success: function(response) {
                     if (response.trim() === "success") {
                         $("#row-" + sr_no).addClass("seen-row"); // Shadow effect
-                        $("#row-" + sr_no).find('.btn-primary').remove(); // Remove "Mark as Read" button
+                        $("#row-" + sr_no).find('.btn-success').remove(); // Remove "Mark as Read" button
                     } else {
                         alert("Failed to mark as read");
                     }
@@ -251,3 +251,4 @@ if (isset($_POST['seen'])) {
 <?php
 $conn->close();
 ?>
+

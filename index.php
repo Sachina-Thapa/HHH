@@ -304,17 +304,17 @@ $conn->close();
       <h2 class="text-center fs-2 fw-bold mb-4">Contact Us</h2>
       <div class="row">
         <div class="col-md-6 mb-4">
-          <form>
+          <form method="POST" onsubmit="return handleSubmit(event)">
             <div class="mb-3">
-              <input type="text" class="form-control" placeholder="Your Name">
+              <input type="text" name="name" class="form-control" placeholder="Your Name" required>
             </div>
             <div class="mb-3">
-              <input type="email" class="form-control" placeholder="Your Email">
+              <input type="email" name="email" class="form-control" placeholder="Your Email" required>
             </div>
             <div class="mb-3">
-              <textarea class="form-control" rows="4" placeholder="Your Message"></textarea>
+              <textarea name="message" class="form-control" rows="4" placeholder="Your Message" required></textarea>
             </div>
-            <button class="btn btn-primary w-100">Send Message</button>
+            <button type="submit" class="btn btn-primary w-100">Send Message</button>
           </form>
         </div>
         <div class="col-md-6">
@@ -423,7 +423,34 @@ $conn->close();
         }
     });
 });
-  </script>
+
+function handleSubmit(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    
+    fetch('handle_query.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            alert('Message sent successfully!');
+            event.target.reset();
+        } else {
+            alert('Error sending message. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Something went wrong. Please try again.');
+    });
+    
+    return false;
+}
+</script>
+
 </body>
 </html>
 
