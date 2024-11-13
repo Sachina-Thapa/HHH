@@ -74,7 +74,9 @@
               <h6 class ="card-subtitle mb-1 fw-bold">About US</h6>
               <p class="card-text" id="site_about"></p>
               <h6 class ="card-subtitle mb-1 fw-bold">Our Facilities</h6>
-              <p class="card-text" id="site_about"></p>
+              <p class="card-text" id="site_facilities"></p>
+              <h6 class ="card-subtitle mb-1 fw-bold">Choose your perfect hostel room</h6>
+              <p class="card-text" id="site_hostelroom"></p>
           
         </div>
         </div>
@@ -110,11 +112,20 @@
                   <label class="form-label fw-bold">Our Facilities</label>
                   <textarea name="site_facilities" id="site_facilities_inp" class="form-control shadow-none" rows="6" required></textarea>
                 </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Choose your perfect Hostel Room</label>
+                  <textarea name="site_hostelroom" id="site_hostelroom_inp" class="form-control shadow-none" rows="6" required></textarea>
+                </div>
               </div>
+              
+
               <div class="modal-footer">
-                <button type="button" onclick="site_title.value=general_data.site_title, site_about.value=general_data.site_about,site_facilities.value=general_data.site_facilities" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" onclick="site_title.value=general_data.site_title, site_about.value=general_data.site_about,site_facilities.value=general_data.site_facilities,site_hostelroom.value=general_data.site_hostelroom" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-outline-primary">Submit</button>
                 </div>
+                
+                
             </div>
             </form>
           </div>
