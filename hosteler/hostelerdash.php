@@ -30,25 +30,25 @@ if (isset($_SESSION['username'])) {
                 <h3 class="mt-3">Hosteler Panel</h3>
 
                 <?php
-                // Fetch and display username if session is active and database connected
+                // Fetch and display name if session is active and database connected
                 if (isset($_SESSION['username'])) {
                     $user = $_SESSION['username'];
                     $q = mysqli_query($conn, "SELECT * FROM hostelers WHERE username='$user'");
 
                     if ($q && mysqli_num_rows($q) > 0) {
                         $row = mysqli_fetch_array($q);
-                        $username = $row['username'];
+                        $name = $row['name']; // Get the name from the database
                     } else {
-                        $username = "User  not found";
+                        $name = "User  not found";
                     }
                 } else {
-                    $username = "Session not set";
+                    $name = "Session not set";
                 }
                 ?>
 
-                <!-- Display Username -->
+                <!-- Display Welcome Message -->
                 <div class="alert alert-info mt-3">
-                    <?php echo htmlspecialchars($username); ?>
+                    <?php echo "Welcome! " . htmlspecialchars($name); ?>
                 </div>
             </div>
         </div>

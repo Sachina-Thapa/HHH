@@ -1,3 +1,6 @@
+<?php
+require('../../admin/inc/db.php');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -287,19 +290,34 @@
     <div class="container main-content">
         <h1 class="text-center mb-3">The Hosteller</h1>
 
+        <?php 
+           
+        // Query to count total room
+        $sql = "SELECT COUNT(*) as total FROM room;";
+        $result = $conn->query($sql);
+        $total_room = 0; // Initialize the variable
+
+        if ($result) {
+            $row = $result->fetch_assoc();
+            $total_room = $row['total']; // Get the total count
+        } else {
+            echo "Error in query: " . $conn->error; // Handle query error
+        }
+?>
+
         <!-- Stats Dashboard -->
         <div class="stats-dashboard">
             <div class="stat-card available">
-                <div class="stat-value" data-target="15">0</div>
-                <div class="stat-title">Available Rooms</div>
+            <h5>Available</h5>
+            <h3><?php echo $total_room; ?></h3>
             </div>
             <div class="stat-card booked">
-                <div class="stat-value" data-target="25">0</div>
-                <div class="stat-title">Booked Rooms</div>
+            <h5>Booked Room</h5>
+            <h3><?php echo $total_room; ?></h3>
             </div>
             <div class="stat-card">
-                <div class="stat-value" data-target="40">0</div>
-                <div class="stat-title">Total Rooms</div>
+            <h5>Total Room</h5>
+            <h3><?php echo $total_room; ?></h3>
             </div>
         </div>
 

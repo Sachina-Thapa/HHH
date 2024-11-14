@@ -33,7 +33,7 @@
             <div class="col-md-2 sidebar">
                 <h3 class="text-white text-center">Her Home Hostel</h3>
                 <a href="hostelerdash.php">Dashboard</a>
-                <a href="#">Manage Booking</a>
+                <a href="booking.php">Manage Booking</a>
                 <a href="feedback.php">Feedback</a>
                 <a href="visitor.php">Visitor</a>
                 <a href="services.php">Services</a>
