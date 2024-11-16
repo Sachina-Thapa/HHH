@@ -12,6 +12,15 @@ if (!isset($_SESSION['username'])) {
 
 $username = $_SESSION['username']; // Get the logged-in username
 
+// Function to get user information by username
+function getUserInfoByUsername($conn, $username) {
+    $sql = "SELECT id, name, email, phone_number, picture_path, address, date_of_birth, username, password FROM hostelers WHERE username = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    return $stmt->get_result();
+}
+
 // Handle the update request
 if (isset($_POST['update'])) {
     $id = $_POST['id'];
@@ -50,11 +59,7 @@ if (isset($_POST['update'])) {
 }
 
 // Fetch the logged-in user's information
-$sql = "SELECT id, name, email, phone_number, picture_path, address, date_of_birth, username, password FROM hostelers WHERE username = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $username);
-$stmt->execute();
-$result = $stmt->get_result();
+$result = getUserInfoByUsername($conn, $username);
 
 if (!$result) {
     echo "Query error: " . $conn->error;
@@ -74,23 +79,26 @@ if (!$result) {
             background-color: #f5f5f5;
             font-family: Arial, sans-serif;
         }
-        table {
-            border-collapse: collapse;
-            width: 100%;
+        .user-info {
             background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: center; /* Center text */
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
+        .user-info img {
+            border-radius: 50%; /* Make the image circular */
+            width: 100px; /* Set a fixed width */
+            height: 100px; /* Set a fixed height */
+            object-fit: cover; /* Maintain aspect ratio */
+            margin-bottom: 20px; /* Space below the image */
         }
-        th {
-            background-color: #3498db;
-            color: #fff;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
+        .info-line {
+            margin: 15px 0; /* Add vertical spacing */
+            padding: 10px 0; /* Add padding */
+            border-bottom: 1px solid #ddd; /* Add a bottom border */
+            text-align: left; /* Align text to the left */
         }
         .action-links a {
             display: inline-block;
@@ -121,101 +129,94 @@ if (!$result) {
 </head>
 <body>
 
-<div class="container-fluid col-md-10 p-4">
-    <div class="row">
-        <div class="col -md-10">
-            <h2 class="mt-3">My Account</h2>
+<div class="container-fluid col-md-6 offset-md-3 p-4">
+    <h2 class="mt-3 text-center">My Account</h2>
 
-            <div id="message">
-                <?php
-                if (isset($_GET['updated']) && $_GET['updated'] == 1) {
-                    echo "<p style='color: green;'>Information updated successfully</p>";
-                }
-                ?>
-            </div>
+    <div id="message">
+        <?php
+        if (isset($_GET['updated']) && $_GET['updated'] == 1) {
+            echo "<p style='color: green;'>Information updated successfully</p>";
+        }
+        ?>
+    </div>
 
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone Number</th>
-                            <th>Photo</th>
-                            <th>Address</th>
-                            <th>DOB</th>
-                            <th>Username</th>
-                            <th>Password</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        if ($result && $result->num_rows > 0) {
-                            $row = $result->fetch_assoc(); // Fetch the single row for the logged-in user
-                            echo "<tr>";
-                            echo "<td>" . htmlspecialchars($row['id']) . "</td>";
-                            echo "<td id='name" . $row['id'] . "' contenteditable='false'>" . htmlspecialchars($row['name']) . "</td>";
-                            echo "<td id='email" . $row['id'] . "' contenteditable='false'>" . htmlspecialchars($row['email']) . "</td>";
-                            echo "<td id='phone_number" . $row['id'] . "' contenteditable='false'>" . htmlspecialchars($row['phone_number']) . "</td>";
-                            echo "<td id='picture_path" . $row['id'] . "'><img src='" . htmlspecialchars($row['picture_path']) . "' alt='Profile Picture' width='50'></td>";
-                            echo "<td id='address" . $row['id'] . "' contenteditable='false'>" . htmlspecialchars($row['address']) . "</td>";
-                            echo "<td id='dob" . $row['id'] . "' contenteditable='false'>" . htmlspecialchars($row['date_of_birth']) . "</td>";
-                            echo "<td id='username" . $row['id'] . "' contenteditable='false'>" . htmlspecialchars($row['username']) . "</td>";
-                            echo "<td id='password" . $row['id'] . "' contenteditable='false'>" . htmlspecialchars($row['password']) . "</td>";
-                            echo "<td class='action-links'>
-                                <a href='#' id='edit_" . $row["id"] . "' class='update-link'>Edit</a>
-                                <a href='#' id='save_" . $row["id"] . "' class='update-link' style='display:none;'>Save</a>
-                                <a href='?delete=" . $row["id"] . "' class='delete-link' onclick='return confirm(\"Are you sure you want to delete your ID?\");'>Delete</a>
-                            </td>";
-                            echo "</tr>";
-                        } else {
-                            echo "<tr><td colspan='10' class='text-center'>No information found</td></tr>";
-                        }
-                        ?>
-                    </tbody>
-                </table>
+    <div class="user-info">
+        <?php
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc(); // Fetch the single row for the logged-in user
+            ?>
+            <img src="<?php echo htmlspecialchars($row['picture_path']); ?>" alt="Profile Picture">
+            <h3>User Information</h3>
+            <div class="info-line">
+                <label>ID:</label> <span><?php echo htmlspecialchars($row['id']); ?></span>
             </div>
-        </div>
+            <div class="info-line">
+                <label>Name:</label> <span id="name"><?php echo htmlspecialchars($row['name']); ?></span>
+            </div>
+            <div class="info-line">
+                <label>Email:</label> <span id="email"><?php echo htmlspecialchars($row['email']); ?></span>
+            </div>
+            <div class="info-line">
+                <label>Phone Number:</label> <span id="phone_number"><?php echo htmlspecialchars($row['phone_number']); ?></span>
+            </div>
+            <div class="info-line">
+                <label>Address:</label> <span id="address"><?php echo htmlspecialchars($row['address']); ?></span>
+            </div>
+            <div class="info-line">
+                <label>Date of Birth:</label> <span id="dob"><?php echo htmlspecialchars($row['date_of_birth']); ?></span>
+            </div>
+            <div class="info-line">
+                <label>Username:</label> <span id="username"><?php echo htmlspecialchars($row['username']); ?></span>
+            </div>
+            <div class="info-line">
+                <label>Password:</label> <span id="password"><?php echo htmlspecialchars($row['password']); ?></span>
+            </div>
+            <div class="action-links">
+                <a href="#" id="edit" class="update-link">Edit</a>
+                <a href="#" id="save" class="update-link" style="display:none;">Save</a>
+                <a href="?delete=<?php echo $row['id']; ?>" class="delete-link" onclick="return confirm('Are you sure you want to delete your ID?');">Delete</a>
+            </div>
+            <?php
+        } else {
+            echo "<p>No information found.</p>";
+        }
+        ?>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-document.querySelectorAll('.update-link').forEach(link => {
-    link.addEventListener('click', function(event) {
-        event.preventDefault(); // Prevent the default anchor behavior
-        const id = this.id.split('_')[1]; // Extract the ID from the link's ID
-        if (this.textContent === 'Edit') {
-            enableEdit(id);
-        } else {
-            saveEdit(id);
-        }
-    });
+document.getElementById('edit').addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent the default anchor behavior
+    enableEdit();
 });
 
-function enableEdit(id) {
-    document.getElementById('name' + id).contentEditable = true;
-    document.getElementById('email' + id).contentEditable = true;
-    document.getElementById('phone_number' + id).contentEditable = true;
-    document.getElementById('address' + id).contentEditable = true;
-    document.getElementById('dob' + id).contentEditable = true;
-    document.getElementById('username' + id).contentEditable = true;
-    document.getElementById('password' + id).contentEditable = true;
-    document.getElementById('edit_' + id).style.display = 'none';
-    document.getElementById('save_' + id).style.display = 'inline';
+document.getElementById('save').addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent the default anchor behavior
+    saveEdit();
+});
+
+function enableEdit() {
+    document.getElementById('name').contentEditable = true;
+    document.getElementById('email').contentEditable = true;
+    document.getElementById('phone_number').contentEditable = true;
+    document.getElementById('address').contentEditable = true;
+    document.getElementById('dob').contentEditable = true;
+    document.getElementById('username').contentEditable = true;
+    document.getElementById('password').contentEditable = true;
+    document.getElementById('edit').style.display = 'none';
+    document.getElementById('save').style.display = 'inline';
 }
 
-function saveEdit(id) {
-    var name = document.getElementById('name' + id). innerText;
-    var email = document.getElementById('email' + id).innerText;
-    var phone_number = document.getElementById('phone_number' + id).innerText;
-    var picture_path = document.getElementById('picture_path' + id).innerText; // Assuming picture_path is editable
-    var address = document.getElementById('address' + id).innerText;
-    var date_of_birth = document.getElementById('dob' + id).innerText;
-    var username = document.getElementById('username' + id).innerText;
-    var password = document.getElementById('password' + id).innerText;
+function saveEdit() {
+    var id = <?php echo json_encode($row['id']); ?>;
+    var name = document.getElementById('name').innerText;
+    var email = document.getElementById('email').innerText;
+ var phone_number = document.getElementById('phone_number').innerText;
+    var address = document.getElementById('address').innerText;
+    var date_of_birth = document.getElementById('dob').innerText;
+    var username = document.getElementById('username').innerText;
+    var password = document.getElementById('password').innerText;
 
     // Send AJAX request to update the user information
     var xhr = new XMLHttpRequest();
@@ -224,11 +225,10 @@ function saveEdit(id) {
     xhr.onload = function() {
         if (this.status == 200) {
             alert("Information updated successfully");
-            // Optionally refresh the page or update the DOM to reflect the changes
             location.reload(); // Reload the page to see the changes
         }
     };
-    xhr.send('update=1&id=' + id + '&name=' + encodeURIComponent(name) + '&email=' + encodeURIComponent(email) + '&phone_number=' + encodeURIComponent(phone_number) + '&picture_path=' + encodeURIComponent(picture_path) + '&address=' + encodeURIComponent(address) + '&date_of_birth=' + encodeURIComponent(date_of_birth) + '&username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password));
+    xhr.send('update=1&id=' + id + '&name=' + encodeURIComponent(name) + '&email=' + encodeURIComponent(email) + '&phone_number=' + encodeURIComponent(phone_number) + '&address=' + encodeURIComponent(address) + '&date_of_birth=' + encodeURIComponent(date_of_birth) + '&username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password));
 }
 </script>
 </body>

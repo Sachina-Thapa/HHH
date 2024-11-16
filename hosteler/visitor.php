@@ -1,4 +1,5 @@
 <?php
+session_start(); // Start the session
 require('../admin/inc/db.php');
 require('inc/hsidemenu.php');
 
@@ -10,11 +11,36 @@ $relation = '';
 $reason = '';
 $days = 1; // Default value for days, can be set to any reasonable default
 
+// Check if user is logged in and retrieve username
+if (!isset($_SESSION['username'])) {
+    // Redirect to login page if not logged in
+    header("Location: http://localhost/hhh/index.php");
+    exit();
+}
+
+$username = $_SESSION['username']; // Assuming username is stored in session
+
+// Retrieve the hosteler ID from the database
+$stmt = $conn->prepare("SELECT id FROM hostelers WHERE username = ?");
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $hid = $row['id']; // Get the hosteler ID
+} else {
+    // Handle the case where the user is not found in the database
+    $_SESSION['error_message'] = "User  not found.";
+    header("Location: http://localhost/hhh/index.php");
+    exit();
+}
+
 // Insert visitor data in visitorform table
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     // Prepare the SQL statement
-    $stmt = $conn->prepare("INSERT INTO visitorform (vname, relation, reason, days) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("sssi", $vname, $relation, $reason, $days);
+    $stmt = $conn->prepare("INSERT INTO visitorform (vname, relation, reason, days, hid) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssi", $vname, $relation, $reason, $days, $hid);
     
     // Get the values from the form
     $vname = $_POST['name']; // Corrected to match the input name
@@ -24,14 +50,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 
     // Execute the statement and check for success
     if ($stmt->execute()) {
-        $success_message = "Visitor's Form is Pending."; // Success message
-        // Optionally, you can clear the form inputs after submission
-        $vname = $relation = $reason = '';
+        $_SESSION['success_message'] = "Visitor's Request is Pending."; // Store success message in session
+        // Clear the form inputs after submission
+        $vname = '';
+        $relation = '';
+        $reason = '';
         $days = 1; // Reset to default value
     } else {
-        $error_message = "Error: " . $stmt->error; // Error message
+        $_SESSION['error_message'] = "Error: " . $stmt->error; // Store error message in session
     }
     $stmt->close();
+}
+
+// Check for messages in session
+if (isset($_SESSION['success_message'])) {
+    $success_message = $_SESSION['success_message'];
+    unset($_SESSION['success_message']); // Clear the message after displaying
+}
+
+if (isset($_SESSION['error_message'])) {
+    $error_message = $_SESSION['error_message'];
+    unset($_SESSION['error_message']); // Clear the message after displaying
 }
 ?>
 <!DOCTYPE html>
@@ -55,11 +94,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 
         .signup-card {
             width: 100%; /* Full width for the card */
-            max-width: 400px; /* Set a max width for the signup card */
+            max-width: 600px; /* Increased max width for the signup card */
             background-color: #ffffff; /* White background for the card */
             border-radius: 8px; /* Rounded corners */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-            padding: 20px; /* Padding inside the card */
+            padding: 30px; /* Increased padding inside the card */
+            box-sizing: border-box; /* Include padding in width calculation */
         }
 
         .card-title {
@@ -94,6 +134,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
         .mb-3 {
             margin-bottom: 15px; /* Adjust spacing between form elements */
         }
+
+        .alert {
+            transition: opacity 0.5s ease; /* Smooth transition for fading out */
+        }
     </style>
 </head>
 <body>
@@ -118,21 +162,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
             </div>
             <div class="mb-3">
                 <input class="form-control button" type="submit" name="submit" value="Submit">
-                <input class="form-control button" type="button" name="cancel" value="Cancel" onclick="window.location.href='your-cancel-url-here';">
+                <input class="form-control button" type="button" name="cancel" value="Cancel" onclick="window.location.href = window.location.pathname;">
             </div>
         </form>
         <?php if ($success_message): ?>
-            <div class="alert alert-success" role="alert">
+            <div class="alert alert-success" role="alert" id="success-message">
                 <?php echo $success_message; ?>
             </div>
         <?php endif; ?>
         <?php if ($error_message): ?>
-            <div class="alert alert-danger" role="alert">
+            <div class="alert alert-danger" role="alert" id="error-message">
                 <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Function to hide messages after 3 seconds
+        setTimeout(function() {
+            var successMessage = document.getElementById('success-message');
+            var errorMessage = document.getElementById('error-message');
+            if (successMessage) {
+                successMessage.style.opacity = '0';
+                setTimeout(function() { successMessage.style.display = 'none'; }, 500); // Hide after fade out
+            }
+            if (errorMessage) {
+                errorMessage.style.opacity = '0';
+                setTimeout(function() { errorMessage.style.display = 'none'; }, 500); // Hide after fade out
+            }
+        }, 3000);
+    </script>
 </body>
 </html>
