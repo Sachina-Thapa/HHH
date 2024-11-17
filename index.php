@@ -11,6 +11,16 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Add Query facilities
+$facilities_query = "SELECT * FROM facilities ORDER BY id";
+$facilities_result = mysqli_query($conn, $facilities_query);
+
+
+// Add query room
+$rooms_query = "SELECT * FROM rooms ORDER BY id";
+$rooms_result = mysqli_query($conn, $rooms_query);
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if(isset($_POST['form_type'])) {
         if($_POST['form_type'] === 'login') {
@@ -273,31 +283,25 @@ $conn->close();
               <h3 class="card-title fs-5">Wi-fi</h3>
               <p class="card-text text-muted">Stay connected with fast, free Wi-Fi at the hostel.</p>
               <a href="#" class="btn btn-outline-primary w-100">Learn More</a>
-            </div>
-          </div>  
+   </div>
+   </div>  
   </section>
 
-  <!-- Choose Your Room -->
+
   <section id="rooms" class="py-5 bg-white">
-    <div class="container">
-      <h2 class="text-center fs-2 fw-bold mb-4">Choose Your Perfect Hostel Room</h2>
-      <div class="d-flex flex-wrap justify-content-center gap-4">
-        <div class="bg-primary text-white rounded-circle d-flex flex-column justify-content-center align-items-center" style="width: 150px; height: 150px;">
-          <h3 class="fs-6 mb-1">Single Bed</h3>
-          <p class="fs-7">From Rs 1000</p>
-        </div>
-        <div class="bg-primary text-white rounded-circle d-flex flex-column justify-content-center align-items-center" style="width: 150px; height: 150px;">
-          <h3 class="fs-6 mb-1">Double Bed</h3>
-          <p class="fs-7">From Rs 1200</p>
-        </div>
-        <div class="bg-primary text-white rounded-circle d-flex flex-column justify-content-center align-items-center" style="width: 150px; height: 150px;">
-          <h3 class="fs-6 mb-1">Triple Bed</h3>
-          <p class="fs-7">From Rs 1500</p>
-        </div>
+      <div class="container">
+          <h2 class="text-center fs-2 fw-bold mb-4">Choose Your Perfect Hostel Room</h2>
+          <div class="d-flex flex-wrap justify-content-center gap-4">
+              <?php while($room = mysqli_fetch_assoc($rooms_result)): ?>
+                  <div class="bg-primary text-white rounded-circle d-flex flex-column justify-content-center align-items-center" 
+                   style="width: 150px; height: 150px;">
+                      <h3 class="fs-6 mb-1"><?php echo htmlspecialchars($room['room_type']); ?></h3>
+                      <p class="fs-7">From Rs <?php echo htmlspecialchars($room['price']); ?></p>
+                  </div>
+              <?php endwhile; ?>
+          </div>
       </div>
-    </div>
   </section>
-
   <!-- Contact Us -->
   <section id="contact" class="py-5 bg-light">
     <div class="container">
@@ -454,3 +458,4 @@ function handleSubmit(event) {
 </body>
 </html>
 
+ 

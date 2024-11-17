@@ -3,7 +3,7 @@
      /* Sidebar CSS */
      .sidebar {
              margin: 0px;
-             height: 140vh;
+             height: full;
              background-color: #343a40;
              padding-top: 10px;
          }
@@ -13,14 +13,15 @@
              padding: 25px;
              display: block;
              text-decoration: none;
+    
          }
  
          .sidebar a:hover {
              background-color: #495057;
          }
- 
+
          .btn {
-             margin-top: 0px;
+             margin-top:0px;
              background-color: transparent !important;
              backdrop-filter: blur(3px);
              border: none;
@@ -36,5 +37,6 @@
             <a href="hostelerManagement.php">Hosteller</a>
             <a href="queries.php">Queries</a>
             <a href="setting.php">Settings</a>
-            <button class="btn w-100"><a href="../index.php">LOG OUT</a></button>
+            <hr class = "w-full text-white mb-0"  >
+            <button class="btn w-100 "><a href="../index.php">LOG OUT</a></button>
  </div>
