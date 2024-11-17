@@ -273,8 +273,8 @@ $conn->close();
               <h3 class="card-title fs-5">Wi-fi</h3>
               <p class="card-text text-muted">Stay connected with fast, free Wi-Fi at the hostel.</p>
               <a href="#" class="btn btn-outline-primary w-100">Learn More</a>
-   </div>
-   </div>  
+            </div>
+          </div>  
   </section>
 
   <!-- Choose Your Room -->
