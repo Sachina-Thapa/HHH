@@ -1,63 +1,53 @@
-// function get_bookings()
-// {
-// let xhr = new XMLHttpRequest();
-// xhr.open("POST", "ajax/new_bookings.php", true);
-// xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-// xhr.onload = function(){
-// document.getElementById('table-data').innerHTML = this.responseText;
-// }
-// xhr.send('get_bookings');
-// }
-// function remove_user(user_id)
-// {
-// if(confirm("Are you sure, you want to remove this user?"))
-// let data new FormData();
-// data.append('user_id', user_id);
-// data.append('remove_user','');
-// }
-
-function confirmBooking(bid, hid) {
+function confirmBooking(bid, id) {
     if (confirm("Are you sure you want to confirm this booking?")) {
         let formData = new FormData();
-        formData.append('confirm_booking', true);
+        formData.append('action', 'confirm');
         formData.append('bid', bid);
-        formData.append('hid', hid);
+        formData.append('id', id);
 
         fetch('../ajax/newbooking.php', {
             method: 'POST',
-            body: formData
+            body: formData,
         })
-        .then(response => response.text())
-        .then(data => {
-            if (data == 1) {
+        .then((response) => response.text())
+        .then((data) => {
+            if (data === '1') {
                 alert("Booking confirmed!");
-                location.reload();
+                location.reload(); // Reload to update the status in the UI
             } else {
-                alert("Failed to confirm booking.");
+                console.log("Error confirming booking: " + data);
+                alert("Failed to confirm booking. Please try again.");
             }
+        })
+        .catch((error) => {
+            console.error("Error confirming booking:", error);
         });
     }
 }
 
-function cancelBooking(bid, hid) {
+function cancelBooking(bid, id) {
     if (confirm("Are you sure you want to cancel this booking?")) {
         let formData = new FormData();
-        formData.append('cancel_booking', true);
+        formData.append('action', 'cancel');
         formData.append('bid', bid);
-        formData.append('hid', hid);
+        formData.append('id', id);
 
         fetch('../ajax/newbooking.php', {
             method: 'POST',
-            body: formData
+            body: formData,
         })
-        .then(response => response.text())
-        .then(data => {
-            if (data == 1) {
+        .then((response) => response.text())
+        .then((data) => {
+            if (data === '1') {
                 alert("Booking canceled!");
-                location.reload();
+                location.reload(); // Reload to update the status in the UI
             } else {
-                alert("Failed to cancel booking.");
+                console.log("Error canceling booking: " + data);
+                alert("Failed to cancel booking. Please try again.");
             }
+        })
+        .catch((error) => {
+            console.error("Error canceling booking:", error);
         });
     }
 }

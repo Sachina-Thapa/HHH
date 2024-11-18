@@ -1,49 +1,75 @@
 <?php
 require('../inc/db.php');
 
+// Enable error reporting
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Confirm Booking
-    if (isset($_POST['confirm_booking'])) {
-        $bid = intval($_POST['bid']);
-        $hid = intval($_POST['hid']);
+    if (isset($_POST['action'])) {
+        $action = $_POST['action'];
 
-        // Update booking status
-        $update_query = "UPDATE bookings SET status = 'confirmed' WHERE bid = ?";
-        $stmt = $mysqli->prepare($update_query);
-        $stmt->bind_param('i', $bid);
-        $stmt->execute();
+        // Handling Confirm Booking
+        if ($action == 'confirm') {
+            $bid = intval($_POST['bid']);
+            $id = intval($_POST['id']);
 
-        // Insert notification
-        $message = "Your booking has been confirmed!";
-        $notif_query = "INSERT INTO notifications (hid, message) VALUES (?, ?)";
-        $notif_stmt = $mysqli->prepare($notif_query);
-        $notif_stmt->bind_param('is', $hid, $message);
-        $notif_stmt->execute();
+            // Update booking status to 'confirmed'
+            $update_query = "UPDATE booking SET bstatus = 'confirmed' WHERE bid = ?";
+            if ($stmt = $mysqli->prepare($update_query)) {
+                $stmt->bind_param('i', $bid);
+                $stmt->execute();
 
-        echo ($stmt->affected_rows > 0) ? 1 : 0;
-        exit;
-    }
+                if ($stmt->affected_rows > 0) {
+                    // Insert notification
+                    $message = "Your booking has been confirmed!";
+                    $notif_query = "INSERT INTO notifications (id, message) VALUES (?, ?)";
+                    if ($notif_stmt = $mysqli->prepare($notif_query)) {
+                        $notif_stmt->bind_param('is', $id, $message);
+                        $notif_stmt->execute();
+                        echo '1'; // Successfully confirmed
+                    } else {
+                        echo "Error inserting notification: " . $mysqli->error;
+                    }
+                } else {
+                    echo "Failed to update booking status.";
+                }
+            } else {
+                echo "Error preparing booking update query: " . $mysqli->error;
+            }
+        }
 
-    // Cancel Booking
-    if (isset($_POST['cancel_booking'])) {
-        $bid = intval($_POST['bid']);
-        $hid = intval($_POST['hid']);
+        // Handling Cancel Booking
+        if ($action == 'cancel') {
+            $bid = intval($_POST['bid']);
+            $id = intval($_POST['id']);
 
-        // Update booking status
-        $update_query = "UPDATE bookings SET status = 'canceled' WHERE bid = ?";
-        $stmt = $mysqli->prepare($update_query);
-        $stmt->bind_param('i', $bid);
-        $stmt->execute();
+            // Update booking status to 'canceled'
+            $update_query = "UPDATE booking SET bstatus = 'canceled' WHERE bid = ?";
+            if ($stmt = $mysqli->prepare($update_query)) {
+                $stmt->bind_param('i', $bid);
+                $stmt->execute();
 
-        // Insert notification
-        $message = "Your booking has been canceled.";
-        $notif_query = "INSERT INTO notifications (hid, message) VALUES (?, ?)";
-        $notif_stmt = $mysqli->prepare($notif_query);
-        $notif_stmt->bind_param('is', $hid, $message);
-        $notif_stmt->execute();
-
-        echo ($stmt->affected_rows > 0) ? 1 : 0;
-        exit;
+                if ($stmt->affected_rows > 0) {
+                    // Insert notification
+                    $message = "Your booking has been canceled.";
+                    $notif_query = "INSERT INTO notifications (id, message) VALUES (?, ?)";
+                    if ($notif_stmt = $mysqli->prepare($notif_query)) {
+                        $notif_stmt->bind_param('is', $id, $message);
+                        $notif_stmt->execute();
+                        echo '1'; // Successfully canceled
+                    } else {
+                        echo "Error inserting notification: " . $mysqli->error;
+                    }
+                } else {
+                    echo "Failed to update booking status.";
+                }
+            } else {
+                echo "Error preparing booking cancel query: " . $mysqli->error;
+            }
+        }
+    } else {
+        echo "No action parameter received.";
     }
 }
 ?>

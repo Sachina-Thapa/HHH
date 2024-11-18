@@ -109,7 +109,7 @@ if (isset($_POST['search_hosteler'])) {
             </td>
             <td>{$row['email']}</td>
             <td>{$row['phone_number']}</td>
-            <td>{$row['address']} | {$row['pincode']}</td>
+            <td>{$row['address']}</td>
             <td>{$row['date_of_birth']}</td>
             <td>$status</td>
             <td>$date</td>
