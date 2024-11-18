@@ -95,6 +95,9 @@
                         <a href="reports.php">Reports</a>
                     </li>
                     <li class="nav-item">
+                        <a href="visitorform.php">Visitors Record</a>
+                     </li>
+                    <li class="nav-item">
                         <button class="btn"><a href="../index.php">LOG OUT</a></button>
                     </li>
                 </ul>

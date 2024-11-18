@@ -1,95 +1,145 @@
 <?php
-require('inc/hsidemenu.php');
+session_start(); // Start the session
+
+// Include your database connection file
+require('inc/db.php');
+require('inc/hsidemenu.php'); // Assuming this includes your sidebar
+
+// Check if the user is logged in
+if (!isset($_SESSION['username'])) {
+    echo "<div class='alert alert-danger'>Please log in first.</div>";
+    exit(); // Stop further execution
+}
+
+$username = $_SESSION['username']; // Get the logged-in username
+
+// Function to get user information by username
+function getUserInfoByUsername($conn, $username) {
+    $sql = "SELECT id, name, email, phone_number, picture_path, address, date_of_birth, username FROM hostelers WHERE username = ?";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        die("Prepare failed: " . $conn->error); // Error handling
+    }
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_assoc(); // Fetch the associative array
+}
+
+// Fetch the user information
+$userInfo = getUserInfoByUsername($conn, $username);
+
+// Check if user information was found
+if (!$userInfo) {
+    echo "<div class='alert alert-danger'>User  not found.</div>";
+    exit(); // Stop further execution
+}
+
+// Now you can access the user's information
+$hosteler_id = $userInfo['id'];
+$name = $userInfo['name'];
+$email = $userInfo['email'];
+$phone_number = $userInfo['phone_number'];
+$address = $userInfo['address'];
+$date_of_birth = $userInfo['date_of_birth'];
+$picture_path = $userInfo['picture_path'];
+
+// Fetch room types for the dropdown
+$room_sql = "SELECT rid, rno, rtype, rprice FROM room";
+$room_result = $conn->query($room_sql);
+if (!$room_result) {
+    die("Query failed: " . $conn->error); // Error handling
+}
+
+// Handle form submission
+$message = '';
+$bookingdate = date('Y-m-d'); // Set the booking date to today
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Get the posted data
+    $room_id = $_POST['room_type'];
+    $check_in = $_POST['checkin_date'];
+    $check_out = $_POST['checkout_date'];
+
+    // Insert the data into the booking table
+    $sql = "INSERT INTO booking (id, rid, bookingdate, check_in, check_out) VALUES (?, ?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        die("Prepare failed: " . $conn->error); // Error handling
+    }
+    $stmt->bind_param("iiiss", $hosteler_id, $room_id, $bookingdate, $check_in, $check_out);
+    $stmt->execute();
+
+    // Check if the insertion was successful
+    if ($stmt->affected_rows > 0) {
+        $message = "<div class='alert alert-success'>Your booking is pending. You will be notified soon.</div>";
+    } else {
+        $message = "<div class='alert alert-danger'>Error submitting booking. Please try again.</div>";
+    }
+    // Redirect to the same page to prevent form resubmission
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup Form</title>
+    <title>Booking Form</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             display: flex;
-            justify-content: center; /* Center horizontally */
-            align-items: center; /* Center vertically */
-            height: 100vh; /* Full viewport height */
+            min-height: 100vh; /* Minimum height of 100% of the viewport */
             margin: 0; /* Remove default margin */
             background-color: #f8f9fa; /* Light background color */
         }
 
-        .signup-card {
-            width: 100%; /* Full width for the card */
-            max-width: 400px; /* Set a max width for the signup card */
-            background-color: #ffffff; /* White background for the card */
-            border-radius: 8px; /* Rounded corners */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-            padding: 20px; /* Padding inside the card */
+        .content {
+            flex: 1; /* Take the remaining space */
+            padding: 20px; /* Padding inside the content area */
         }
 
-        .card-title {
-            color: #007bff; /* Bootstrap primary color for the title */
-            margin-bottom: 20px; /* Space below the title */
-        }
-
-        .form-label {
-            color: #495057; /* Darker color for labels */
-        }
-
-        .form-control {
-            border: 1px solid #ced4da; /* Default border color */
-            border-radius: 4px; /* Rounded corners for input fields */
-        }
-
-        .form-control:focus {
-            border-color: #007bff; /* Change border color on focus */
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Focus shadow */
-        }
-
-        .btn-primary {
-            background-color: #007bff; /* Bootstrap primary color */
-            border-color: #007bff; /* Border color for the button */
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3; /* Darker shade on hover */
-            border-color: #0056b3; /* Darker border on hover */
-        }
-
-        .mb-3 {
-            margin-bottom: 15px; /* Adjust spacing between form elements */
+        .alert {
+            margin-top: 20px; /* Margin for alerts */
         }
     </style>
 </head>
 <body>
-    <div class="signup-card">
-        <h3 class="card-title">Visitor Form</h3>
-        <form action="signup-user.php" method="POST" autocomplete="">
+    <div class="content">
+        <h1>Booking Form</h1>
+        <?php if ($message) echo $message; ?>
+
+        <!-- Display user information -->
+        <p><strong>Name:</strong> <?= htmlspecialchars($name); ?></p>
+        <p><strong >Email:</strong> <?= htmlspecialchars($email); ?></p>
+        <p><strong>Phone Number:</strong> <?= htmlspecialchars($phone_number); ?></p>
+        <p><strong>Address:</strong> <?= htmlspecialchars($address); ?></p>
+        <p><strong>Date of Birth:</strong> <?= htmlspecialchars($date_of_birth); ?></p>
+        <p><strong>Booking Date:</strong> <?= htmlspecialchars($bookingdate); ?></p> 
+
+        <form method="POST" action="">
             <div class="mb-3">
-                <label for="name" class="form-label">Full Name</label>
-                <input class="form-control" type="text" name="name" id="name" placeholder="Enter your full name" required>
+                <label for="room_type" class="form-label">Select Room Type</label>
+                <select name="room_type" id="room_type" class="form-select" required>
+                    <?php while ($row = $room_result->fetch_assoc()): ?>
+                        <option value="<?= $row['rid']; ?>"><?= htmlspecialchars($row['rtype'] . ' - ' . $row['rprice']); ?></option>
+                    <?php endwhile; ?>
+                </select>
             </div>
             <div class="mb-3">
-                <label for="relation" class="form-label">Relationship</label>
-                <input class="form-control" type="text" name="relation" id="relation" placeholder="Enter your full name" required>
+                <label for="checkin_date" class="form-label">Check-in Date</label>
+                <input type="date" name="checkin_date" id="checkin_date" class="form-control" required>
             </div>
             <div class="mb-3">
-            <label for="reason" class="form-label">Reason of Visit</label>
-            <textarea class="form-control" id="reason" rows="4"></textarea>
+                <label for="checkout_date" class="form-label">Check-out Date</label>
+                <input type="date" name="checkout_date" id="checkout_date" class="form-control" required>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">No of Days</label>
-                <input class="form-control" type="password" name="password" id="password" placeholder="Enter your password" required>
-            </div>
-            <div class="mb-3">
-                <input class="form-control button" type="submit" name="sumbit" value="Submit">
-                <input class="form-control button" type="button" name="cancel" value="Cancel">
-            </div>
+            <button type="submit" class="btn btn-primary">Book Now</button>
+            <a href="dashboard.php" class="btn btn-secondary">Cancel</a> <!-- Cancel button -->
         </form>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
