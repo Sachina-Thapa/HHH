@@ -1,8 +1,23 @@
-<!-- Sidebar and database -->
-<?php 
-    require('inc/sidemenu.php');
-    require('inc/db.php'); 
+<?php
+require('inc/sidemenu.php');
+require('inc/db.php');
+
+// Query to get the bookings data and join with the hostelers table
+$query = "
+    SELECT b.bid, b.bookingdate, b.status, b.rid, h.name, h.phone_number, b.hid
+    FROM booking b
+    JOIN hostelers h ON b.hid = h.id
+";
+
+$result = $mysqli->query($query);
+
+if ($result === false) {
+    // Handle query error, e.g., log it or display a message
+    echo "Error fetching data: " . $mysqli->error;
+    exit;
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,8 +80,41 @@
                                         <th scope="col">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody id="table-data">
-                                    <!-- User data will be populated here -->
+                                <tbody>
+                                    <?php if ($result->num_rows > 0): ?>
+                                        <?php while ($row = $result->fetch_assoc()): ?>
+                                            <tr>
+                                                <td><?= $row['bid'] ?></td>
+                                                <td>
+                                                    <strong><?= $row['hosteler_name'] ?></strong><br>
+                                                    Phone: <?= $row['phone_number'] ?>
+                                                </td>
+                                                <td>Room ID: <?= $row['rid'] ?></td>
+                                                <td><?= $row['booking_date'] ?></td>
+                                                <td><?= ucfirst($row['status']) ?></td>
+                                                <td>
+                                                    <?php if ($row['status'] == 'pending'): ?>
+                                                        <button 
+                                                            onclick="confirmBooking(<?= $row['bid'] ?>, <?= $row['hid'] ?>)" 
+                                                            class="btn btn-success btn-sm">
+                                                            Confirm
+                                                        </button>
+                                                        <button 
+                                                            onclick="cancelBooking(<?= $row['bid'] ?>, <?= $row['hid'] ?>)" 
+                                                            class="btn btn-danger btn-sm">
+                                                            Cancel
+                                                        </button>
+                                                    <?php else: ?>
+                                                        <em><?= ucfirst($row['status']) ?></em>
+                                                    <?php endif; ?>
+                                                </td>
+                                            </tr>
+                                        <?php endwhile; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="6">No bookings found.</td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>

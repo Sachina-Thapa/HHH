@@ -15,3 +15,49 @@
 // data.append('user_id', user_id);
 // data.append('remove_user','');
 // }
+
+function confirmBooking(bid, hid) {
+    if (confirm("Are you sure you want to confirm this booking?")) {
+        let formData = new FormData();
+        formData.append('confirm_booking', true);
+        formData.append('bid', bid);
+        formData.append('hid', hid);
+
+        fetch('../ajax/newbooking.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data == 1) {
+                alert("Booking confirmed!");
+                location.reload();
+            } else {
+                alert("Failed to confirm booking.");
+            }
+        });
+    }
+}
+
+function cancelBooking(bid, hid) {
+    if (confirm("Are you sure you want to cancel this booking?")) {
+        let formData = new FormData();
+        formData.append('cancel_booking', true);
+        formData.append('bid', bid);
+        formData.append('hid', hid);
+
+        fetch('../ajax/newbooking.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data == 1) {
+                alert("Booking canceled!");
+                location.reload();
+            } else {
+                alert("Failed to cancel booking.");
+            }
+        });
+    }
+}

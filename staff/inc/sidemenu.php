@@ -83,10 +83,10 @@
                     <a href="hosteler.php">Hosteler</a>
                     </li>
                     <li class="nav-item">
-                        <a href="feedback.php">Feedback</a>
+                    <a href="services.php">Services</a>
                     </li>
                     <li class="nav-item">
-                        <a href="services.php">Services</a>
+                        <a href="feedback.php">Feedback</a>
                     </li>
                     <li class="nav-item">
                         <a href="fee.php">Fee</a>
