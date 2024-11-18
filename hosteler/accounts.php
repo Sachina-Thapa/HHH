@@ -146,7 +146,7 @@ if (!$result) {
             $row = $result->fetch_assoc(); // Fetch the single row for the logged-in user
             ?>
             <img src="<?php echo htmlspecialchars($row['picture_path']); ?>" alt="Profile Picture">
-            <h3>User Information</h3>
+            
             <div class="info-line">
                 <label>ID:</label> <span><?php echo htmlspecialchars($row['id']); ?></span>
             </div>
