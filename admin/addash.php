@@ -44,6 +44,10 @@
              color: #000;
              padding: 6px;
          }
+         img, svg {
+         vertical-align: middle;
+         height: 60px;
+}
  
          /* Card styling for stats */
          .stats-card {
@@ -130,16 +134,20 @@
  
    <div class="container-fluid">
          <div class="row">
-             <!-- Sidebar -->
-             <div class="col-md-2 sidebar">
-                 <h4 class="text-white text-center">Her Home Hostel</h4>
-                 <a href="addash.php">Dashboard</a>
-                 <a href="admanagement.php">Room Management</a>
-                 <a href="adstaff.php">Staff management</a>
-                 <a href="adhosteller.php">Hosteller</a>
-                 <a href="setting.php">Settings</a>
-                 <button class="logout-btn w-100">LOG OUT</button>
-             </div>
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
+            <!-- Logo -->
+         <div class="text-center mb-3">
+         <img src="../images/logoo.png" alt="Logo">
+  </div>
+    <a href="addash.php">Dashboard</a>
+    <a href="admanagement.php">Room Management</a>
+    <a href="adstaff.php">Staff management</a>
+    <a href="adhosteller.php">Hosteller</a>
+    <a href="setting.php">Settings</a>
+    <button class="logout-btn w-100">LOG OUT</button>
+     </div>
+
  
              <!-- Main Content -->
              <div class="col-md-10 p-4">

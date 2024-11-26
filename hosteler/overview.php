@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Krofile</title>
+    <title>hosteller profile</title>
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
@@ -320,7 +320,7 @@
                 <div class="card-content">
                     <p>👥 Capacity: 1 person</p>
                     <p>💲 Price: $30/night</p>
-                    <h6>Amenities:</h6>
+                    <h6>services:</h6>
                     <ul>
                         <li>Single bed</li>
                         <li>Work desk</li>
@@ -339,7 +339,7 @@
                 <div class="card-content">
                     <p>👥 Capacity: 2 people</p>
                     <p>💲 Price: $50/night</p>
-                    <h6>Amenities:</h6>
+                    <h6>services:</h6>
                     <ul>
                         <li>Two single beds</li>
                         <li>Work desk</li>
@@ -358,7 +358,7 @@
                 <div class="card-content">
                     <p>👥 Capacity: 3 people</p>
                     <p>💲 Price: $70/night</p>
-                    <h6>Amenities:</h6>
+                    <h6>services:</h6>
                     <ul>
                         <li>Three single beds</li>
                         <li>Work desk</li>

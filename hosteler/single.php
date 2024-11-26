@@ -268,14 +268,6 @@
                             <input class="form-check-input" type="radio" name="roomType" id="singleRoom" value="1000" checked>
                             <label class="form-check-label" for="singleRoom">Single ($1000/day)</label>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="roomType" id="doubleRoom" value="1200">
-                            <label class="form-check-label" for="doubleRoom">Double ($1200/day)</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="roomType" id="tripleRoom" value="1500">
-                            <label class="form-check-label" for="tripleRoom">Triple ($1500/day)</label>
-                        </div>
                     </div>
                     <hr>
 
