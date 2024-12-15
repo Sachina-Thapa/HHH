@@ -167,9 +167,9 @@ $result = $conn->query($sql);
             }
             ?>
              <!-- Sidebar -->
-        <?php require('inc/sideMenu.php'); ?>
+             <?php require('inc/sideMenu.php'); ?>
              <!-- Main Content -->
-             <div class="col-md-10 p-4">
+             <div class="col-md-10 content-wrapper py-4 px-4">
                  <!-- Success Notification -->
                  <div id="successAlert" class="alert alert-success d-none">
                       Staff added successfully.

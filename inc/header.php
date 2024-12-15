@@ -1,3 +1,22 @@
+<?php
+
+$host = 'localhost';
+$user = 'root'; 
+$password = ''; 
+$database = 'hhh'; 
+$errorMessage = '';
+
+$conn = new mysqli($host, $user, $password, $database);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+// Fetch logo from site_settings
+$logo_query = "SELECT logo_path FROM site_settings LIMIT 1";
+$logo_result = mysqli_query($conn, $logo_query);
+$logo_path = $logo_result && mysqli_num_rows($logo_result) > 0 
+    ? mysqli_fetch_assoc($logo_result)['logo_path'] 
+    : 'images/logoo.png'; // Fallback to default logo if no logo in database
+?>
 
  <!-- NAVIGATION BAR -->
  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
@@ -5,7 +24,10 @@
     <!-- Logo in the Navbar -->
     <a class="navbar-brand d-flex align-items-center" href="index.php">
 
-    <img src="images/logoo.png" alt="Logo" style="filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));">
+    <!-- Map logo -->
+    <img src="admin/<?php echo htmlspecialchars($logo_path); ?>" 
+           alt="Logo" 
+           style="filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));">
 
       <span style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 1.5);"
       >Her Home Hostel</span>

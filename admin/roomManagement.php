@@ -171,11 +171,11 @@ $result = $conn->query($sql);
     </style>
 </head>
 <body> 
-<div class="container-fluid m-0">
+<div class="container-fluid m-0 ">
   <div class="row">
   <!-- Sidebar -->
   <?php require('inc/sideMenu.php'); ?>  
-  <div class="col-md-10">
+  <div class="col-md-10 content-wrapper py-4 px-4">
      <h3>Add New Room</h3>
      <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
         <?php if (isset($room_to_update)) echo "<input type='hidden' name='rid' value='" . $room_to_update['rid'] . "'>"; ?>
