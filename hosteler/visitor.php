@@ -1,5 +1,5 @@
 <?php
-session_start(); // Start the session
+session_start();
 require('../admin/inc/db.php');
 require('inc/hsidemenu.php');
 
@@ -9,16 +9,15 @@ $error_message = '';
 $vname = '';
 $relation = '';
 $reason = '';
-$days = 1; // Default value for days, can be set to any reasonable default
+$days = 1; // Default value for days
 
 // Check if user is logged in and retrieve username
 if (!isset($_SESSION['username'])) {
-    // Redirect to login page if not logged in
     header("Location: http://localhost/hhh/index.php");
     exit();
 }
 
-$username = $_SESSION['username']; // Assuming username is stored in session
+$username = $_SESSION['username'];
 
 // Retrieve the hosteler ID from the database
 $stmt = $conn->prepare("SELECT id FROM hostelers WHERE username = ?");
@@ -30,49 +29,55 @@ if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $hid = $row['id']; // Get the hosteler ID
 } else {
-    // Handle the case where the user is not found in the database
-    $_SESSION['error_message'] = "User  not found.";
+    $_SESSION['error_message'] = "User not found.";
     header("Location: http://localhost/hhh/index.php");
     exit();
 }
 
-// Insert visitor data in visitorform table
+// Insert visitor data in visitorform table if form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
+    // Get the values from the form
+    $vname = htmlspecialchars($_POST['name']);
+    $relation = htmlspecialchars($_POST['relation']);
+    $reason = htmlspecialchars($_POST['reason']);
+    $days = (int)$_POST['days']; // Ensuring days is an integer
+
     // Prepare the SQL statement
     $stmt = $conn->prepare("INSERT INTO visitorform (vname, relation, reason, days, hid) VALUES (?, ?, ?, ?, ?)");
     $stmt->bind_param("ssssi", $vname, $relation, $reason, $days, $hid);
-    
-    // Get the values from the form
-    $vname = $_POST['name']; // Corrected to match the input name
-    $relation = $_POST['relation']; // Added to capture relationship
-    $reason = $_POST['reason']; // Capture reason of visit
-    $days = $_POST['days']; // Corrected to match the input name
 
     // Execute the statement and check for success
     if ($stmt->execute()) {
-        $_SESSION['success_message'] = "Visitor's Request is Pending."; // Store success message in session
+        $_SESSION['success_message'] = "Visitor's Request is Pending.";
         // Clear the form inputs after submission
         $vname = '';
         $relation = '';
         $reason = '';
         $days = 1; // Reset to default value
     } else {
-        $_SESSION['error_message'] = "Error: " . $stmt->error; // Store error message in session
+        $_SESSION['error_message'] = "Error: " . $stmt->error;
     }
     $stmt->close();
+    
+    // After processing the form, redirect to prevent form resubmission on page refresh
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
 }
 
-// Check for messages in session
-if (isset($_SESSION['success_message'])) {
-    $success_message = $_SESSION['success_message'];
-    unset($_SESSION['success_message']); // Clear the message after displaying
-}
+// Fetch previously submitted visitor forms
+$stmt = $conn->prepare("SELECT * FROM visitorform WHERE hid = ?");
+$stmt->bind_param("i", $hid);
+$stmt->execute();
+$result = $stmt->get_result();
 
-if (isset($_SESSION['error_message'])) {
-    $error_message = $_SESSION['error_message'];
-    unset($_SESSION['error_message']); // Clear the message after displaying
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $visitorform[] = $row;
+    }
 }
+$stmt->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -99,7 +104,9 @@ if (isset($_SESSION['error_message'])) {
             border-radius: 8px; /* Rounded corners */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
             padding: 30px; /* Increased padding inside the card */
-            box-sizing: border-box; /* Include padding in width calculation */
+            box-sizing: border-box;
+            max-height: 80vh; /* Set a maximum height for the card */
+            overflow-y: auto;
         }
 
         .card-title {
@@ -152,14 +159,25 @@ if (isset($_SESSION['error_message'])) {
                 <label for="relation" class="form-label">Relationship</label>
                 <input class="form-control" type="text" name="relation" id="relation" placeholder="Enter your relationship with the visitor" value="<?php echo htmlspecialchars($relation); ?>" required>
             </div>
-            <div class="mb-3">
+                        <div class="mb-3">
                 <label for="reason" class="form-label">Reason of Visit</label>
-                <textarea class="form-control" id="reason" name="reason" rows="4" placeholder="Enter reason for visit" required><?php echo htmlspecialchars($reason); ?></textarea>
+                <select class="form-control" id="reason" name="reason" required onchange="toggleDaysInput()">
+                    <option value="" disabled selected>Select reason</option>
+                    <option value="stay">Stay</option>
+                    <option value="visit">Visit</option>
+                </select>
             </div>
-            <div class="mb-3">
-                <label for="days" class="form-label">No of Days of Visit</label>
-                <input type="number" class="form-control" id="days" name="days" min="1" placeholder="Enter number of days" value="<?php echo htmlspecialchars($days); ?>" required>
-            </div>
+                <div class="mb-3" id="daysContainer" style="display: none;">
+                    <label for="days" class="form-label">No of Days of Visit</label>
+                    <div class="input-group">
+                        <button type="button" class="btn btn-outline-secondary" onclick="decrementDays()">-</button>
+                        <input type="number" class="form-control" id="days" name="days" min="1" value="<?php echo htmlspecialchars($days); ?>" required>
+                        <button type="button" class="btn btn-outline-secondary" onclick="incrementDays()">+</button>
+                    </div>
+                    <div id="warningMessage" class="alert alert-warning mt-2" style="display: none;">
+                        Visitor's Expense will be included as per the number of staying days.
+                    </div>
+                </div>
             <div class="mb-3">
                 <input class="form-control button" type="submit" name="submit" value="Submit">
                 <input class="form-control button" type="button" name="cancel" value="Cancel" onclick="window.location.href = window.location.pathname;">
@@ -177,6 +195,42 @@ if (isset($_SESSION['error_message'])) {
         <?php endif; ?>
     </div>
 
+    <div class="signup-card">
+
+    <!-- Table for previously submitted visitor forms -->
+    <div class="container mt-4">
+        <h3 class="card-title">Visitors Form </h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Relationship</th>
+                    <th>Reason</th>
+                    <th>No of Days</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (!empty($visitorform)): ?>
+                    <?php foreach ($visitorform as $form): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($form['vname']); ?></td>
+                            <td><?php echo htmlspecialchars($form['relation']); ?></td>
+                            <td><?php echo htmlspecialchars($form['reason']); ?></td>
+                            <td><?php echo $form['reason'] === 'stay' ? htmlspecialchars($form['days']) : ''; ?></td>
+                            <td><?php echo htmlspecialchars($form['status']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="5" class="text-center">No visitor forms submitted yet.</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Function to hide messages after 3 seconds
@@ -192,6 +246,37 @@ if (isset($_SESSION['error_message'])) {
                 setTimeout(function() { errorMessage.style.display = 'none'; }, 500); // Hide after fade out
             }
         }, 3000);
+
+        function toggleDaysInput() {
+        const reason = document.getElementById('reason').value;
+        const daysContainer = document.getElementById('daysContainer');
+        const warningMessage = document.getElementById('warningMessage');
+        
+        if (reason === 'stay') {
+            daysContainer.style.display = 'block';
+            warningMessage.style.display = 'block'; // Show warning message
+            
+            // Hide the warning message after 5 seconds
+            setTimeout(() => {
+                warningMessage.style.display = 'none';
+            }, 5000);
+        } else {
+            daysContainer.style.display = 'none';
+            warningMessage.style.display = 'none'; // Hide warning message
+        }
+    }
+
+    function incrementDays() {
+        const daysInput = document.getElementById('days');
+        daysInput.value = parseInt(daysInput.value) + 1;
+    }
+
+    function decrementDays() {
+        const daysInput = document.getElementById('days');
+        if (daysInput.value > 1) {
+            daysInput.value = parseInt(daysInput.value) - 1;
+        }
+    }
     </script>
 </body>
 </html>

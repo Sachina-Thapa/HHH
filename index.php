@@ -307,22 +307,10 @@ $conn->close();
     <div class="container">
       <h2 class="text-center fs-2 fw-bold mb-4">Contact Us</h2>
       <div class="row">
-        <div class="col-md-6 mb-4">
-          <form method="POST" onsubmit="return handleSubmit(event)">
-            <div class="mb-3">
-              <input type="text" name="name" class="form-control" placeholder="Your Name" required>
-            </div>
-            <div class="mb-3">
-              <input type="email" name="email" class="form-control" placeholder="Your Email" required>
-            </div>
-            <div class="mb-3">
-              <textarea name="message" class="form-control" rows="4" placeholder="Your Message" required></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Send Message</button>
-          </form>
-        </div>
-        <div class="col-md-6">
-          <div class="mb-4">
+        <div class="col-md-3">
+      </div>
+        <div class="col-md-3">
+          <div class="mb-4 mt-5  ">
             <div class="d-flex align-items-center">
               <svg class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l9 4-9 4-9-4 9-4zm0 0v16"></path>
@@ -342,7 +330,10 @@ $conn->close();
               <p class="mb-0">info@herhomehostel.com</p>
             </div>
           </div>
-          <img src="images/map.png?height=300&width=400" alt="Map" class="rounded img-fluid shadow-sm">
+        </div>
+        <div class="col-md-6">
+        <img src="images/map.png?height=300&width=400" alt="Map" class="rounded img-fluid shadow-sm">
+
         </div>
       </div>
     </div>

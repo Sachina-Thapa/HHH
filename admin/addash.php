@@ -106,10 +106,9 @@
  
    <div class="container-fluid">
          <div class="row">
- <!-- Sidebar -->
- <?php 
-         // Ensure this is included only once
-        require_once('inc/sideMenu.php'); 
+  <!-- Sidebar -->
+  <?php 
+  require('inc/sideMenu.php');  
 
         // Query to count total staff
         $sql = "SELECT COUNT(*) as total FROM staff_data;";
@@ -148,7 +147,7 @@
          }
 ?>
              <!-- Main Content -->
-             <div class="col-md-10 p-4">
+             <div class="col-md-10 content-wrapper py-4 px-4">
                  <!-- Success Notification -->
                  <div id="successAlert" class="alert alert-success d-none">
                  </div>
