@@ -68,10 +68,10 @@ if ($conn->connect_error) {
 <div class="container-fluid m-0">
     <div class="row">
         <!-- Sidebar -->
-        <?php require('inc/sideMenu.php'); ?>
+        <?php require_once('inc/sideMenu.php'); ?>
 
         <!-- Main Content -->
-        <div class="col-md-10">
+        <div class="col-md-10 content-wrapper py-4 px-4">
             <h2 class="mt-4 mb-4">Hosteler Management</h2>
               <!-- Advanced Search Bar -->
               <form method="GET" action="" class="search-form">

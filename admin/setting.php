@@ -1,5 +1,85 @@
 <?php
 require('inc/db.php');
+require('inc/essentials.php');
+
+
+// Handle logo upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['site_logo'])) {
+    $target_dir = "uploads/logo/";
+    if (!file_exists($target_dir)) {
+        mkdir($target_dir, 0777, true);
+    }
+
+    $file_name = uniqid() . '_' . basename($_FILES['site_logo']['name']);
+    $target_file = $target_dir . $file_name;
+    $uploadOk = 1;
+    $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+
+    // Check if image file is a actual image or fake image
+    $check = getimagesize($_FILES['site_logo']['tmp_name']);
+    if($check !== false) {
+        $uploadOk = 1;
+    } else {
+        $_SESSION['error'] = "File is not an image.";
+        $uploadOk = 0;
+    }
+
+    // Check file size (limit to 5MB)
+    if ($_FILES['site_logo']['size'] > 5000000) {
+        $_SESSION['error'] = "Sorry, your file is too large.";
+        $uploadOk = 0;
+    }
+
+    // Allow certain file formats
+    $allowed_formats = ["jpg", "jpeg", "png", "gif", "webp"];
+    if(!in_array($imageFileType, $allowed_formats)) {
+        $_SESSION['error'] = "Sorry, only JPG, JPEG, PNG, GIF & WebP files are allowed.";
+        $uploadOk = 0;
+    }
+
+     // Upload and save logo
+     if ($uploadOk == 1) {
+        if (move_uploaded_file($_FILES['site_logo']['tmp_name'], $target_file)) {
+            // Prepare SQL to insert logo path
+            $logo_path = mysqli_real_escape_string($conn, $target_file);
+            
+            // Check if a logo already exists
+            $check_existing = "SELECT id FROM site_settings LIMIT 1";
+            $existing_result = mysqli_query($conn, $check_existing);
+
+            if (mysqli_num_rows($existing_result) > 0) {
+                // Update existing record
+                $update_query = "UPDATE site_settings SET logo_path = '$logo_path'";
+                $result = mysqli_query($conn, $update_query);
+            } else {
+                // Insert new record
+                $insert_query = "INSERT INTO site_settings (logo_path) VALUES ('$logo_path')";
+                $result = mysqli_query($conn, $insert_query);
+            }
+
+            if ($result) {
+                $_SESSION['success_message'] = "Logo uploaded successfully!";
+            } else {
+                $_SESSION['error_message'] = "Database error: " . mysqli_error($conn);
+            }
+        } else {
+            $_SESSION['error_message'] = "Sorry, there was an error uploading your file.";
+        }
+    } else {
+        $_SESSION['error_message'] = $error_message;
+    }
+
+    // Redirect to prevent form resubmission
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+// Fetch current logo
+$logo_query = "SELECT logo_path FROM site_settings LIMIT 1";
+$logo_result = mysqli_query($conn, $logo_query);
+$current_logo = $logo_result && mysqli_num_rows($logo_result) > 0 
+    ? mysqli_fetch_assoc($logo_result)['logo_path'] 
+    : null;
 
 // Handle POST request for adding facility
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -96,6 +176,7 @@ if (isset($_GET['delete_room'])) {
 $query = "SELECT * FROM facilities ORDER BY id ASC";
 $facilities_result = mysqli_query($conn, $query);
 
+
 // Get rooms data
 $query = "SELECT * FROM rooms ORDER BY id ASC";
 $rooms_result = mysqli_query($conn, $query);
@@ -113,17 +194,67 @@ $rooms_result = mysqli_query($conn, $query);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css">
 
-    <style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone.css" rel="stylesheet">
+
+
+<style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+        }
         body {
-            background-color: #f5f5f5;
-            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .table thead {
-            background-color: #000;
-            color: #a06666;
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
         }
-        .table th, .table td {
-            text-align: center;
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .btn-modern {
+
+            border-radius: 25px;
+            color : black;
+            text-transform: uppercase;
+            font-weight: 550;
+            transition: all 0.3s ease;
+        }
+        .logo-preview {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .component-card {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .component-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        .component-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .component-body {
+            padding: 20px;
+        }
+        .badge-modern {
+            border-radius: 20px;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -134,130 +265,153 @@ $rooms_result = mysqli_query($conn, $query);
             <?php require('inc/sideMenu.php'); ?>
             
             <!-- Main Content -->
-            <div class="col-md-10 p-4">
+            <div class="col-md-10 content-wrapper py-4 px-4">
                 <h2>Settings</h2>
 
+                <div class="col-md-10 p-4">
+                <div class="row">
+                  <!-- Logo Management Section -->
+<div class="col-md-4">
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Logo Management</h5>
+        </div>
+        <div class="card-body text-center">
+            <!-- Display current logo if exists -->
+            <?php if ($current_logo): ?>
+                <img src="<?php echo htmlspecialchars($current_logo); ?>" 
+                     alt="Current Logo" 
+                     class="img-fluid rounded-circle mb-3" 
+                     style="max-width: 200px; max-height: 200px; object-fit: cover;">
+            <?php endif; ?>
+
+            <!-- Logo Upload Form -->
+            <form id="logoUploadForm" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <input type="file"
+                           name="site_logo"
+                           id="siteLogo"
+                           accept="image/png,image/jpeg,image/gif,image/webp"
+                           class="form-control"
+                           required>
+                    
+                    <!-- Image Preview Container -->
+                    <div id="logoPreviewContainer" class="mt-3 text-center" style="display: none;">
+                        <img id="logoPreview"
+                             src=""
+                             alt="Logo Preview"
+                             class="img-fluid rounded-circle shadow-sm"
+                             style="max-height: 200px; max-width: 200px; object-fit: cover;">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-modern btn-primary">
+                    Upload New Logo
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
                 <!-- Facilities Section -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <h5 class="card-title m-0" style="cursor: pointer" onclick="toggleFacilitySection()">
-                                Our Facilities <i class="bi bi-chevron-down"></i>
-                            </h5>
-                        </div>
-
-                        <div id="facilitySection" style="display: none;">
-                            <div class="mb-3">
-                                <button type="button" class="btn btn-primary shadow-md text-black btn-sm" 
-                                        data-bs-toggle="modal" data-bs-target="#add-facility">
-                                    <i class="bi bi-plus-lg"></i> Add Facility
+                <div class="col-md-8 border-0">
+                    <div class="card component-card mb-4">
+                            <div class="component-header">
+                                <h5 class="mb-0">Facilities Management</h5>
+                                <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#add-facility">
+                                    <i class="bi bi-plus-lg"></i> Add
                                 </button>
                             </div>
 
-                            <div class="table-responsive">
-                                <table class="table table-hover border">
-                                    <thead class="bg-dark text-white">
-                                        <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col">Title</th>
-                                            <th scope="col">Description</th>
-                                            <th scope="col">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php 
-                                        $i = 1;
-                                        while ($facility = mysqli_fetch_assoc($facilities_result)): 
-                                        ?>
-                                        <tr>
-                                            <td><?php echo $i++; ?></td>
-                                            <td><?php echo htmlspecialchars($facility['title']); ?></td>
-                                            <td><?php echo htmlspecialchars($facility['description']); ?></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-primary text-black" 
-                                                        onclick="editFacility(<?php echo $facility['id']; ?>, 
-                                                        '<?php echo addslashes($facility['title']); ?>', 
-                                                        '<?php echo addslashes($facility['description']); ?>')"
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#edit-facility">
-                                                    Edit
-                                                </button>
-                                                <a href="?delete_facility=<?php echo $facility['id']; ?>" 
-                                                   class="btn btn-sm btn-danger text-black" 
-                                                   onclick="return confirm('Are you sure you want to delete this facility?')">
-                                                    Delete
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        <?php endwhile; ?>
-                                    </tbody>
-                                </table>
+                            <div class="component-body">
+                                <div class="list-group">
+                                    <?php while ($facility = mysqli_fetch_assoc($facilities_result)): ?>
+                                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1"><?php echo htmlspecialchars($facility['title']); ?></h6>
+                                                <small class="text-muted">
+                                                    <?php echo substr(htmlspecialchars($facility['description']), 0, 50) . '...'; ?>
+                                                </small>
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-primary badge-modern me-2">
+                                                    <?php echo date('M d, Y', strtotime($facility['created_at'])); ?>
+                                                </span>
+                                                <div class="btn-group">
+                                                    <button class="btn btn-sm btn-outline-primary" 
+                                                            onclick="editFacility(<?php echo $facility['id']; ?>, 
+                                                            '<?php echo addslashes($facility['title']); ?>', 
+                                                            '<?php echo addslashes($facility['description']); ?>')"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#edit-facility">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <a href="?delete_facility=<?php echo $facility['id']; ?>" 
+                                                       class="btn btn-sm btn-outline-danger" 
+                                                       onclick="return confirm('Are you sure?')">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endwhile; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rooms Management Section -->
+                    <div class="col-md-4">
+                        <div class="card component-card mb-4">
+                            <div class="component-header">
+                                <h5 class="mb-0">Rooms Management</h5>
+                                <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#add-room">
+                                    <i class="bi bi-plus-lg"></i> Add
+                                </button>
+                            </div>
+                            <div class="component-body">
+                                <div class="list-group">
+                                    <?php while ($room = mysqli_fetch_assoc($rooms_result)): ?>
+                                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1"><?php echo htmlspecialchars($room['room_type']); ?></h6>
+                                                <small class="text-muted">
+                                                    Price: $<?php echo number_format($room['price'], 2); ?>
+                                                </small>
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-success badge-modern me-2">
+                                                    <?php echo date('M d, Y', strtotime($room['created_at'])); ?>
+                                                </span>
+                                                <div class="btn-group">
+                                                    <button class="btn btn-sm btn-outline-primary" 
+                                                            onclick="editRoom(<?php echo $room['id']; ?>, 
+                                                            '<?php echo addslashes($room['room_type']); ?>', 
+                                                            '<?php echo $room['price']; ?>')"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#edit-room">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <a href="?delete_room=<?php echo $room['id']; ?>" 
+                                                       class="btn btn-sm btn-outline-danger" 
+                                                       onclick="return confirm('Are you sure?')">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endwhile; ?>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- Rooms Section -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <h5 class="card-title m-0" style="cursor: pointer" onclick="toggleRoomSection()">
-                                Hostel Rooms <i class="bi bi-chevron-down"></i>
-                            </h5>
-                        </div>
+            </div>
+        </div>
+    </div>
 
-                        <div id="roomSection" style="display: none;">
-                            <div class="mb-3">
-                                <button type="button" class="btn btn-primary shadow-md text-black btn-sm" 
-                                        data-bs-toggle="modal" data-bs-target="#add-room">
-                                    <i class="bi bi-plus-lg"></i> Add Room
-                                </button>
-                            </div>
 
-                            <div class="table-responsive">
-                                <table class="table table-hover border">
-                                    <thead class="bg-dark text-white">
-                                        <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col">Room Type</th>
-                                            <th scope="col">Price</th>
-                                            <th scope="col">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php 
-                                        $i = 1;
-                                        while ($room = mysqli_fetch_assoc($rooms_result)): 
-                                        ?>
-                                        <tr>
-                                            <td><?php echo $i++; ?></td>
-                                            <td><?php echo htmlspecialchars($room['room_type']); ?></td>
-                                            <td><?php echo htmlspecialchars($room['price']); ?></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-primary text-black" 
-                                                        onclick="editRoom(<?php echo $room['id']; ?>, 
-                                                        '<?php echo addslashes($room['room_type']); ?>', 
-                                                        '<?php echo $room['price']; ?>')"
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#edit-room">
-                                                    Edit
-                                                </button>
-                                                <a href="?delete_room=<?php echo $room['id']; ?>" 
-                                                   class="btn btn-sm btn-danger text-black" 
-                                                   onclick="return confirm('Are you sure you want to delete this room?')">
-                                                    Delete
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        <?php endwhile; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Add Facility Modal -->
-                <div class="modal fade" id="add-facility" tabindex="-1">
+     <!-- Add Facility Modal -->
+     <div class="modal fade" id="add-facility" tabindex="-1">
                     <div class="modal-dialog">
                         <form method="POST" action="">
                             <div class="modal-content">
@@ -378,7 +532,59 @@ $rooms_result = mysqli_query($conn, $query);
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     
+     <!-- Modern JS -->
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
+        
+          // Logo preview functionality
+          document.getElementById('siteLogo').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const previewContainer = document.getElementById('logoPreviewContainer');
+        const previewImage = document.getElementById('logoPreview');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        } else {
+            previewContainer.style.display = 'none';
+        }
+    });
+
+    // Display success/error messages
+    <?php if(isset($_SESSION['success_message'])): ?>
+        alert('<?php echo $_SESSION['success_message']; unset($_SESSION['success_message']); ?>');
+    <?php endif; ?>
+
+    <?php if(isset($_SESSION['error_message'])): ?>
+        alert('<?php echo $_SESSION['error_message']; unset($_SESSION['error_message']); ?>');
+    <?php endif; ?>
+
+        // Logo preview
+        document.getElementById('siteLogo').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const preview = document.querySelector('.logo-preview');
+                if (preview) {
+                    preview.src = e.target.result;
+                } else {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.classList.add('logo-preview', 'mb-3');
+                    event.target.closest('.card-body').insertBefore(img, event.target);
+                }
+            }
+
+            reader.readAsDataURL(file);
+        });
+
         function editFacility(id, title, description) {
             document.getElementById('edit_facility_id').value = id;
             document.getElementById('edit_facility_title').value = title;
@@ -401,6 +607,20 @@ $rooms_result = mysqli_query($conn, $query);
             const roomSection = document.getElementById('roomSection');
             const isHidden = roomSection.style.display === 'none';
             roomSection.style.display = isHidden ? 'block' : 'none';
+        }
+         // Enhanced delete confirmation
+         function confirmDelete(message) {
+            return Swal.fire({
+                title: 'Are you sure?',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                return result.isConfirmed;
+            });
         }
     </script>
 </body>
