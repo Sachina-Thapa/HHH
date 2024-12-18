@@ -16,21 +16,21 @@ if (!isset($_SESSION['username'])) {
 
 $username = $_SESSION['username']; // Assuming username is stored in session
 
-// Retrieve the user ID from the database
-$stmt = $conn->prepare("SELECT id FROM hostelers WHERE username = ?");
-$stmt->bind_param("s", $username);
-$stmt->execute();
-$result = $stmt->get_result();
+    // Retrieve the user ID from the database
+    $stmt = $conn->prepare("SELECT id FROM hostelers WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    $hid = $row['id']; // Get the user ID
-} else {
-    // Handle the case where the user is not found in the database
-    $_SESSION['error_message'] = "User  not found.";
-    header("Location: http://localhost/hhh/index.php");
-    exit();
-}
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $hid = $row['id']; // Get the user ID
+    } else {
+        // Handle the case where the user is not found in the database
+        $_SESSION['error_message'] = "User  not found.";
+        header("Location: http://localhost/hhh/index.php");
+        exit();
+    }
 
 // Insert feedback into the database
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
@@ -65,6 +65,34 @@ if (isset($_SESSION['error_message'])) {
     $error_message = $_SESSION['error_message'];
     unset($_SESSION['error_message']); // Clear the message after displaying
 }
+
+
+        $feedbacks = [];
+        $stmt = $conn->prepare("SELECT ftext, fdate FROM feedback WHERE hid = ?");
+        $stmt->bind_param("i", $hid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $feedbacks[] = $row; // Store feedback in an array
+        }
+        $stmt->close();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (isset($_POST['feedback_id'])) {
+                $feedback_id = $_POST['feedback_id'];
+        
+                // Prepare the SQL statement to delete feedback
+                $stmt = $conn->prepare("DELETE FROM feedback WHERE id = ?");
+                $stmt->bind_param("i", $feedback_id);
+        
+                if ($stmt->execute()) {
+                    echo json_encode(['success' => true]);
+                } else {
+                    echo json_encode(['success' => false, 'error' => $stmt->error]);
+                }
+                $stmt->close();
+            }
+        }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -160,35 +188,87 @@ if (isset($_SESSION['error_message'])) {
             </div>
 
             <!-- Previous Feedback Section -->
-            <div class="pfeedback-card">
-                <h3 class="ab-0 h-font card-title">Previous Feedback</h3>
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <form id="pfeedbackForm">
-                            <div class="mb-3">
-                                <label for="pfeedback" class="form-label">Your Feedback</label>
-                                <textarea class="form-control" id="pfeedback" rows="4" placeholder="Enter your feedback here..."></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Delete Feedback</button>
-                        </form>
-                    </div>
+        <div class="pfeedback-card">
+            <h3 class="ab-0 h-font card-title">Previous Feedback</h3>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Feedback</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Action</th>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($feedbacks as $feedback): ?>
+                                <tr data-id="<?php echo $feedback['id']; ?>"> <!-- Assuming you have id in your feedback array -->
+                                    <td><?php echo htmlspecialchars($feedback['ftext']); ?></td>
+                                    <td><?php echo htmlspecialchars($feedback['fdate']); ?></td>
+                                    <td><button class="btn btn-danger" onclick="deleteFeedback(this)">Delete</button></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
+    
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+    function deleteFeedback(button) {
+        // Get the row of the feedback to be deleted
+        var row = button.closest('tr');
+        var feedbackText = row.cells[0].innerText; // Get the feedback text for the alert
+
+        // Extract the feedback ID from the row (you may need to adjust this part)
+        var feedbackId = row.dataset.id; // Assuming you set data-id on the row
+
+        // Send AJAX request to delete the feedback
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "delete_feedback.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    // Remove the row from the table
+                    row.remove();
+
+                    // Create a new alert for the "Feedback Deleted" message
+                    var alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success';
+                    alertDiv.role = 'alert';
+                    alertDiv.innerText = 'Feedback Deleted';
+
+                    // Append the alert to the feedback card
+                    var feedbackCard = document.querySelector('.pfeedback-card .card-body');
+                    feedbackCard.appendChild(alertDiv);
+
+                    // Automatically remove the alert after 3 seconds
+                    setTimeout(function() {
+                        alertDiv.style.opacity = '0';
+                        setTimeout(function() { alertDiv.remove(); }, 500);
+                    }, 3000);
+                } else {
+                    alert("Error deleting feedback: " + response.error);
+                }
+            }
+        };
+        xhr.send("feedback_id=" + feedbackId);
+    }
+
+
         setTimeout(function() {
             var successMessage = document.getElementById('success-message');
             var errorMessage = document.getElementById('error-message');
             if (successMessage) {
                 successMessage.style.opacity = '0';
-                setTimeout(function() { successMessage.style.display = 'none'; }, 500); // Hide after fade out
+                setTimeout(function() { successMessage.style.display = 'none'; }, 500);
             }
             if (errorMessage) {
                 errorMessage.style.opacity = '0';
-                setTimeout(function() { errorMessage.style.display = 'none'; }, 500); // Hide after fade out
+                setTimeout(function() { errorMessage.style.display = 'none'; }, 500);
             }
         }, 3000);
     </script>

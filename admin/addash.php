@@ -133,6 +133,18 @@
          } else {
              echo "Error in query: " . $conn->error; // Handle query error
          }
+
+         // Query to count total Guestes
+         $sql = "SELECT COUNT(*) as total FROM visitorform;";
+         $result = $conn->query($sql);
+         $total_visitor = 0; // Initialize the variable
+ 
+         if ($result) {
+             $row = $result->fetch_assoc();
+             $total_visitor= $row['total']; // Get the total count
+         } else {
+             echo "Error in query: " . $conn->error; // Handle query error
+         }
 ?>
              <!-- Main Content -->
              <div class="col-md-10 content-wrapper py-4 px-4">
@@ -155,8 +167,8 @@
                      </div>
                      <div class="col-md-4 mb-4">
                          <div class="card stats-card">
-                             <h5>Guests</h5>
-                             <h3>5</h3>
+                         <h5>Total Visitors</h5>
+                         <h3><?php echo $total_visitor; ?></h3>
                          </div>
                      </div>
                  </div>
