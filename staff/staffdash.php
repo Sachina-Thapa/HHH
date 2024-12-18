@@ -83,17 +83,17 @@
         $visitorform = $stmt->fetch_row()[0];
         
         // Query for Check-In
-        $stmt = $mysqli->query("SELECT COUNT(*) FROM visitorform");
-        $checkin = $stmt->fetch_row()[0];
+        // $stmt = $mysqli->query("SELECT COUNT(*) FROM visitorform");
+        // $checkin = $stmt->fetch_row()[0];
         
-        // Query for Check-Out
-        $stmt = $mysqli->query("SELECT COUNT(*) FROM visitorform ");
-        $checkout = $stmt->fetch_row()[0];
+        // // Query for Check-Out
+        // $stmt = $mysqli->query("SELECT COUNT(*) FROM visitorform ");
+        // $checkout = $stmt->fetch_row()[0];
         
-        // Query for Fee Collected
-        $stmt = $mysqli->query("SELECT COUNT(*) FROM visitorform");
-        $feecollected = $stmt->fetch_row()[0];
-        ?>
+        // // Query for Fee Collected
+        // $stmt = $mysqli->query("SELECT COUNT(*) FROM visitorform");
+        // $feecollected = $stmt->fetch_row()[0];
+        // ?>
         
     <!-- Display the stats in a row -->
     <div class="row">
@@ -129,25 +129,6 @@
                 <p>Visitor Form</p>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="stat-card">
-                <h2><?php echo $checkin; ?></h2>
-                <p>Check-In</p>
-                <!-- <i class="bi bi-person-plus"></i> -->
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stat-card">
-                <h2><?php echo $checkout; ?></h2>
-                <p>Check-Out</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stat-card">
-                <h2><?php echo $feecollected; ?></h2>
-                <p>Fee Collected</p>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -156,3 +137,4 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.js"></script>
 </body>
 </html>
+

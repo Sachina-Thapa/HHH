@@ -54,3 +54,23 @@ session_start();
     </script>
 </body>
 </html>
+
+<div class="col-md-4">
+            <div class="stat-card">
+                <h2><?php echo $checkin; ?></h2>
+                <p>Check-In</p>
+                <!-- <i class="bi bi-person-plus"></i> -->
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h2><?php echo $checkout; ?></h2>
+                <p>Check-Out</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h2><?php echo $feecollected; ?></h2>
+                <p>Fee Collected</p>
+            </div>
+        </div>
