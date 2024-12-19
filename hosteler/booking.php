@@ -70,14 +70,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Check if the insertion was successful
     if ($stmt->affected_rows > 0) {
-        $message = "<div class='alert alert-success'>Your booking is pending. You will be notified soon.</div>";
+        // Redirect to the same page to prevent form resubmission
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
     } else {
         $message = "<div class='alert alert-danger'>Error submitting booking. Please try again.</div>";
     }
-    // Redirect to the same page to prevent form resubmission
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit();
 }
+
+// Check the latest booking status
+$status_sql = "SELECT bstatus FROM booking WHERE id = ? ORDER BY bookingdate DESC LIMIT 1";
+$status_stmt = $conn->prepare($status_sql);
+$status_stmt->bind_param("i", $hosteler_id);
+$status_stmt->execute();
+$status_result = $status_stmt->get_result();
+$status_row = $status_result->fetch_assoc();
+$status = $status_row ? $status_row['bstatus'] : null;
+
+// Close the connection
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -92,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <style>
         body {
             display: flex;
-            min-height: 100vh; /* Minimum height of 100% of the viewport */
+            min-height: 100vh; /* Minimum height of 100 % of the viewport */
             margin: 0; /* Remove default margin */
             background-color: #f8f9fa; /* Light background color */
         }
@@ -105,6 +116,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .alert {
             margin-top: 20px; /* Margin for alerts */
         }
+
+        .booking-form {
+            display: <?= ($status === 'confirmed') ? 'none' : 'block'; ?>; /* Show or hide the booking form based on status */
+        }
     </style>
 </head>
 <body>
@@ -114,32 +129,78 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <!-- Display user information -->
         <p><strong>Name:</strong> <?= htmlspecialchars($name); ?></p>
-        <p><strong >Email:</strong> <?= htmlspecialchars($email); ?></p>
+        <p><strong>Email:</strong> <?= htmlspecialchars($email); ?></p>
         <p><strong>Phone Number:</strong> <?= htmlspecialchars($phone_number); ?></p>
         <p><strong>Address:</strong> <?= htmlspecialchars($address); ?></p>
         <p><strong>Date of Birth:</strong> <?= htmlspecialchars($date_of_birth); ?></p>
-        <p><strong>Booking Date:</strong> <?= htmlspecialchars($bookingdate); ?></p> 
+        <p><strong>Booking Date:</strong> <?= htmlspecialchars($bookingdate); ?></p>
 
-        <form method="POST" action="">
-            <div class="mb-3">
-                <label for="room_type" class="form-label">Select Room Type</label>
-                <select name="room_type" id="room_type" class="form-select" required>
-                    <?php while ($row = $room_result->fetch_assoc()): ?>
-                        <option value="<?= $row['rid']; ?>"><?= htmlspecialchars($row['rtype'] . ' - ' . $row['rprice']); ?></option>
-                    <?php endwhile; ?>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="checkin_date" class="form-label">Check-in Date</label>
-                <input type="date" name="checkin_date" id="checkin_date" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label for="checkout_date" class="form-label">Check-out Date</label>
-                <input type="date" name="checkout_date" id="checkout_date" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Book Now</button>
-            <a href="dashboard.php" class="btn btn-secondary">Cancel</a> <!-- Cancel button -->
-        </form>
+        <?php if ($status === 'confirmed'): ?>
+            <div class="alert alert-success">Your Booking has been confirmed.</div>
+        <?php elseif ($status === 'canceled'): ?>
+            <div class="alert alert-danger">Your Booking has been declined.</div>
+            <div class="alert alert-warning" id="rebookMessage">Do you wish to book a room again?</div>
+            <button id="yesButton" class="btn btn-success">Yes</button>
+            <button id="noButton" class="btn btn-danger">No</button>
+        <?php endif; ?>
+
+        <div class="booking-form">
+            <form method="POST" action="">
+                <div class="mb-3">
+                    <label for="room_type" class="form-label">Select Room Type</label>
+                    <select name="room_type" id="room_type" class="form-select" required>
+                        <?php while ($row = $room_result->fetch_assoc()): ?>
+                            <option value="<?= $row['rid']; ?>"><?= htmlspecialchars($row['rtype'] . ' - ' . $row['rprice']); ?></option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="checkin_date" class="form-label">Check-in Date</label>
+                    <input type="date" name="checkin_date" id="checkin_date" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="checkout_date" class="form-label ">Check-out Date</label>
+                    <input type="date" name="checkout_date" id="checkout_date" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Book Now</button>
+                <a href="dashboard.php" class="btn btn-secondary">Cancel</a> <!-- Cancel button -->
+            </form>
+        </div>
     </div>
+
+    <script>
+        // Show or hide the booking form based on the user's choice
+        const yesButton = document.getElementById('yesButton');
+        const noButton = document.getElementById('noButton');
+        const rebookMessage = document.getElementById('rebookMessage');
+        const bookingForm = document.querySelector('.booking-form');
+
+        if (yesButton) {
+            yesButton.onclick = function() {
+                if (bookingForm) {
+                    bookingForm.style.display = 'block'; // Show the booking form
+                }
+                if (rebookMessage) {
+                    rebookMessage.style.display = 'none'; // Hide the rebooking message
+                }
+                this.style.display = 'none'; // Hide the Yes button
+                if (noButton) {
+                    noButton.style.display = 'none'; // Hide the No button
+                }
+            };
+        }
+
+        if (noButton) {
+            noButton.onclick = function() {
+                if (rebookMessage) {
+                    rebookMessage.style.display = 'none'; // Hide the rebooking message
+                }
+                this.style.display = 'none'; // Hide the No button
+                if (yesButton) {
+                    yesButton.style.display = 'none'; // Hide the Yes button
+                }
+            };
+        }
+    </script>
 </body>
 </html>

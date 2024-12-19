@@ -1,8 +1,34 @@
 <?php
-require('inc/sidemenu.php');
-require('inc/db.php');
+require('../admin/inc/db.php');
 
-// Query to get the bookings data and join with the hostelers and room tables
+// Check if a form has been submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $bid = $_POST['bid'];
+    $action = $_POST['action'];
+
+    // Determine the new status based on the action
+    $new_status = ($action === 'confirm') ? 'confirmed' : 'canceled';
+
+    // Prepare the SQL statement to update the status
+    $sql = "UPDATE booking SET bstatus = ? WHERE bid = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("si", $new_status, $bid);
+
+    // Execute the statement
+    if ($stmt->execute()) {
+        // Redirect to the same page to avoid form resubmission
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        // Handle error if needed
+        error_log("Error updating status: " . $stmt->error);
+    }
+
+    // Close the statement
+    $stmt->close();
+}
+
+// Fetch booking data
 $query = "
     SELECT 
         b.bid, 
@@ -15,129 +41,122 @@ $query = "
         h.address,
         r.rtype AS room_type, 
         r.rprice AS room_price,
-        b.id AS hosteler_id
+        h.id AS hosteler_id
     FROM booking b
-    JOIN hostelers h ON b.id = h.id
+    JOIN hostelers h ON b.id = h.id  -- Ensure this is the correct foreign key
     JOIN room r ON b.rid = r.rid
 ";
 
-$result = $mysqli->query($query);
-
-if ($result === false) {
-    echo "Error fetching data: " . $mysqli->error;
-    exit;
-}
+$result = $conn->query($query);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking</title>
+    <title>Booking Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 200px;
-            background-color: #343a40;
-            padding-top: 20px;
+        body {
+            display: flex;
+            margin: 0; /* Remove default margin */
+        }
+        
+        .content {
+            margin-left: 200px; /* Same as sidebar width */
+            padding: 20px; /* Add padding to the content area */
+            width: calc(100% - 200px); /* Adjust width to fill the remaining space */
         }
 
-        .sidebar a {
-            color: #fff;
-            padding: 15px;
-            display: block;
-            text-decoration: none;
+        .confirmed {
+            background-color: #d4edda; /* Light green background for confirmed */
         }
 
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-
-        .main-content {
-            margin-left: 220px;
-            padding: 20px;
+        .canceled {
+            opacity: 0.5; /* Less transparent for canceled */
         }
     </style>
 </head>
 <body>
+    <?php require('inc/sidemenu.php'); ?>
 
-<div class="main-content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-12 ms-auto p-4 overflow-hidden">
-                <h3 class="mb-4">New Bookings</h3>
-                <div class="card border-6 shadow-sm mb-4">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover border text-center" style="min-width: 1300px;">
-                                <thead>
-                                    <tr class="bg-dark text-light">
-                                        <th scope="col">S.N.</th>
-                                        <th scope="col">Hosteler Details</th>
-                                        <th scope="col">Room Details</th>
-                                        <th scope="col">Booking Details</th>
-                                        <th scope="col">Status</th>
-                                        <th scope="col">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if ($result->num_rows > 0): ?>
-                                        <?php $serial_number = 1; ?>
-                                        <?php while ($row = $result->fetch_assoc()): ?>
-                                            <tr>
-                                                <td><?= $serial_number++; ?></td>
-                                                <td>
-                                                    <strong><?= htmlspecialchars($row['hosteler_name']) ?></strong><br>
-                                                    Email: <?= htmlspecialchars($row['email']) ?><br>
-                                                    Phone: <?= htmlspecialchars($row['phone_number']) ?><br>
-                                                    Address: <?= htmlspecialchars($row['address']) ?>
-                                                </td>
-                                                <td>
-                                                    Type: <?= htmlspecialchars($row['room_type']) ?><br>
-                                                    Price: $<?= htmlspecialchars($row['room_price']) ?>
-                                                </td>
-                                                <td><?= htmlspecialchars($row['bookingdate']) ?></td>
-                                                <td><?= ucfirst(htmlspecialchars($row['booking_status'])) ?></td>
-                                                <td>
-                                                    <?php if ($row['booking_status'] == 'pending'): ?>
-                                                        <button 
-                                                            onclick="confirmBooking(<?= $row['bid'] ?>, <?= $row['hosteler_id'] ?>)" 
-                                                            class="btn btn-success btn-sm">
-                                                            Confirm
-                                                        </button>
-                                                        <button 
-                                                            onclick="cancelBooking(<?= $row['bid'] ?>, <?= $row['hosteler_id'] ?>)" 
-                                                            class="btn btn-danger btn-sm">
-                                                            Cancel
-                                                        </button>
-                                                    <?php else: ?>
-                                                        <em><?= ucfirst(htmlspecialchars($row['booking_status'])) ?></em>
-                                                    <?php endif; ?>
-                                                </td>
-                                            </tr>
-                                        <?php endwhile; ?>
-                                    <?php else: ?>
-                                        <tr>
-                                            <td colspan="6">No bookings found.</td>
-                                        </tr>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+    <div class="content">
+        <div class="container mt-4">
+            <h3>New Bookings</h3>
+            <div class="table-responsive">
+                <table class="table table-hover text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Hosteler Name</th>
+                            <th>Hosteler Phone</th>
+                            <th>Hosteler Email</th>
+                            <th>Hosteler Address</th>
+                            <th>Room Type</th>
+                            <th>Booking Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                        // Check if the query was successful
+                        if ($result === false) {
+                            // Output the error message
+                            echo "Error: " . $conn->error;
+                        } else {
+                            // Check if there are results
+                            if ($result->num_rows > 0) {
+                                // Output data of each row
+                                while($row = $result->fetch_assoc()) {
+                                    // Determine the class for the row based on the status
+                                    $row_class = '';
+                                    $action_message = '';
+
+                                    if ($row['booking_status'] === 'confirmed') {
+                                        $row_class = 'confirmed';
+                                        $action_message = 'Confirmed';
+                                    } elseif ($row['booking_status'] === 'canceled') {
+                                        $row_class = 'canceled';
+                                        $action_message = 'Canceled';
+                                    }
+
+                                    echo "<tr class='$row_class'>
+                                            <td>" . htmlspecialchars($row["bid"]) . "</td>
+                                            <td>" . htmlspecialchars($row["hosteler_name"]) . "</td>
+                                            <td >" . htmlspecialchars($row["phone_number"]) . "</td>
+                                            <td>" . htmlspecialchars($row["email"]) . "</td>
+                                            <td>" . htmlspecialchars($row["address"]) . "</td>
+                                            <td>" . htmlspecialchars($row["room_type"]) . "</td>
+                                            <td>" . htmlspecialchars($row["bookingdate"]) . "</td>
+                                            <td>";
+                                    if ($action_message) {
+                                        echo $action_message; // Show the action message
+                                    } else {
+                                        echo "<form method='post' action=''>
+                                                <input type='hidden' name='bid' value='" . htmlspecialchars($row['bid']) . "'>
+                                                <button type='submit' name='action' value='confirm' class='btn btn-success'>Confirm</button>
+                                                <button type='submit' name='action' value='cancel' class='btn btn-danger'>Cancel</button>
+                                            </form>";
+                                    }
+                                    echo "</td>
+                                        </tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='8'>No bookings found.</td></tr>";
+                            }
+                        }
+
+                        // Close the connection
+                        $conn->close();
+                    ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
-<script src="scripts/newbooking.js"></script>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
