@@ -28,18 +28,18 @@ if (isset($_POST['load_services'])) {
         $i = 1;
         while ($row = $result->fetch_assoc()) {
             echo <<<HTML
-            <tr id="service-row-{$row['id']}">
+            <tr id="service-row-{$row['seid']}">
                 <td>{$i}</td>
-                <td><span id="name-{$row['id']}">{$row['name']}</span><input type="text" id="name-input-{$row['id']}" class="form-control d-none" value="{$row['name']}"></td>
-                <td><span id="price-{$row['id']}">{$row['price']}</span><input type="text" id="price-input-{$row['id']}" class="form-control d-none" value="{$row['price']}"></td>
+                <td><span id="name-{$row['seid']}">{$row['name']}</span><input type="text" id="name-input-{$row['seid']}" class="form-control d-none" value="{$row['name']}"></td>
+                <td><span id="price-{$row['seid']}">{$row['price']}</span><input type="text" id="price-input-{$row['seid']}" class="form-control d-none" value="{$row['price']}"></td>
                 <td>
-                    <button type="button" onclick="editService({$row['id']})" class="btn btn-warning btn-sm" id="edit-btn-{$row['id']}">
+                    <button type="button" onclick="editService({$row['seid']})" class="btn btn-warning btn-sm" id="edit-btn-{$row['seid']}">
                         <i class="bi bi-pencil"></i> Edit
                     </button>
-                    <button type="button" onclick="saveService({$row['id']})" class="btn btn-success btn-sm d-none" id="save-btn-{$row['id']}">
+                    <button type="button" onclick="saveService({$row['seid']})" class="btn btn-success btn-sm d-none" id="save-btn-{$row['seid']}">
                         <i class="bi bi-save"></i> Save
                     </button>
-                    <button type="button" onclick="deleteService({$row['id']})" class="btn btn-danger btn-sm">
+                    <button type="button" onclick="deleteService({$row['seid']})" class="btn btn-danger btn-sm">
                         <i class="bi bi-trash"></i> Delete
                     </button>
                 </td>
@@ -53,11 +53,11 @@ if (isset($_POST['load_services'])) {
 
 // Update service
 if (isset($_POST['update_service'])) {
-    $id = $_POST['id'];
+    $id = $_POST['seid'];
     $name = $_POST['name'];
     $price = $_POST['price'];
 
-    $query = "UPDATE `services` SET `name` = ?, `price` = ? WHERE `id` = ?";
+    $query = "UPDATE `services` SET `name` = ?, `price` = ? WHERE `seid` = ?";
     $stmt = $mysqli->prepare($query);
 
     if ($stmt) {
@@ -72,9 +72,9 @@ if (isset($_POST['update_service'])) {
 
 // Delete service
 if (isset($_POST['delete_service'])) {
-    $id = $_POST['id'];
+    $id = $_POST['seid'];
 
-    $query = "DELETE FROM `services` WHERE `id` = ?";
+    $query = "DELETE FROM `services` WHERE `seid` = ?";
     $stmt = $mysqli->prepare($query);
 
     if ($stmt) {

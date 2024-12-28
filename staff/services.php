@@ -126,26 +126,26 @@ require('inc/db.php');
         }
 
         // Edit service inline
-        function editService(id) {
+        function editService(seid) {
             // Hide the text and show the input fields
-            document.getElementById('name-' + id).classList.add('d-none');
-            document.getElementById('price-' + id).classList.add('d-none');
-            document.getElementById('name-input-' + id).classList.remove('d-none');
-            document.getElementById('price-input-' + id).classList.remove('d-none');
+            document.getElementById('name-' + seid).classList.add('d-none');
+            document.getElementById('price-' + seid).classList.add('d-none');
+            document.getElementById('name-input-' + seid).classList.remove('d-none');
+            document.getElementById('price-input-' + seid).classList.remove('d-none');
 
             // Hide the Edit button and show the Save button
-            document.getElementById('edit-btn-' + id).classList.add('d-none');
-            document.getElementById('save-btn-' + id).classList.remove('d-none');
+            document.getElementById('edit-btn-' + seid).classList.add('d-none');
+            document.getElementById('save-btn-' + seid).classList.remove('d-none');
         }
 
         // Save edited service
-        function saveService(id) {
-            let name = document.getElementById('name-input-' + id).value;
-            let price = document.getElementById('price-input-' + id).value;
+        function saveService(seid) {
+            let name = document.getElementById('name-input-' + seid).value;
+            let price = document.getElementById('price-input-' + seid).value;
 
             let data = new FormData();
             data.append('update_service', '');
-            data.append('id', id);
+            data.append('seid', seid);
             data.append('name', name);
             data.append('price', price);
 
@@ -155,18 +155,18 @@ require('inc/db.php');
             xhr.onload = function () {
                 if (this.responseText == 1) {
                     // Update the displayed name and price
-                    document.getElementById('name-' + id).innerText = name;
-                    document.getElementById('price-' + id).innerText = price;
+                    document.getElementById('name-' + seid).innerText = name;
+                    document.getElementById('price-' + seid).innerText = price;
 
                     // Hide the input fields and show the text
-                    document.getElementById('name-' + id).classList.remove('d-none');
-                    document.getElementById('price-' + id).classList.remove('d-none');
-                    document.getElementById('name-input-' + id).classList.add('d-none');
-                    document.getElementById('price-input-' + id).classList.add('d-none');
+                    document.getElementById('name-' + seid).classList.remove('d-none');
+                    document.getElementById('price-' + seid).classList.remove('d-none');
+                    document.getElementById('name-input-' + seid).classList.add('d-none');
+                    document.getElementById('price-input-' + seid).classList.add('d-none');
 
                     // Hide the Save button and show the Edit button
-                    document.getElementById('edit-btn-' + id).classList.remove('d-none');
-                    document.getElementById('save-btn-' + id).classList.add('d-none');
+                    document.getElementById('edit-btn-' + seid).classList.remove('d-none');
+                    document.getElementById('save-btn-' + seid).classList.add('d-none');
                 } else {
                     alert('Error saving changes!');
                 }
@@ -190,7 +190,7 @@ require('inc/db.php');
                         alert('Error', 'Server Down!');
                     }
                 };
-                xhr.send("delete_service=1&id=" + id);
+                xhr.send("delete_service=1&seid=" + seid);
             }
         }
     </script>
