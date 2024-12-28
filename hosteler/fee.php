@@ -1,6 +1,120 @@
 <?php
-require('inc/hsidemenu.php');
+session_start(); // Start the session
+require('inc/db.php'); // Database connection
+require('inc/hsidemenu.php'); // Sidebar
+
+// Initialize messages
+$success_message = '';
+$error_message = '';
+
+// Check if user is logged in and retrieve username
+if (!isset($_SESSION['username'])) {
+    // Redirect to login page if not logged in
+    header("Location: http://localhost/hhh/index.php");
+    exit();
+}
+
+$username = $_SESSION['username']; // Assuming username is stored in session
+
+// Fetch hosteler ID from the database
+$stmt = $conn->prepare("SELECT id FROM hostelers WHERE username = ?");
+if ($stmt === false) {
+    // Output error message if query preparation fails
+    die('Query preparation failed: ' . $conn->error);
+}
+
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $hid = $row['id']; // Get the hosteler ID
+} else {
+    // Handle the case where the user is not found in the database
+    $_SESSION['error_message'] = "User not found.";
+    header("Location: http://localhost/hhh/index.php");
+    exit();
+}
+
+// Fetch booking details for the logged-in hosteler
+$stmt = $conn->prepare("SELECT check_in, check_out, rid, bstatus FROM booking WHERE id = ? AND bstatus = 'confirmed'");
+if ($stmt === false) {
+    die('Query preparation failed: ' . $conn->error);
+}
+
+$stmt->bind_param("i", $hid);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows === 0) {
+    $bookingDetails = null; // No booking found
+} else {
+    $bookingDetails = $result->fetch_assoc();
+    $room_id = $bookingDetails['rid'];
+    
+    // Fetch room price
+    $stmt = $conn->prepare("SELECT rprice FROM room WHERE rid = ?");
+    if ($stmt === false) {
+        die('Query preparation failed: ' . $conn->error);
+    }
+    
+    $stmt->bind_param("i", $room_id);
+    $stmt->execute();
+    $roomResult = $stmt->get_result();
+    
+    if ($roomResult->num_rows > 0) {
+        $room = $roomResult->fetch_assoc();
+        $roomPrice = $room['rprice'];
+        
+        // Calculate the number of days
+        $check_in = new DateTime($bookingDetails['check_in']);
+        $check_out = new DateTime($bookingDetails['check_out']);
+        $interval = $check_in->diff($check_out);
+        $days = $interval->days;
+
+        // Calculate the total price (room price for 30 days, prorated for the days stayed)
+        $totalPrice = ($roomPrice / 30) * $days;
+    } else {
+        $roomPrice = 0;
+        $totalPrice = 0;
+        $days = 0; // Set default value for days
+    }
+}
+
+// Handle voucher upload
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['upload_voucher'])) {
+    // Check if a file was uploaded
+    if (isset($_FILES['voucher']) && $_FILES['voucher']['error'] == UPLOAD_ERR_OK) {
+        $fileTmpPath = $_FILES['voucher']['tmp_name'];
+        $fileName = $_FILES['voucher']['name'];
+        $fileSize = $_FILES['voucher']['size'];
+        $fileType = $_FILES['voucher']['type'];
+
+        // Specify the directory where the file will be uploaded
+        $uploadFileDir = 'uploads/';
+        $dest_path = $uploadFileDir . $fileName;
+
+        // Move the file to the specified directory
+        if (move_uploaded_file($fileTmpPath, $dest_path)) {
+            // Insert voucher information into the database
+            $stmt = $conn->prepare("INSERT INTO vouchers (hosteler_id, file_name, upload_date) VALUES (?, ?, NOW())");
+            $stmt->bind_param("is", $hid, $fileName);
+            if ($stmt->execute()) {
+                $_SESSION['success_message'] = "Voucher uploaded successfully.";
+            } else {
+                $_SESSION['error_message'] = "Error uploading voucher: " . $stmt->error;
+            }
+            $stmt->close();
+        } else {
+            $_SESSION['error_message'] = "Error moving the uploaded file.";
+        }
+    } else {
+        $_SESSION['error_message'] = "No file uploaded or there was an upload error.";
+    }
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,75 +124,81 @@ require('inc/hsidemenu.php');
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style></style>
+    <style>
+        /* Ensure the main content is aligned properly */
+        body {
+            display: flex;
+        }
+        .main-content {
+            margin-left: 210px; /* Adjust to be a bit more than sidebar width */
+            padding: 20px;
+            flex-grow: 1; /* Allow the main content to grow */
+        }
+    </style>
 </head>
 <body>
 
-
 <!-- Total Price Display -->
 <div class="card-footer gradient-bg text-dark d-flex justify-content-between align-items-center p-3">
-                    <div class="price-label">
-                        Total Price: $<span id="totalPrice">0</span>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Book Now</button>
-                </div>
-            </form>
-        </div>
+    <div class="price-label">
+        Total Price: $<span id="totalPrice"><?php echo isset($totalPrice) ? $totalPrice : 0; ?></span>
+    </div>
+    <?php if ($bookingDetails): ?>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detailsModal" 
+                data-bs-whatever="@mdo">View Booking Details</button>
+    <?php endif; ?>
+</div>
 
-
-<!-- Voucher Upload Section -->
-<div id="voucherUploadSection" class="card shadow mt-4">
-            <div class="card-header text-center bg-secondary text-white">
-                <h3 class="card-title">Upload Payment Voucher</h3>
+<!-- Booking Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsModalLabel">Booking Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="card-body">
-                <form id="voucherForm">
-                    <div class="mb-3">
-                        <label for="voucherFile" class="form-label">Choose Voucher File</label>
-                        <input type="file" class="form-control" id="voucherFile" accept="image/*" required>
-                        <div class="error" id="voucherError"></div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Submit Voucher</button>
-                </form>
+            <div class="modal-body">
+                <?php if ($bookingDetails): ?>
+                    <p>Check-in Date: <?php echo $bookingDetails['check_in']; ?></p>
+                    <p>Check-out Date: <?php echo $bookingDetails['check_out']; ?></p>
+                    <p>Total Staying Days: <?php echo $days; ?> days</p> <!-- Display staying days -->
+                    <p>Room ID: <?php echo $bookingDetails['rid']; ?></p>
+                    <p>Room Price (30 days): $<?php echo $roomPrice; ?></p>
+                    <p>Total Price for Stay: $<?php echo $totalPrice; ?></p>
+                <?php else: ?>
+                    <p>No booking found.</p>
+                <?php endif; ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
-<script>
-     document.getElementById('voucherForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const voucherFile = document.getElementById('voucherFile').files[0];
-            if (voucherFile) {
-                document.getElementById('voucherError').textContent = '';
+</div>
 
-    // Display uploaded voucher as an image
-    const reader = new FileReader();
-                reader.onload = function (e) {
-                    const img = document.createElement("img");
-                    img.src = e.target.result;
-                    img.alt = "Voucher Image";
-                    img.classList.add("img-thumbnail", "mt-3");
-                    img.style.maxWidth = "200px";
-                    document.getElementById('voucherImageContainer').innerHTML = '<strong>Voucher Image:</strong><br>';
-                    document.getElementById('voucherImageContainer').appendChild(img);
-                };
-                reader.readAsDataURL(voucherFile);
+<!-- Upload Voucher Section -->
+<div class="container mt-4">
+    <h3>Upload Voucher</h3>
+    <?php if (!empty($_SESSION['success_message'])): ?>
+        <div class="alert alert-success">
+            <?php echo $_SESSION['success_message']; unset($_SESSION['success_message']); ?>
+        </div>
+    <?php endif; ?>
+    <?php if (!empty($_SESSION['error_message'])): ?>
+        <div class="alert alert-danger">
+            <?php echo $_SESSION['error_message']; unset($_SESSION['error_message']); ?>
+        </div>
+    <?php endif; ?>
+    <form action="" method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="voucher" class="form-label">Select Voucher File</label>
+            <input type="file" class="form-control" name="voucher" id="voucher" required>
+        </div>
+        <button type="submit" name="upload_voucher" class="btn btn-success">Upload Voucher</button>
+    </form>
+</div>
 
-                // Update voucher status to "Pending" after submission
-                document.getElementById('voucherStatus').innerText = 'Pending';
-                document.getElementById('voucherStatus').className = 'badge bg-warning text-dark';
-
-                // Hide voucher upload section
-                document.getElementById('voucherUploadSection').style.display = 'none';
-            } else {
-                document.getElementById('voucherError').textContent = 'Please upload a voucher file.';
-            }
-        });
-
-        document.getElementById('checkIn').addEventListener('change', calculateTotalPrice);
-        document.getElementById('checkOut').addEventListener('change', calculateTotalPrice);
-        document.querySelectorAll('input[name="roomType"], #breakfast, #lunch, #dinner').forEach(element => {
-            element.addEventListener('change', calculateTotalPrice);
-        });
-</script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

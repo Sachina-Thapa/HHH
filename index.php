@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     break;
                 case 'Hosteler':
                     $table = 'hostelers';
-                    $dashboard = 'hosteler/index/overview.php';
+                    $dashboard = 'hosteler/hostelerdash.php';
                     break;
                 default:
                     $errorMessage = "Invalid user type selected";
