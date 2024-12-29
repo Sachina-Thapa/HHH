@@ -152,12 +152,19 @@ if (isset($_SESSION['error_message'])) {
         .mb-3 {
             margin-bottom: 15px; /* Adjust spacing between form elements */
         }
+        .main-content {
+            margin-left: 210px; /* Adjust to the sidebar width */
+            padding: 20px;
+            flex-grow: 1;
+            background-color: #f1f1f1;
+        }
     </style>
 </head>
 <body>
+<div class="main-content">
     <div class="col-md-10 p-4">
         <div class="row">
-            <div class="col-md-10 main-content">
+            
                 <!-- New Feedback Section -->
                 <div class="feedback-card">
                     <h3 class="ab-0 h-font card-title">Feedback</h3>
@@ -201,7 +208,6 @@ if (isset($_SESSION['error_message'])) {
                         </thead>
                         <tbody>
                             <?php foreach ($feedbacks as $feedback): ?>
-                                <tr data-id="<?php echo $feedback['id']; ?>"> <!-- Assuming you have id in your feedback array -->
                                     <td><?php echo htmlspecialchars($feedback['ftext']); ?></td>
                                     <td><?php echo htmlspecialchars($feedback['fdate']); ?></td>
                                     <td><button class="btn btn-danger" onclick="deleteFeedback(this)">Delete</button></td>
@@ -212,6 +218,7 @@ if (isset($_SESSION['error_message'])) {
                 </div>
             </div>
         </div>
+                            </div>
     
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>

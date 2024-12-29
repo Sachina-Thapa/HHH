@@ -30,7 +30,7 @@ $userInfo = getUserInfoByUsername($conn, $username);
 
 // Check if user information was found
 if (!$userInfo) {
-    echo "<div class='alert alert-danger'>User  not found.</div>";
+    echo "<div class='alert alert-danger'>User not found.</div>";
     exit(); // Stop further execution
 }
 
@@ -120,10 +120,16 @@ $conn->close();
         .booking-form {
             display: <?= ($status === 'confirmed') ? 'none' : 'block'; ?>; /* Show or hide the booking form based on status */
         }
+        .main-content {
+            margin-left: 210px; /* Adjust to the sidebar width */
+            padding: 20px;
+            flex-grow: 1;
+            background-color: #f1f1f1;
+        }
     </style>
 </head>
 <body>
-    <div class="content">
+<div class="main-content">
         <h1>Booking Form</h1>
         <?php if ($message) echo $message; ?>
 
@@ -167,6 +173,7 @@ $conn->close();
             </form>
         </div>
     </div>
+  </div>
 
     <script>
         // Show or hide the booking form based on the user's choice
