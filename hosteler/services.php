@@ -6,7 +6,7 @@ require('inc/hsidemenu.php');
 // Initialize message and input variables
 $success_message = '';
 $error_message = '';
-$total_price = 0;  // Track the total price
+$total_price = 0;
 
 // Check if user is logged in and retrieve username
 if (!isset($_SESSION['username'])) {
@@ -26,7 +26,7 @@ if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $hid = $row['id']; // Get the hosteler ID
 } else {
-    $_SESSION['error_message'] = "User  not found.";
+    $_SESSION['error_message'] = "User not found.";
     header("Location: http://localhost/hhh/index.php");
     exit();
 }
@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 
                 // Insert service into `hservice` table
                 $insert_stmt = $conn->prepare(
-                    "INSERT INTO hservice (seid, name, price, hid, status, total) 
+                    "INSERT INTO hservice (seid, name, price, hid, status, total)
                      VALUES (?, ?, ?, ?, 'pending', ?)"
                 );
                 $insert_stmt->bind_param("isdid", $service_id, $service_name, $service_price, $hid, $total_price);
@@ -77,7 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $stmt->close();
 }
 
-// Fetch services from the database
+// Fetch services from the database for selection
 $services = [];
 $stmt = $conn->prepare("SELECT seid, name, price FROM services");
 $stmt->execute();
@@ -90,10 +90,22 @@ if ($result->num_rows > 0) {
 } else {
     $error_message = "No services found.";
 }
+$stmt->close();
 
+// Fetch services requested by the logged-in hosteler
+$requested_services = [];
+$stmt = $conn->prepare("SELECT seid, name, price, status FROM hservice WHERE hid = ?");
+$stmt->bind_param("i", $hid);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $requested_services[] = $row;
+    }
+}
 $stmt->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -102,113 +114,81 @@ $stmt->close();
     <title>Service Submission</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+                body {
             margin: 0;
             background-color: #f8f9fa;
+            padding: 20px; /* Optional for spacing */
+            overflow-y: auto; /* Ensures vertical scrolling */
         }
 
         .signup-card {
             width: 100%;
-            max-width: 600px;
+            max-width: 800px;
             background-color: #ffffff;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 30px;
             box-sizing: border-box;
-            max-height: 80vh;
-            overflow-y: auto;
+            margin: 0 auto; /* Center horizontally */
         }
 
-        .card -title {
-            color: #007bff;
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            color: #495057;
-        }
-
-        .form-control {
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-        }
-
-        .form-control:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
-        }
-
-        .mb-3 {
-            margin-bottom: 15px;
-        }
-
-        .alert {
-            transition: opacity 0.5s ease;
-        }
-
-        #service-form {
-            display: block;
-        }
-
-        #pending-message {
-            display: none;
+        table {
+            width: 100%;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="signup-card">
-        <h3 class="card-title">Select Services</h3>
+<div class="signup-card">
+    <h3 class="card-title">Select Services</h3>
 
-        <!-- Show success or error messages -->
-        <?php if (!empty($success_message)): ?>
-            <div class="alert alert-success" id="pending-message">
-                <?php echo htmlspecialchars($success_message); ?>
+    <!-- Show success or error messages -->
+    <?php if (!empty($success_message)): ?>
+        <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>
+    <?php endif; ?>
+    <?php if (!empty($error_message)): ?>
+        <div class="alert alert-danger"><?php echo htmlspecialchars($error_message); ?></div>
+    <?php endif; ?>
+
+    <!-- Service selection form -->
+    <form method="POST" action="">
+        <?php foreach ($services as $service): ?>
+            <div class="mb-3 form-check">
+                <input class="form-check-input" type="checkbox" name="services[]" value="<?php echo htmlspecialchars($service['seid']); ?>" id="service_<?php echo htmlspecialchars($service['seid']); ?>">
+                <label class="form-check-label" for="service_<?php echo htmlspecialchars($service['seid']); ?>">
+                    <?php echo htmlspecialchars($service['name']); ?> ($<?php echo htmlspecialchars($service['price']); ?>)
+                </label>
             </div>
-        <?php endif; ?>
-        <?php if (!empty($error_message)): ?>
-            <div class="alert alert-danger"><?php echo htmlspecialchars($error_message); ?></div>
-        <?php endif; ?>
+        <?php endforeach; ?>
+        <button type="submit" name="submit" class="btn btn-primary">Request Services</button>
+    </form>
 
-        <!-- Service selection form -->
-        <div id="service-form">
-            <form method="POST" action="">
-                <?php foreach ($services as $service): ?>
-                    <div class="mb-3 form-check">
-                        <input class="form-check-input" type="checkbox" name="services[]" value="<?php echo htmlspecialchars($service['seid']); ?>" id="service_<?php echo htmlspecialchars($service['seid']); ?>">
-                        <label class="form-check-label" for="service_<?php echo htmlspecialchars($service['seid']); ?>">
-                            <?php echo htmlspecialchars($service['name']); ?> ($<?php echo htmlspecialchars($service['price']); ?>)
-                        </label>
-                    </div>
-                <?php endforeach; ?>
-                <button type="submit" name="submit" class="btn btn-primary">Request Services</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        // If success message is displayed, hide the form and show the message, then hide after 3 seconds
-        <?php if (!empty($success_message)): ?>
-            document.getElementById('pending-message').style.display = 'block';
-            document.getElementById('service-form').style.display = 'none';
-            setTimeout(function() {
-                document.getElementById('pending-message').style.display = 'none';
-                document.getElementById('service-form').style.display = 'block';
-            }, 5000); // Wait for 3 seconds before hiding the message and showing the form
-        <?php endif; ?>
-    </script>
+    <!-- Requested services table -->
+    <h3 class="mt-4">Your Requested Services</h3>
+    <?php if (!empty($requested_services)): ?>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Service ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($requested_services as $service): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($service['seid']); ?></td>
+                    <td><?php echo htmlspecialchars($service['name']); ?></td>
+                    <td>$<?php echo htmlspecialchars($service['price']); ?></td>
+                    <td><?php echo htmlspecialchars(ucfirst($service['status'])); ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php else: ?>
+        <p>No services requested yet.</p>
+    <?php endif; ?>
+</div>
 </body>
 </html>

@@ -4,8 +4,10 @@
         }
         .sidebar {
             height: 100vh;
-            background-color: #343a40;
+            background-color:hsl(210, 10.30%, 22.70%);
             padding-top: 10px;
+            position:fixed;
+           
         }
         .sidebar a {
             color: #fff;
@@ -13,6 +15,7 @@
             display: block;
             text-decoration: none;
             
+        
         }
         .sidebar a:hover {
             background-color: #495057;

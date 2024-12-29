@@ -128,74 +128,92 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['upload_voucher'])) {
         /* Ensure the main content is aligned properly */
         body {
             display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 210px; /* Sidebar width */
+            background-color: #f8f9fa;
+            padding-top: 20px;
         }
         .main-content {
-            margin-left: 210px; /* Adjust to be a bit more than sidebar width */
+            margin-left: 210px; /* Adjust to the sidebar width */
             padding: 20px;
-            flex-grow: 1; /* Allow the main content to grow */
+            flex-grow: 1;
+            background-color: #f1f1f1;
+        }
+        .card-footer {
+            background-color: #dfe6e9;
         }
     </style>
 </head>
 <body>
 
-<!-- Total Price Display -->
-<div class="card-footer gradient-bg text-dark d-flex justify-content-between align-items-center p-3">
-    <div class="price-label">
-        Total Price: $<span id="totalPrice"><?php echo isset($totalPrice) ? $totalPrice : 0; ?></span>
-    </div>
-    <?php if ($bookingDetails): ?>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detailsModal" 
-                data-bs-whatever="@mdo">View Booking Details</button>
-    <?php endif; ?>
+<!-- Sidebar -->
+<div class="sidebar">
+    <?php include('inc/hsidemenu.php'); ?>
 </div>
 
-<!-- Booking Details Modal -->
-<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="detailsModalLabel">Booking Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <?php if ($bookingDetails): ?>
-                    <p>Check-in Date: <?php echo $bookingDetails['check_in']; ?></p>
-                    <p>Check-out Date: <?php echo $bookingDetails['check_out']; ?></p>
-                    <p>Total Staying Days: <?php echo $days; ?> days</p> <!-- Display staying days -->
-                    <p>Room ID: <?php echo $bookingDetails['rid']; ?></p>
-                    <p>Room Price (30 days): $<?php echo $roomPrice; ?></p>
-                    <p>Total Price for Stay: $<?php echo $totalPrice; ?></p>
-                <?php else: ?>
-                    <p>No booking found.</p>
-                <?php endif; ?>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Total Price Display -->
+    <div class="card-footer gradient-bg text-dark d-flex justify-content-between align-items-center p-3">
+        <div class="price-label">
+            Total Price: $<span id="totalPrice"><?php echo isset($totalPrice) ? $totalPrice : 0; ?></span>
+        </div>
+        <?php if ($bookingDetails): ?>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detailsModal" 
+                    data-bs-whatever="@mdo">View Details</button>
+        <?php endif; ?>
+    </div>
+
+    <!-- Booking Details Modal -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel">Booking Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <?php if ($bookingDetails): ?>
+                        <p>Check-in Date: <?php echo $bookingDetails['check_in']; ?></p>
+                        <p>Check-out Date: <?php echo $bookingDetails['check_out']; ?></p>
+                        <p>Total Staying Days: <?php echo $days; ?> days</p> <!-- Display staying days -->
+                        <p>Room ID: <?php echo $bookingDetails['rid']; ?></p>
+                        <p>Room Price (30 days): $<?php echo $roomPrice; ?></p>
+                        <p>Total Price for Stay: $<?php echo $totalPrice; ?></p>
+                    <?php else: ?>
+                        <p>No booking found.</p>
+                    <?php endif; ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Upload Voucher Section -->
-<div class="container mt-4">
-    <h3>Upload Voucher</h3>
-    <?php if (!empty($_SESSION['success_message'])): ?>
-        <div class="alert alert-success">
-            <?php echo $_SESSION['success_message']; unset($_SESSION['success_message']); ?>
-        </div>
-    <?php endif; ?>
-    <?php if (!empty($_SESSION['error_message'])): ?>
-        <div class="alert alert-danger">
-            <?php echo $_SESSION['error_message']; unset($_SESSION['error_message']); ?>
-        </div>
-    <?php endif; ?>
-    <form action="" method="POST" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="voucher" class="form-label">Select Voucher File</label>
-            <input type="file" class="form-control" name="voucher" id="voucher" required>
-        </div>
-        <button type="submit" name="upload_voucher" class="btn btn-success">Upload Voucher</button>
-    </form>
+    <!-- Upload Voucher Section -->
+    <div class="container mt-4">
+        <h3>Upload Voucher</h3>
+        <?php if (!empty($_SESSION['success_message'])): ?>
+            <div class="alert alert-success">
+                <?php echo $_SESSION['success_message']; unset($_SESSION['success_message']); ?>
+            </div>
+        <?php endif; ?>
+        <?php if (!empty($_SESSION['error_message'])): ?>
+            <div class="alert alert-danger">
+                <?php echo $_SESSION['error_message']; unset($_SESSION['error_message']); ?>
+            </div>
+        <?php endif; ?>
+        <form action="" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="voucher" class="form-label">Select Voucher File</label>
+                <input type="file" class="form-control" name="voucher" id="voucher" required>
+            </div>
+            <button type="submit" name="upload_voucher" class="btn btn-success">Upload Voucher</button>
+        </form>
+    </div>
 </div>
 
 <!-- Bootstrap JS -->

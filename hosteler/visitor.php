@@ -145,9 +145,17 @@ $stmt->close();
         .alert {
             transition: opacity 0.5s ease; /* Smooth transition for fading out */
         }
+        .main-content {
+            margin-left: 210px; /* Adjust to the sidebar width */
+            padding: 20px;
+            flex-grow: 1;
+            background-color: #f1f1f1;
+        }
     </style>
 </head>
 <body>
+<div class="main-content">
+
     <div class="signup-card">
         <h3 class="card-title">Visitor Form</h3>
         <form action="" method="POST" autocomplete="">
