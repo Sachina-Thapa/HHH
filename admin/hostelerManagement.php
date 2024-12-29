@@ -50,18 +50,32 @@ if ($conn->connect_error) {
     margin-right: 10px;
     font-weight: 500;
 }
-  .search-form .btn-primary {
+.search-form .btn-primary {
     background-color: #4169E1 !important;
-      border: none;
-      border-radius: 8px;
-      color: #fff;
-      transition: all 0.3s ease;
-  }
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    transition: all 0.3s ease;
+}
 .search-form .btn-primary:hover {
     background-color: #0b5ed7;
     transform: translateY(-1px);
 }
 
+.table-responsive {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: #343a40;
+    color: #fff;
+}
+
+.table tbody tr:hover {
+    background-color: #f1f1f1;
+}
 
 </style>
 
@@ -72,7 +86,6 @@ if ($conn->connect_error) {
 
         <!-- Main Content -->
         <div class="col-md-10 content-wrapper py-4 px-4">
-            <h2 class="mt-4 mb-4">Hosteler Management</h2>
               <!-- Advanced Search Bar -->
               <form method="GET" action="" class="search-form">
                   <div class="row mb-3">

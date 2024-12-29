@@ -16,18 +16,18 @@
      <!-- Custom CSS -->
      <style>
          body {
-             background-color: #f5f5f5;
-             font-family: Arial, sans-serif;
+             background-color: #f8f9fa;
+             font-family: 'Roboto', sans-serif;
          }
 
- 
          /* Card styling for stats */
          .stats-card {
-             background-color: white;
+             background-color: #ffffff;
              border-radius: 10px;
              padding: 20px;
-             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
              text-align: center;
+             border-left: 5px solid #0d6efd;
          }
  
          .stats-card h5 {
@@ -38,24 +38,23 @@
          .stats-card h3 {
              font-size: 28px;
              font-weight: bold;
-             color: #343a40;
+             color: #0d6efd;
          }
  
          .table-wrapper {
              margin-top: 2rem;
-             background-color: white;
-             padding: 10px;
+             background-color: #ffffff;
+             padding: 20px;
              border-radius: 10px;
-             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
          }
- 
+
          .chart-wrapper {
-             background-color: white;
-             padding: 18px;
-             border-radius: 50px;
-             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+             background-color: #ffffff;
+             padding: 20px;
+             border-radius: 10px;
+             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
              margin-top: 20px;
-             width: 100px5px;
              text-align: center;
          }
  
@@ -70,35 +69,29 @@
              font-size: 15px;
              font-weight: bold;
          }
- 
+
          /* Flexbox for side-by-side charts */
-      /* Adjust the gap between the charts */
- .chart-container {
-     display: flex;
-     justify-content: space-between;
-     gap: 2px; /* Reduce the gap between charts */
- }
+         .chart-container {
+             display: flex;
+             justify-content: space-between;
+             gap: 10px;
+         }
  
-        /* Add this CSS for chart canvas sizing */
- .chart-container .chart canvas {
-     width: 100% !important;
-     height: 350px !important; /* Set a fixed height */
- }
- 
+         /* Add this CSS for chart canvas sizing */
+         .chart-container .chart canvas {
+             width: 100% !important;
+             height: 350px !important;
+         }
+
          /* Responsive adjustments */
-         @media (max-width: 500px) {
-             .content {
-                 margin-left: 0;
-                 padding: 50px;
-             }
- 
+         @media (max-width: 768px) {
              .chart-container {
                  flex-direction: column;
              }
- 
-             .chart-container .chart {
-                 max-width: 50%;
-             }
+         }
+
+         table {
+             text-align: center;
          }
      </style>
  </head>
@@ -163,7 +156,8 @@
                      <div class="col-md-4 mb-4">
                          <div class="card stats-card">
                              <h5>Total Staff</h5>
-                             <h3><?php echo $total_staff; ?></h3> <!-- Display the total staff count -->                         </div>
+                             <h3><?php echo $total_staff; ?></h3>
+                         </div>
                      </div>
                      <div class="col-md-4 mb-4">
                          <div class="card stats-card">
@@ -177,7 +171,14 @@
                  <div class="table-wrapper">
                      <h5>Room Occupancy and Pricing</h5>
                      <table class="table table-bordered">
-                     
+                      <thead class="table-dark">
+                          <tr>
+                              <th>Room No</th>
+                              <th>Room Type</th>
+                              <th>Price</th>
+                          </tr>
+                      </thead>
+                      <tbody>
          <?php
             // Query to select room data
                 $sql = "SELECT rid, rno, rtype, rprice FROM room"; 
@@ -195,9 +196,10 @@
                 }
             
                 else {
-                echo "<tr><td colspan='4'>No rooms found</td></tr>";
+                echo "<tr><td colspan='3'>No rooms found</td></tr>";
                 }
         ?>
+                      </tbody>
                   </table>       
                  </div>
  
@@ -230,8 +232,8 @@
              datasets: [{
                  label: 'Monthly Revenue',
                  data: [3000, 4000, 3500, 4500, 5000, 4800, 5200,5000,5300,5400,5800,6000],
-                 borderColor: '#007bff',
-                 backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                 borderColor: '#0d6efd',
+                 backgroundColor: 'rgba(13, 110, 253, 0.1)',
                  fill: true
              }]
          };
@@ -271,7 +273,7 @@
              datasets: [{
                  label: 'Hostel Overview',
                  data: [50, 10, 5],
-                 backgroundColor: ['#007bff', '#28a745', '#ffc107'],
+                 backgroundColor: ['#0d6efd', '#198754', '#ffc107'],
                  hoverOffset: 4
              }]
          };
