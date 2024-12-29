@@ -5,6 +5,42 @@ require('../inc/db.php');
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+// if (isset($_POST['get_newbooking'])) {
+//     $res = $mysqli->query("SELECT * FROM booking");
+
+//     if (!$res) {
+//         die("Query failed: " . $mysqli->error);
+//     }
+
+//     $i = 1;
+//     $data = "";
+
+//     while ($row = $res->fetch_assoc()) {
+//         $status = "<button onclick='toggle_status($row[id], 0)' class='btn btn-dark btn-sm shadow-none'>active</button>";
+//         if (!$row['status']) {
+//             $status = "<button onclick='toggle_status($row[id], 0)' class='btn btn-danger btn-sm shadow-none'>inactive</button>";
+//         }
+//         $date = date("d-m-Y", strtotime($row['created_at']));
+//         $data .= "
+//         <tr>
+//             <td>$i</td>
+//             <td>{$row['bid']}</td>
+//             <td>{$row['name']}</td>
+//             <td>{$row['phone_number']}</td>
+//             <td>{$row['email']}</td>
+//             <td>{$row['address']}</td>
+//             <td>{$row['rtype']}</td>
+//             <td>{$row['bdate']}</td>
+//             <td>$status</td>
+//             <td>$action</td>
+//         </tr>
+//         ";
+//         $i++;
+//     }
+//     echo $data;
+// }
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         $action = $_POST['action'];

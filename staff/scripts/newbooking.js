@@ -1,3 +1,13 @@
+function get_newbooking() {
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "ajax/newbookingr.php", true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function() {
+        document.getElementById('newbooking-data').innerHTML = this.responseText;
+    }
+    xhr.send('get_newbooking');
+}
+
 function confirmBooking(bid, id) {
     if (confirm("Are you sure you want to confirm this booking?")) {
         let formData = new FormData();

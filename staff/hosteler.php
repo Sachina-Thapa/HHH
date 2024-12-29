@@ -17,6 +17,17 @@
             margin-left: 220px;
             padding: 20px;
         }
+        #hosteler-details {
+            margin-top: 20px; /* Space between first and second tables */
+        }
+        #hosteler-details table th {
+            width: 30%;
+            text-align: left;
+            background-color: #f8f9fa;
+        }
+        #hosteler-details table td {
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -56,6 +67,51 @@
                                 </thead>
                                 <tbody id="hosteler-data">
                                     <!-- Dynamic data will be populated here by the JavaScript functions -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hosteler Details Section -->
+                <div id="hosteler-details" class="card border shadow-sm mt-4">
+                    <div class="card-body">
+                        <h5 class="mb-3">Hosteler Details</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">ID</th>
+                                        <td id="hosteler-id"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Name</th>
+                                        <td id="hosteler-name"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Email</th>
+                                        <td id="hosteler-email"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Phone</th>
+                                        <td id="hosteler-phone"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Location</th>
+                                        <td id="hosteler-location"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Date of Birth</th>
+                                        <td id="hosteler-dob"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Status</th>
+                                        <td id="hosteler-status"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Created At</th>
+                                        <td id="hosteler-created-at"></td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

@@ -43,7 +43,7 @@ $query = "
         r.rprice AS room_price,
         h.id AS hosteler_id
     FROM booking b
-    JOIN hostelers h ON b.id = h.id  -- Ensure this is the correct foreign key
+    JOIN hostelers h ON b.id = h.id
     JOIN room r ON b.rid = r.rid
 ";
 
@@ -60,21 +60,25 @@ $result = $conn->query($query);
     <style>
         body {
             display: flex;
-            margin: 0; /* Remove default margin */
+            margin: 0;
         }
-        
+
         .content {
-            margin-left: 200px; /* Same as sidebar width */
-            padding: 20px; /* Add padding to the content area */
-            width: calc(100% - 200px); /* Adjust width to fill the remaining space */
+            margin-left: 200px;
+            padding: 20px;
+            width: calc(100% - 200px);
         }
 
         .confirmed {
-            background-color: #d4edda; /* Light green background for confirmed */
+            background-color: #d4edda;
         }
 
         .canceled {
-            opacity: 0.5; /* Less transparent for canceled */
+            opacity: 0.5;
+        }
+
+        .clickable-row {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -100,16 +104,11 @@ $result = $conn->query($query);
                     </thead>
                     <tbody>
                     <?php
-                        // Check if the query was successful
                         if ($result === false) {
-                            // Output the error message
                             echo "Error: " . $conn->error;
                         } else {
-                            // Check if there are results
                             if ($result->num_rows > 0) {
-                                // Output data of each row
-                                while($row = $result->fetch_assoc()) {
-                                    // Determine the class for the row based on the status
+                                while ($row = $result->fetch_assoc()) {
                                     $row_class = '';
                                     $action_message = '';
 
@@ -121,17 +120,17 @@ $result = $conn->query($query);
                                         $action_message = 'Canceled';
                                     }
 
-                                    echo "<tr class='$row_class'>
+                                    echo "<tr class='clickable-row $row_class' data-id='" . htmlspecialchars($row["hosteler_id"]) . "'>
                                             <td>" . htmlspecialchars($row["bid"]) . "</td>
                                             <td>" . htmlspecialchars($row["hosteler_name"]) . "</td>
-                                            <td >" . htmlspecialchars($row["phone_number"]) . "</td>
+                                            <td>" . htmlspecialchars($row["phone_number"]) . "</td>
                                             <td>" . htmlspecialchars($row["email"]) . "</td>
                                             <td>" . htmlspecialchars($row["address"]) . "</td>
                                             <td>" . htmlspecialchars($row["room_type"]) . "</td>
                                             <td>" . htmlspecialchars($row["bookingdate"]) . "</td>
                                             <td>";
                                     if ($action_message) {
-                                        echo $action_message; // Show the action message
+                                        echo $action_message;
                                     } else {
                                         echo "<form method='post' action=''>
                                                 <input type='hidden' name='bid' value='" . htmlspecialchars($row['bid']) . "'>
@@ -146,8 +145,6 @@ $result = $conn->query($query);
                                 echo "<tr><td colspan='8'>No bookings found.</td></tr>";
                             }
                         }
-
-                        // Close the connection
                         $conn->close();
                     ?>
                     </tbody>
@@ -156,7 +153,79 @@ $result = $conn->query($query);
         </div>
     </div>
 
-    <!-- Bootstrap JS and dependencies -->
+    <!-- Modal -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel">Hosteler Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Dynamic content will be injected here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.clickable-row').forEach(row => {
+            row.addEventListener('click', function () {
+                const hostelerId = this.getAttribute('data-id');
+
+                fetch(`get_hosteler_details.php?id=${hostelerId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert(data.error);
+                        } else {
+                            displayHostelerDetails(data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        });
+    });
+
+    function displayHostelerDetails(data) {
+        let modalBody = `
+            <h5>Hosteler Information</h5>
+            <p><strong>Name:</strong> ${data[0].hosteler_name}</p>
+            <p><strong>Phone:</strong> ${data[0].phone_number}</p>
+            <p><strong>Email:</strong> ${data[0].email}</p>
+            <p><strong>Address:</strong> ${data[0].address}</p>
+            <hr>
+            <h5>Booking Details</h5>
+            <ul>
+        `;
+
+        data.forEach(booking => {
+            modalBody += `
+                <li>
+                    <strong>Booking ID:</strong> ${booking.bid}<br>
+                    <strong>Room Type:</strong> ${booking.room_type}<br>
+                    <strong>Room Price:</strong> ${booking.room_price}<br>
+                    <strong>Booking Date:</strong> ${booking.bookingdate}<br>
+                    <strong>Status:</strong> ${booking.bstatus}
+                </li>
+                <hr>
+            `;
+        });
+
+        modalBody += `</ul>`;
+
+        const modal = document.getElementById('detailsModal');
+        modal.querySelector('.modal-body').innerHTML = modalBody;
+        new bootstrap.Modal(modal).show();
+    }
+    </script>
 </body>
 </html>
