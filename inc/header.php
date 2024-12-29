@@ -15,7 +15,7 @@ $logo_query = "SELECT logo_path FROM site_settings LIMIT 1";
 $logo_result = mysqli_query($conn, $logo_query);
 $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0 
     ? mysqli_fetch_assoc($logo_result)['logo_path'] 
-    : 'images/logoo.png'; // Fallback to default logo if no logo in database
+    : '../images/logoo.png'; // Fallback to default logo if no logo in database
 ?>
 
  <!-- NAVIGATION BAR -->
