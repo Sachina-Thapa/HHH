@@ -32,7 +32,7 @@ if ($result->num_rows > 0) {
     $hid = $row['id']; // Get the hosteler ID
 } else {
     // Handle the case where the user is not found in the database
-    $_SESSION['error_message'] = "User not found.";
+    $_SESSION['error_message'] = "User  not found.";
     header("Location: http://localhost/hhh/index.php");
     exit();
 }
@@ -47,6 +47,7 @@ $stmt->bind_param("i", $hid);
 $stmt->execute();
 $result = $stmt->get_result();
 
+$totalPrice = 0; // Initialize total price
 if ($result->num_rows === 0) {
     $bookingDetails = null; // No booking found
 } else {
@@ -77,10 +78,20 @@ if ($result->num_rows === 0) {
         $totalPrice = ($roomPrice / 30) * $days;
     } else {
         $roomPrice = 0;
-        $totalPrice = 0;
         $days = 0; // Set default value for days
     }
 }
+
+// Fetch total fees from visitorform for the logged-in hosteler
+$stmt = $conn->prepare("SELECT SUM(fee) AS total_visitor_fee FROM visitorform WHERE hid = ?");
+$stmt->bind_param("i", $hid);
+$stmt->execute();
+$visitorResult = $stmt->get_result();
+$visitorRow = $visitorResult->fetch_assoc();
+$totalVisitorFee = $visitorRow['total_visitor_fee'] ? $visitorRow['total_visitor_fee'] : 0;
+
+// Calculate the grand total
+$grandTotal = $totalPrice + $totalVisitorFee;
 
 // Handle voucher upload
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['upload_voucher'])) {
@@ -158,7 +169,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['upload_voucher'])) {
     <!-- Total Price Display -->
     <div class="card-footer gradient-bg text-dark d-flex justify-content-between align-items-center p-3">
         <div class="price-label">
-            Total Price: $<span id="totalPrice"><?php echo isset($totalPrice) ? $totalPrice : 0; ?></span>
+            Total Price: $<span id="totalPrice"><?php echo number_format($grandTotal, 2); ?></span>
         </div>
         <?php if ($bookingDetails): ?>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detailsModal" 
@@ -180,8 +191,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['upload_voucher'])) {
                         <p>Check-out Date: <?php echo $bookingDetails['check_out']; ?></p>
                         <p>Total Staying Days: <?php echo $days; ?> days</p> <!-- Display staying days -->
                         <p>Room ID: <?php echo $bookingDetails['rid']; ?></p>
-                        <p>Room Price (30 days): $<?php echo $roomPrice; ?></p>
-                        <p>Total Price for Stay: $<?php echo $totalPrice; ?></p>
+                        <p>Room Price (30 days): $<?php echo number_format($roomPrice, 2); ?></p>
+                        <p>Total Price for Stay: $<?php echo number_format($totalPrice, 2); ?></p>
+                        <p>Total Visitor Fees: $<?php echo number_format($totalVisitorFee, 2); ?></p> <!-- Display visitor fees -->
                     <?php else: ?>
                         <p>No booking found.</p>
                     <?php endif; ?>

@@ -29,7 +29,7 @@ if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $hid = $row['id']; // Get the hosteler ID
 } else {
-    $_SESSION['error_message'] = "User not found.";
+    $_SESSION['error_message'] = "User  not found.";
     header("Location: http://localhost/hhh/index.php");
     exit();
 }
@@ -42,22 +42,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $reason = htmlspecialchars($_POST['reason']);
     $days = (int)$_POST['days']; // Ensuring days is an integer
 
-    // Prepare the SQL statement
-    $stmt = $conn->prepare("INSERT INTO visitorform (vname, relation, reason, days, hid) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssi", $vname, $relation, $reason, $days, $hid);
+    // Fetch the room ID and price based on the hosteler's booking
+    $stmt = $conn->prepare("SELECT b.rid, r.rprice FROM booking b JOIN room r ON b.rid = r.rid WHERE b.id = ? AND b.bstatus = 'confirmed'");
+    $stmt->bind_param("i", $hid);
+    $stmt->execute();
+    $roomResult = $stmt->get_result();
 
-    // Execute the statement and check for success
-    if ($stmt->execute()) {
-        $_SESSION['success_message'] = "Visitor's Request is Pending.";
-        // Clear the form inputs after submission
-        $vname = '';
-        $relation = '';
-        $reason = '';
-        $days = 1; // Reset to default value
+    if ($roomResult->num_rows > 0) {
+        $room = $roomResult->fetch_assoc();
+        $roomPrice = (float)$room['rprice']; // Cast to float for calculation
+        $rid = $room['rid']; // Get the room ID
+
+        // Debugging output
+        error_log("Room ID: " . $rid); // Log the room ID
+        error_log("Room Price: " . $roomPrice); // Log the room price
+
+        // Calculate the fee based on the number of days
+        $fee = 0; // Default to 0
+        if ($roomPrice > 0) {
+            $fee = ($roomPrice / 30) * $days; // Calculate fee based on room price and days
+        }
+
+        // Prepare the SQL statement to insert visitor data with initial status as 'pending'
+        $stmt = $conn->prepare("INSERT INTO visitorform (vname, relation, reason, days, fee, hid, rid, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')");
+        $stmt->bind_param("sssdiiis", $vname, $relation, $reason, $days, $fee, $hid, $rid, $status);
+
+        // Execute the statement and check for success
+        if ($stmt->execute()) {
+            $_SESSION['success_message'] = "Visitor's Request is Pending.";
+            // Clear the form inputs after submission
+            $vname = '';
+            $relation = '';
+            $reason = '';
+            $days = 1; // Reset to default value
+        } else {
+            $_SESSION['error_message'] = "Error: " . $stmt->error; // This will show any error during execution
+            error_log("Insertion Error: " . $stmt->error); // Log the error
+        }
+        $stmt->close();
     } else {
-        $_SESSION['error_message'] = "Error: " . $stmt->error;
+        $_SESSION['error_message'] = "No room found for the hosteler.";
+        error_log("No room found for hosteler ID: $hid"); // Log if no room is found
     }
-    $stmt->close();
     
     // After processing the form, redirect to prevent form resubmission on page refresh
     header("Location: " . $_SERVER['PHP_SELF']);
@@ -70,6 +96,7 @@ $stmt->bind_param("i", $hid);
 $stmt->execute();
 $result = $stmt->get_result();
 
+$visitorform = [];
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $visitorform[] = $row;
@@ -167,7 +194,7 @@ $stmt->close();
                 <label for="relation" class="form-label">Relationship</label>
                 <input class="form-control" type="text" name="relation" id="relation" placeholder="Enter your relationship with the visitor" value="<?php echo htmlspecialchars($relation); ?>" required>
             </div>
-                        <div class="mb-3">
+            <div class="mb-3">
                 <label for="reason" class="form-label">Reason of Visit</label>
                 <select class="form-control" id="reason" name="reason" required onchange="toggleDaysInput()">
                     <option value="" disabled selected>Select reason</option>
@@ -175,17 +202,17 @@ $stmt->close();
                     <option value="visit">Visit</option>
                 </select>
             </div>
-                <div class="mb-3" id="daysContainer" style="display: none;">
-                    <label for="days" class="form-label">No of Days of Visit</label>
-                    <div class="input-group">
-                        <button type="button" class="btn btn-outline-secondary" onclick="decrementDays()">-</button>
-                        <input type="number" class="form-control" id="days" name="days" min="1" value="<?php echo htmlspecialchars($days); ?>" required>
-                        <button type="button" class="btn btn-outline-secondary" onclick="incrementDays()">+</button>
-                    </div>
-                    <div id="warningMessage" class="alert alert-warning mt-2" style="display: none;">
-                        Visitor's Expense will be included as per the number of staying days.
-                    </div>
+            <div class="mb-3" id="daysContainer" style="display: none;">
+                <label for="days" class="form-label">No of Days of Visit</label>
+                <div class="input-group">
+                    <button type="button" class ="btn btn-outline-secondary" onclick="decrementDays()">-</button>
+                    <input type="number" class="form-control" id="days" name="days" min="1" value="<?php echo htmlspecialchars($days); ?>" required>
+                    <button type="button" class="btn btn-outline-secondary" onclick="incrementDays()">+</button>
                 </div>
+                <div id="warningMessage" class="alert alert-warning mt-2" style="display: none;">
+                    Visitor's Expense will be included as per the number of staying days.
+                </div>
+            </div>
             <div class="mb-3">
                 <input class="form-control button" type="submit" name="submit" value="Submit">
                 <input class="form-control button" type="button" name="cancel" value="Cancel" onclick="window.location.href = window.location.pathname;">
@@ -215,6 +242,7 @@ $stmt->close();
                     <th>Relationship</th>
                     <th>Reason</th>
                     <th>No of Days</th>
+                    <th>Fee</th> <!-- New column for Fee -->
                     <th>Status</th>
                 </tr>
             </thead>
@@ -226,12 +254,13 @@ $stmt->close();
                             <td><?php echo htmlspecialchars($form['relation']); ?></td>
                             <td><?php echo htmlspecialchars($form['reason']); ?></td>
                             <td><?php echo $form['reason'] === 'stay' ? htmlspecialchars($form['days']) : ''; ?></td>
+                            <td><?php echo htmlspecialchars($form['status'] === 'accepted' ? $form['fee'] : 0); ?></td> 
                             <td><?php echo htmlspecialchars($form['status']); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="5" class="text-center">No visitor forms submitted yet.</td>
+                        <td colspan="6" class="text-center">No visitor forms submitted yet.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -256,35 +285,35 @@ $stmt->close();
         }, 3000);
 
         function toggleDaysInput() {
-        const reason = document.getElementById('reason').value;
-        const daysContainer = document.getElementById('daysContainer');
-        const warningMessage = document.getElementById('warningMessage');
-        
-        if (reason === 'stay') {
-            daysContainer.style.display = 'block';
-            warningMessage.style.display = 'block'; // Show warning message
+            const reason = document.getElementById('reason').value;
+            const daysContainer = document.getElementById('daysContainer');
+            const warningMessage = document.getElementById('warningMessage');
             
-            // Hide the warning message after 5 seconds
-            setTimeout(() => {
-                warningMessage.style.display = 'none';
-            }, 5000);
-        } else {
-            daysContainer.style.display = 'none';
-            warningMessage.style.display = 'none'; // Hide warning message
+            if (reason === 'stay') {
+                daysContainer.style.display = 'block';
+                warningMessage.style.display = 'block'; // Show warning message
+                
+                // Hide the warning message after 5 seconds
+                setTimeout(() => {
+                    warningMessage.style.display = 'none';
+                }, 5000);
+            } else {
+                daysContainer.style.display = 'none';
+                warningMessage.style.display = 'none'; // Hide warning message
+            }
         }
-    }
 
-    function incrementDays() {
-        const daysInput = document.getElementById('days');
-        daysInput.value = parseInt(daysInput.value) + 1;
-    }
-
-    function decrementDays() {
-        const daysInput = document.getElementById('days');
-        if (daysInput.value > 1) {
-            daysInput.value = parseInt(daysInput.value) - 1;
+        function incrementDays() {
+            const daysInput = document.getElementById('days');
+            daysInput.value = parseInt(daysInput.value) + 1;
         }
-    }
+
+        function decrementDays() {
+            const daysInput = document.getElementById('days');
+            if (daysInput.value > 1) {
+                daysInput.value = parseInt(daysInput.value) - 1;
+            }
+        }
     </script>
 </body>
 </html>
