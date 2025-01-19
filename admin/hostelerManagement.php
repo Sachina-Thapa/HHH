@@ -81,8 +81,10 @@ if ($conn->connect_error) {
 
 <div class="container-fluid m-0">
     <div class="row">
-        <!-- Sidebar -->
-        <?php require_once('inc/sideMenu.php'); ?>
+          <!-- Sidebar -->
+          <div class="sidebar">
+            <?php require('inc/sideMenu.php'); ?>
+        </div>
 
         <!-- Main Content -->
         <div class="col-md-10 content-wrapper py-4 px-4">
