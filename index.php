@@ -20,6 +20,13 @@ $facilities_result = mysqli_query($conn, $facilities_query);
 $rooms_query = "SELECT * FROM rooms ORDER BY id";
 $rooms_result = mysqli_query($conn, $rooms_query);
 
+// Fetch current About Us data
+$about_query = "SELECT description, image_path FROM about_us LIMIT 1";
+$about_result = mysqli_query($conn, $about_query);
+$current_about = $about_result && mysqli_num_rows($about_result) > 0 
+    ? mysqli_fetch_assoc($about_result) 
+    : null;
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if(isset($_POST['form_type'])) {
@@ -181,6 +188,29 @@ $conn->close();
       top: 0;
       left: 0;
     }
+    .image-container {
+    width: 300px;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 5%; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+  }
+
+  .image-preview {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .text-secondary {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+
   </style>
 </head>
 <body class="min-vh-100 bg-light">
@@ -197,8 +227,8 @@ $conn->close();
     </div>
     <div class="position-absolute top-0 bottom-0 start-0 end-0 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center">
       <div class="text-center text-white">
-        <h1 class="display-3 fw-bold mb-4">Welcome to Her Home Hostel</h1>
-        <p class="fs-4 mb-4">Experience comfort and community in our modern hostels</p>
+      <h1 class="display-3 fw-bold mb-4">Welcome to <?php echo isset($site_settings['site_title']) ? htmlspecialchars($site_settings['site_title']) : 'Her Home Hostel'; ?></h1>
+      <p class="fs-4 mb-4">Experience comfort and community in our modern hostels</p>
         <button class="btn btn-primary btn-lg">Book Now</button>
       </div>
     </div>
@@ -214,27 +244,33 @@ $conn->close();
     </button>
   </section>
 
-  <!-- About Us -->
-  <section id="about" class="py-5 bg-white">
-    <div class="container">
-      <h2 class="text-center fs-2 fw-bold mb-4">About Us</h2>
-      <div class="row align-items-center">
-        <div class="col-md-6 mb-4">
-          <img src="images/aboutus.png?height=200&width=200" alt="About Us" class="rounded shadow-lg img-fluid">
+ <!-- About Us -->
+<section id="about" class="py-5 bg-white">
+  <div class="container">
+    <h2 class="text-center fs-2 fw-bold mb-4">About Us</h2>
+    <div class="row align-items-center">
+      <div class="col-12 mb-4">
+        <div class="content-area">
+          <div class="row">
+            <div class="col-md-4 text-center">
+              <div class="image-container mb-4">
+                <img src="admin/<?php echo htmlspecialchars($current_about['image_path']); ?>" alt="About Us Image" class="image-preview">
+              </div>
+            </div>
+            <div class="col-md-8">
+              <p class="text-secondary fw-medium">
+                <?php echo $current_about ? htmlspecialchars($current_about['description']) : 'No description available'; ?>
+              </p>
+            </div>
+          </div>
         </div>
-        <div class="col-md-6">
-          <p class="text-muted mb-4">
-            Her Home Hostel is more than just a place to stay; it's a community where travelers from all over the world come
-            together. Our modern facilities and welcoming atmosphere ensure that your stay is comfortable, memorable, and full of new experiences.
-          </p>
-          <p class="text-muted mb-4">
-           We are committed to providing a convenient, secure, and efficient way for students, travelers, and working professionals to find and book hostel room according to their choice. 
-          Our mission is to simplify the process of finding and booking hostels, ensuring a seamless experience for users seeking affordable and comfortable accommodation.
-          <button class="btn btn-primary">Learn More</button>
+        <div class="text-center mt-3">
+          <button class="btn btn-primary px-4 py-2">Learn More</button>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
   <!-- Facilities Section -->
   <section id="Facilities" class="py-5 bg-light">
@@ -327,14 +363,24 @@ $conn->close();
               <svg class="me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m4-4v8"></path>
               </svg>
-              <p class="mb-0">info@herhomehostel.com</p>
+              <p class="mb-0">hhhherhomehostel@gmail.com</p>
             </div>
           </div>
         </div>
         <div class="col-md-6">
-        <img src="images/map.png?height=300&width=400" alt="Map" class="rounded img-fluid shadow-sm">
+    <iframe 
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3000!2d<?php echo $site_settings['map_longitude']; ?>!3d<?php echo $site_settings['map_latitude']; ?>!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z<?php echo urlencode($site_settings['map_address']); ?>!5e0!3m2!1sen!2snp!4v1696825700296!5m2!1sen!2snp"
+        width="60%" 
+        height="200" 
+        class="rounded shadow-sm"
+        style="border:0;" 
+        allowfullscreen="" 
+        loading="lazy" 
+        referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
+</div>
 
-        </div>
+
       </div>
     </div>
   </section>
@@ -344,7 +390,8 @@ $conn->close();
     <div class="container">
       <div class="d-flex justify-content-between align-items-center">
         <div>
-          <h3 class="fs-5 fw-bold"> Her Home Hostel</h3>
+          <h3 class="fs-5 fw-bold">     <?php echo isset($site_settings['site_title']) ? htmlspecialchars($site_settings['site_title']) : 'Her Home Hostel'; ?>
+          </h3>
           <p class="mb-0">Your home away from home</p>
         </div>
         <div class="d-flex gap-2">
@@ -449,4 +496,3 @@ function handleSubmit(event) {
 </body>
 </html>
 
- 

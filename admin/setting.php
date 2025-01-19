@@ -71,6 +71,134 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['site_logo'])) {
     exit();
 }
 
+// Handle Map Settings Update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['map_latitude'])) {
+    $latitude = mysqli_real_escape_string($conn, $_POST['map_latitude']);
+    $longitude = mysqli_real_escape_string($conn, $_POST['map_longitude']);
+    $address = mysqli_real_escape_string($conn, $_POST['map_address']);
+    
+    $query = "UPDATE site_settings SET 
+              map_latitude = '$latitude',
+              map_longitude = '$longitude',
+              map_address = '$address'";
+              
+    if (mysqli_query($conn, $query)) {
+        $_SESSION['success_message'] = "Map location updated successfully!";
+    } else {
+        $_SESSION['error_message'] = "Error updating map location";
+    }
+    
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+
+// Handle Site Title Update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['site_title'])) {
+    $site_title = mysqli_real_escape_string($conn, $_POST['site_title']);
+    
+    // Check if settings exist
+    $check_existing = "SELECT id FROM site_settings LIMIT 1";
+    $existing_result = mysqli_query($conn, $check_existing);
+    
+    if (mysqli_num_rows($existing_result) > 0) {
+        $query = "UPDATE site_settings SET site_title = '$site_title'";
+    } else {
+        $query = "INSERT INTO site_settings (site_title) VALUES ('$site_title')";
+    }
+    
+    if (mysqli_query($conn, $query)) {
+        $_SESSION['success_message'] = "Site title updated successfully!";
+    } else {
+        $_SESSION['error_message'] = "Error updating site title: " . mysqli_error($conn);
+    }
+    
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+// Fetch current site settings
+$settings_query = "SELECT * FROM site_settings LIMIT 1";
+$settings_result = mysqli_query($conn, $settings_query);
+$site_settings = mysqli_fetch_assoc($settings_result);
+
+// Handle About Us upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['about_image'])) {
+    $target_dir = "uploads/about/";
+    if (!file_exists($target_dir)) {
+        mkdir($target_dir, 0777, true);
+    }
+
+    $file_name = uniqid() . '_' . basename($_FILES['about_image']['name']);
+    $target_file = $target_dir . $file_name;
+    $uploadOk = 1;
+    $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+
+    // Check if image file is actual image or fake image
+    $check = getimagesize($_FILES['about_image']['tmp_name']);
+    if($check !== false) {
+        $uploadOk = 1;
+    } else {
+        $_SESSION['error'] = "File is not an image.";
+        $uploadOk = 0;
+    }
+
+    // Check file size (limit to 5MB)
+    if ($_FILES['about_image']['size'] > 5000000) {
+        $_SESSION['error'] = "Sorry, your file is too large.";
+        $uploadOk = 0;
+    }
+
+    // Allow certain file formats
+    $allowed_formats = ["jpg", "jpeg", "png", "gif", "webp"];
+    if(!in_array($imageFileType, $allowed_formats)) {
+        $_SESSION['error'] = "Sorry, only JPG, JPEG, PNG, GIF & WebP files are allowed.";
+        $uploadOk = 0;
+    }
+
+    // Upload and save about image
+    if ($uploadOk == 1) {
+        if (move_uploaded_file($_FILES['about_image']['tmp_name'], $target_file)) {
+            // Prepare SQL to insert about us data
+            $about_image = mysqli_real_escape_string($conn, $target_file);
+            $about_description = mysqli_real_escape_string($conn, $_POST['about_description']);
+            
+            // Check if about us data already exists
+            $check_existing = "SELECT id FROM about_us LIMIT 1";
+            $existing_result = mysqli_query($conn, $check_existing);
+
+            if (mysqli_num_rows($existing_result) > 0) {
+                $update_query = "UPDATE about_us SET description = '$about_description', image_path = '$about_image'";
+                $result = mysqli_query($conn, $update_query);
+            } else {
+                $insert_query = "INSERT INTO about_us (description, image_path) VALUES ('$about_description', '$about_image')";
+                $result = mysqli_query($conn, $insert_query);
+            }
+
+            if ($result) {
+                $_SESSION['success_message'] = "About Us updated successfully!";
+            } else {
+                $_SESSION['error_message'] = "Database error: " . mysqli_error($conn);
+            }
+        } else {
+            $_SESSION['error_message'] = "Sorry, there was an error uploading your file.";
+        }
+    } else {
+        $_SESSION['error_message'] = $error_message;
+    }
+
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+// Fetch current About Us data
+$about_query = "SELECT description, image_path FROM about_us LIMIT 1";
+$about_result = mysqli_query($conn, $about_query);
+$current_about = $about_result && mysqli_num_rows($about_result) > 0 
+    ? mysqli_fetch_assoc($about_result) 
+    : null;
+
+
 // Fetch current logo
 $logo_query = "SELECT logo_path FROM site_settings LIMIT 1";
 $logo_result = mysqli_query($conn, $logo_query);
@@ -408,6 +536,29 @@ $rooms_result = mysqli_query($conn, $query);
             <div class="container-fluid">
 
                 <div class="row">
+
+                <!-- Site Title Management Section -->
+<div class="col-md-12 mb-4">
+    <div class="section-card">
+        <div class="card-header">
+            <h5 class="mb-0">Site Title Management</h5>
+        </div>
+        <div class="content-area">
+            <form method="POST" action="" id="siteTitleForm">
+                <div class="input-group mb-3">
+                    <input type="text" name="site_title" class="form-control" 
+                           value="<?php echo isset($site_settings['site_title']) ? htmlspecialchars($site_settings['site_title']) : ''; ?>" 
+                           placeholder="Enter Site Title" required>
+                    <button class="modern-btn btn-primary" type="submit">
+                        <i class="bi bi-check-lg"></i>
+                        Update Title
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
                     <!-- Logo Management Section -->
                     <div class="col-md-4 mb-4">
                         <div class="section-card">
@@ -547,6 +698,72 @@ $rooms_result = mysqli_query($conn, $query);
                             </div>
                         </div>
                     </div>
+                        <!-- About Us Management Section -->
+<div class="col-12">
+    <div class="section-card">
+        <div class="card-header">
+            <h5 class="mb-0">About Us Management</h5>
+            <button class="modern-btn btn-light" data-bs-toggle="modal" data-bs-target="#edit-about-us">
+                <i class="bi bi-pencil"></i>
+                Edit About Us
+            </button>
+        </div>
+        <div class="content-area">
+            <div class="row">
+                <div class="col-md-4">
+                    <?php if ($current_about && $current_about['image_path']): ?>
+                    <div class="logo-preview-container mb-4">
+                        <img src="<?php echo htmlspecialchars($current_about['image_path']); ?>" alt="About Us Image" class="logo-preview">
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <div class="col-md-8">
+                    <p class="text-secondary">
+                        <?php echo $current_about ? htmlspecialchars($current_about['description']) : 'No description available'; ?>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Map Location Settings -->
+<div class="col-12 mb-4">
+    <div class="section-card">
+        <div class="card-header">
+            <h5 class="mb-0">Map Location Settings</h5>
+        </div>
+        <div class="content-area">
+            <form method="POST" action="" id="mapSettingsForm">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Latitude</label>
+                            <input type="text" name="map_latitude" class="form-control" 
+                                value="<?php echo isset($site_settings['map_latitude']) ? $site_settings['map_latitude'] : '27.7090'; ?>" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Longitude</label>
+                            <input type="text" name="map_longitude" class="form-control" 
+                                value="<?php echo isset($site_settings['map_longitude']) ? $site_settings['map_longitude'] : '85.2911'; ?>" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <input type="text" name="map_address" class="form-control" 
+                                value="<?php echo isset($site_settings['map_address']) ? htmlspecialchars($site_settings['map_address']) : 'Kathmandu 44600'; ?>" required>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="modern-btn btn-primary">Update Location</button>
+            </form>
+        </div>
+    </div>
+</div>
+
                 </div>
             </div>
         </div>
@@ -676,11 +893,66 @@ $rooms_result = mysqli_query($conn, $query);
         </div>
     </div>
 
+    <!-- Edit About Us Modal -->
+<div class="modal fade" id="edit-about-us" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="POST" action="" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit About Us</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="about_description" class="form-control" rows="5" required><?php 
+                            echo $current_about ? htmlspecialchars($current_about['description']) : ''; 
+                        ?></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Image</label>
+                        <input type="file" name="about_image" id="aboutImage"
+                            accept="image/png,image/jpeg,image/gif,image/webp" class="form-control">
+
+                        <div id="aboutImagePreviewContainer" class="mt-3 d-none">
+                            <img id="aboutImagePreview" src="" alt="About Image Preview" class="logo-preview">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="modern-btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="modern-btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
     <!-- JavaScript Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+
+        // About Image preview functionality
+document.getElementById('aboutImage').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const previewContainer = document.getElementById('aboutImagePreviewContainer');
+    const previewImage = document.getElementById('aboutImagePreview');
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImage.src = e.target.result;
+            previewContainer.classList.remove('d-none');
+        }
+        reader.readAsDataURL(file);
+    } else {
+        previewContainer.classList.add('d-none');
+    }
+});
+
     // Logo preview functionality
     document.getElementById('siteLogo').addEventListener('change', function(event) {
         const file = event.target.files[0];
