@@ -54,6 +54,13 @@
             margin: 5px 0 0;
             color: #6c757d;
         }
+
+        .message {
+            display: none;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #28a745;
+        }
     </style>
 </head>
 <body>
@@ -63,20 +70,9 @@
     <?php 
     require('inc/db.php');
 
-    // Handle accept or decline action
-    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
-        $id = $_POST['id'];
-        $action = $_POST['action'];
-
-        if ($action == 'accept') {
-            $stmt = $mysqli->prepare("UPDATE hservice SET status = 'Accepted' WHERE id = ?");
-        } else if ($action == 'decline') {
-            $stmt = $mysqli->prepare("UPDATE hservice SET status = 'Declined' WHERE id = ?");
-        }
-
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-    }
+    // Enable error reporting for debugging
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
 
     // Query for Total Bookings
     $stmt = $mysqli->query("SELECT COUNT(*) FROM booking");
@@ -97,6 +93,13 @@
     // Query for Visitor Forms
     $stmt = $mysqli->query("SELECT COUNT(*) FROM visitorform");
     $visitorform = $stmt->fetch_row()[0];
+
+    // Check for messages
+    $message = '';
+    if (isset($_GET['action']) && isset($_GET['status'])) {
+        $action = $_GET['action'];
+        $message = "You have $action the service request.";
+    }
     ?>
         
     <!-- Display the stats in a row -->
@@ -133,6 +136,11 @@
         </div>
     </div>
 
+    <!-- Display message if exists -->
+    <?php if ($message): ?>
+        <div class="alert alert-success"><?php echo $message; ?></div>
+    <?php endif; ?>
+
     <!-- Hosteler Service Requests Table -->
     <h3 class="mt-4">Hosteler Service Requests</h3>
     <div class="table-responsive">
@@ -150,10 +158,11 @@
             </thead>
             <tbody>
             <?php
-            // Query to fetch data from hservice table and join with hostelers table
+            // Query to fetch only pending services
             $stmt = $mysqli->query("SELECT hservice.id, hservice.seid, hservice.name, hservice.price, hservice.hid, hservice.status, hostelers.name AS hosteler_name 
                                      FROM hservice 
-                                     JOIN hostelers ON hservice.hid = hostelers.id");
+                                     JOIN hostelers ON hservice.hid = hostelers.id
+                                     WHERE hservice.status = 'Pending'");
 
             if (!$stmt) {
                 die("Query failed: " . $mysqli->error);
@@ -161,7 +170,7 @@
 
             $count = 1;
             while ($row = $stmt->fetch_assoc()) {
-                echo "<tr>
+                echo "<tr id='row-{$row['id']}'>
                         <td>{$count}</td>
                         <td>{$row['hosteler_name']}</td>
                         <td>{$row['seid']}</td>
@@ -169,11 +178,12 @@
                         <td>{$row['price']}</td>
                         <td>{$row['status']}</td>
                         <td>
-                            <form method='post' action=''>
+                            <form method='post' action='ajax_handler.php' class='action-form'>
                                 <input type='hidden' name='id' value='{$row['id']}'>
-                                <button type='submit' name='action' value='accept' class='btn btn-success btn-sm'>Accept</button>
-                                <button type='submit' name='action' value='decline' class='btn btn-danger btn-sm'>Decline</button>
+                                <button type='button' name='action' value='accept' class='btn btn-success btn-sm accept-btn'>Accept</button>
+                                <button type='button' name='action' value='decline' class='btn btn-danger btn-sm decline-btn'>Decline</button>
                             </form>
+                            <div class='message' id='message-{$row['id']}'></div>
                         </td>
                       </tr>";
                 $count++;
@@ -185,5 +195,68 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.querySelectorAll('.action-form').forEach(form => {
+        // Extract the buttons
+        const acceptButton = form.querySelector('.accept-btn');
+        const declineButton = form.querySelector('.decline-btn');
+        const messageDiv = form.querySelector('.message');
+
+        acceptButton.addEventListener('click', function() {
+            handleFormSubmit(form, 'accept');
+        });
+
+        declineButton.addEventListener('click', function() {
+            handleFormSubmit(form, 'decline');
+        });
+    });
+
+    function handleFormSubmit(form, action) {
+        const formData = new FormData(form);
+        formData.append('action', action); // Append action manually
+        const id = formData.get('id');
+        const row = document.getElementById(`row-${id}`);
+        const messageDiv = form.querySelector('.message');
+
+        // Disable both buttons after one is clicked
+        form.querySelectorAll('button').forEach(button => {
+            button.disabled = true;
+        });
+
+        // Send the form data using fetch
+        fetch('staffdash.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Show the message based on the action
+                if (data.action === 'accept') {
+                    messageDiv.textContent = `You have accepted the service: ${row.cells[3].textContent} for ${row.cells[1].textContent}`;
+                } else if (data.action === 'decline') {
+                    messageDiv.textContent = `You have declined the service: ${row.cells[3].textContent} for ${row.cells[1].textContent}`;
+                }
+                messageDiv.style.display = 'block';
+
+                // Remove the row immediately
+                row.remove();
+
+                // Set a timeout to remove the message after 3 seconds
+                setTimeout(() => {
+                    messageDiv.style.display = 'none'; // Hide the message after 3 seconds
+                }, 3000);
+            } else {
+                console.error(data.message); // Log the error message if any
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
 </body>
 </html>
