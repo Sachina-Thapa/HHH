@@ -1,67 +1,80 @@
 <?php
-    require('inc/db.php');
+session_start(); // Start the session
+require('inc/db.php');
+
+// Handle deletion of a room
+if (isset($_GET['delete'])) {
+    $room_id = $_GET['delete'];
+    $delete_sql = "DELETE FROM room WHERE rid = ?";
+    $delete_stmt = $conn->prepare($delete_sql);
+    
+    if ($delete_stmt === false) {
+        die("Error preparing delete statement: " . $conn->error);
+    }
+
+    $delete_stmt->bind_param("i", $room_id);
+    if ($delete_stmt->execute()) {
+        $_SESSION['success_message'] = "Room deleted successfully.";
+    } else {
+        $_SESSION['error_message'] = "Error deleting room: " . $delete_stmt->error;
+    }
+    $delete_stmt->close();
+
+    // Redirect to the same page
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
 
 // Insert new room
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
-    $stmt = $conn->prepare("INSERT INTO room (rno, rtype, rprice) VALUES (?, ?, ?)");
-    $stmt->bind_param("ssd", $room_number, $room_type, $room_price);
-    
+    // Check if the room number already exists
     $room_number = $_POST['room_number'];
-    $room_type = $_POST['room_type'];
-    $room_price = $_POST['room_price'];
+    $check_sql = "SELECT * FROM room WHERE rno = ?";
+    $check_stmt = $conn->prepare($check_sql);
 
-    if ($stmt->execute()) {
-        header("Location: ".$_SERVER['PHP_SELF']."?success=1");
-        exit();
-    } else {
-        $error_message = "Error: " . $stmt->error;
+    if ($check_stmt === false) {
+        die("Error preparing statement: " . $conn->error);
     }
-    $stmt->close();
+
+    $check_stmt->bind_param("s", $room_number);
+    $check_stmt->execute();
+    $check_result = $check_stmt->get_result();
+
+    if ($check_result->num_rows > 0) {
+        $_SESSION['error_message'] = "The room already exists.";
+    } else {
+        // Insert new room without features
+        $stmt = $conn->prepare("INSERT INTO room (rno, rtype, rprice) VALUES (?, ?, ?)");
+        
+        if ($stmt === false) {
+            die("Error preparing insert statement: " . $conn->error);
+        }
+
+        $room_type = $_POST['room_type'];
+        $room_price = $_POST['room_price'];
+
+        $stmt->bind_param("ssd", $room_number, $room_type, $room_price);
+
+        if ($stmt->execute()) {
+            // Store features in session
+            if (isset($_POST['features'])) {
+                $_SESSION['room_features'][$room_number] = $_POST['features'];
+            }
+            $_SESSION['success_message'] = "New room added successfully.";
+        } else {
+            $_SESSION['error_message'] = "Error: " . $stmt->error;
+        }
+        $stmt->close();
+    }
+    $check_stmt->close();
+
+    // Redirect to the same page
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
 }
 
-
-// Update room
-if (isset($_GET['update'])) {
-    $rid = $_GET['update'];
-    $fetch_sql = "SELECT * FROM room WHERE rid = $rid";
-    $fetch_result = $conn->query($fetch_sql);
-    $room_to_update = $fetch_result->fetch_assoc();
-}
-
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
-    $rid = $_POST['rid'];
-    $room_number = $_POST['rno'];
-    $room_type = $_POST['rtype'];
-    $room_price = $_POST['rprice'];
-
-    $update_sql = "UPDATE room SET rno=?, rtype=?, rprice=? WHERE rid=?";
-    $stmt = $conn->prepare($update_sql);
-    $stmt->bind_param("ssdi", $room_number, $room_type, $room_price, $rid);
-
-    if ($stmt->execute()) {
-        header("Location: ".$_SERVER['PHP_SELF']."?updated=1");
-        exit();
-    } else {
-        echo "Error updating record: " . $stmt->error;
-    }
-    $stmt->close();
-}// Delete room
-if (isset($_GET['delete'])) {
-    $rid = $_GET['delete'];
-    $delete_sql = "DELETE FROM room WHERE rid = $rid";
-    if ($conn->query($delete_sql) === TRUE) {
-        // Reset auto-increment
-        $reset_sql = "ALTER TABLE room AUTO_INCREMENT = 1";
-        $conn->query($reset_sql);
-        header("Location: ".$_SERVER['PHP_SELF']."?deleted=1");
-        exit();
-    } else {
-        $error_message = "Error deleting record: " . $conn->error;
-    }
-}
-
-// Fetch all rooms
-$sql = "SELECT * FROM room";
+// Fetch all rooms in ascending order
+$sql = "SELECT * FROM room ORDER BY rno ASC";
 $result = $conn->query($sql);
 ?>
 
@@ -74,126 +87,40 @@ $result = $conn->query($sql);
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/roommanagement.css"> <!-- Link to external CSS -->
 
-    <!-- Custom CSS -->
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Roboto', sans-serif;
+    <script src="js/roommanagement.js" defer></script> <!-- Link to external JavaScript -->
+    <script>
+        function enableEdit(rid) {
+            // Enable editing for the selected room
+            document.getElementById('rno_' + rid).contentEditable = true;
+            document.getElementById('rtype_' + rid).contentEditable = true;
+            document.getElementById('rprice_' + rid).contentEditable = true;
+
+            // Change the edit link to save link
+            document.getElementById('edit_' + rid).style.display = 'none';
+            document.getElementById('save_' + rid).style.display = 'inline';
         }
 
-        h3, h4 {
-            color: #343a40;
-        }
+        function saveEdit(rid) {
+            // Get the updated values
+            var rno = document.getElementById('rno_' + rid).innerText;
+            var rtype = document.getElementById('rtype_' + rid).innerText;
+            var rprice = document.getElementById('rprice_' + rid).innerText.replace('₹ ', '');
 
-        .content-wrapper {
-            background: #ffffff;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            padding: 20px;
+            // Send the updated values to the server using AJAX
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "update_room.php", true); // Create a new PHP file for updating
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Handle the response if needed
+                    location.reload(); // Reload the page to see the changes
+                }
+            };
+            xhr.send("rid=" + rid + "&rno=" + encodeURIComponent(rno) + "&rtype=" + encodeURIComponent(rtype) + "&rprice=" + encodeURIComponent(rprice));
         }
-
-        form {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        input[type="text"], input[type="number"], select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        input[type="submit"] {
-            background-color: #0d6efd;
-            color: #ffffff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #0a58ca;
-        }
-
-        table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        th {
-            background-color: #343a40;
-            color: #ffffff;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-
-        .action-links a {
-            text-decoration: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            margin-right: 5px;
-            color: #ffffff;
-            font-size: 14px;
-            transition: background-color 0.3s;
-        }
-
-        .update-link {
-            background-color: #198754;
-        }
-
-        .update-link:hover {
-            background-color: #157347;
-        }
-
-        .delete-link {
-            background-color: #dc3545;
-        }
-
-        .delete-link:hover {
-            background-color: #bb2d3b;
-        }
-
-        #message {
-            text-align: center;
-            font-size: 1.2em;
-            margin-bottom: 20px;
-        }
-
-        .container-fluid {
-            padding: 30px;
-        }
-
-        .btn-save {
-            display: none;
-            background-color: #0dcaf0;
-        }
-
-        .btn-save:hover {
-            background-color: #0b97a9;
-        }
-    </style>
+    </script>
 </head>
 <body>
 <div class="container-fluid">
@@ -202,105 +129,90 @@ $result = $conn->query($sql);
         <?php require('inc/sideMenu.php'); ?>
 
         <div class="col-md-10 content-wrapper">
-            <!-- <h3 class="mb-4">Room Management</h3> -->
-
             <h4>Add New Room</h4>
+            <?php
+            // Display session messages
+            if (isset($_SESSION['success_message'])) {
+                echo "<div class='alert alert-success'>" . $_SESSION['success_message'] . "</div>";
+                unset($_SESSION['success_message']); // Clear the message after displaying
+            }
+
+            if (isset($_SESSION['error_message'])) {
+                echo "<div class='alert alert-danger'>" . $_SESSION['error_message'] . "</div>";
+                unset($_SESSION['error_message']); // Clear the message after displaying
+            }
+            ?>
             <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-                <?php if (isset($room_to_update)) echo "<input type='hidden' name='rid' value='" . $room_to_update['rid'] . "'>"; ?>
-                <input type="text" name="room_number" placeholder="Room Number" required value="<?php echo isset($room_to_update) ? $room_to_update['rno'] : ''; ?>">
+                <label for="room_number">Room Number</label>
+                <input type="text" id="room_number" name="room_number" placeholder="Room Number" required value="<?php echo isset($room_to_update) ? $room_to_update['rno'] : ''; ?>" onkeyup="checkRoomNumber()">
+                <div id="room_check_message" style="color: red; font-size: small;"></div>
 
                 <!-- Dropdown for Room Type -->
                 <select name="room_type" required>
                     <option value="" disabled selected>Select Room Type</option>
-                    <option value="Single" <?php if (isset($room_to_update) && $room_to_update['rtype'] == 'Single') echo 'selected'; ?>>Single</option>
-                    <option value="Double" <?php if (isset($room_to_update) && $room_to_update['rtype'] == 'Double') echo 'selected'; ?>>Double</option>
-                    <option value="Triple" <?php if (isset($room_to_update) && $room_to_update['rtype'] == 'Triple') echo 'selected'; ?>>Triple</option>
+                    <option value="Single">Single</option>
+                    <option value="Double">Double</option>
+                    <option value="Triple">Triple</option>
                 </select>
 
                 <input type="number" name="room_price" step="0.01" placeholder="Room Price" required value="<?php echo isset($room_to_update) ? $room_to_update['rprice'] : ''; ?>">
+
+                <!-- Optional Features Checkboxes -->
+                <h5>Optional Features:</h5>
+                <label><input type="checkbox" name="features[]" value="Attached T.V."> Attached T.V.</label><br>
+                <label><input type="checkbox" name="features[]" value="AC"> AC</label><br>
+                <label><input type="checkbox" name="features[]" value="Fan"> Fan</label><br>
+                <label><input type="checkbox" name="features[]" value="Sofa and Study Table"> Sofa and Study Table</label><br>
+                <label><input type="checkbox" name="features[]" value="Locker/Wardrobe"> Locker/Wardrobe</label><br>
+
                 <input type="submit" name="add" value="Add Room">
             </form>
 
-            <div id="message">
-                <?php
-                if (isset($_GET['success']) && $_GET['success'] == 1) {
-                    echo "<p style='color: green;'>New room added successfully</p>";
-                }
-                if (isset($error_message)) {
-                    echo "<p style='color: red;'>$error_message</p>";
-                }
-                if (isset($_GET['deleted']) && $_GET['deleted'] == 1) {
-                    echo "<p style='color: green;'>Room deleted successfully and IDs reset</p>";
-                }
-                if (isset($_GET['updated']) && $_GET['updated'] == 1) {
-                    echo "<p style='color: green;'>Room updated successfully</p>";
-                }
-                ?>
-            </div>
-
             <h4 class="mt-5">Room Details</h4>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Room Number</th>
-                        <th>Room Type</th>
-                        <th>Room Price</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    if ($result->num_rows > 0) {
-                        while($row = $result->fetch_assoc()) {
-                            echo "<tr>";
-                            echo "<td id='rno_" . $row["rid"] . "'>" . $row["rno"] . "</td>";
-                            echo "<td id='rtype_" . $row["rid"] . "'>" . $row["rtype"] . "</td>";
-                            echo "<td id='rprice_" . $row["rid"] . "'>₹ " . number_format($row["rprice"], 2) . "</td>";
-                            echo "<td class='action-links'>
-                                <a href='#' id='edit_" . $row["rid"] . "' class='update-link' onclick='enableEdit(" . $row["rid"] . ")'>Edit</a>
-                                <a href='#' id='save_" . $row["rid"] . "' class='update-link btn-save' onclick='saveEdit(" . $row["rid"] . ")'>Save</a>
-                                <a href='?delete=" . $row["rid"] . "' class='delete-link' onclick='return confirm(\"Are you sure you want to delete this room?\");'>Delete</a>
-                            </td>";
-                            echo "</tr>";
+            <div style="max-height: 300px; overflow-y: auto;"> <!-- Add scrollable area -->
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Room Number</th>
+                            <th>Room Type</th>
+                            <th>Room Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        if ($result->num_rows > 0) {
+                            while($row = $result->fetch_assoc()) {
+                                echo "<tr>";
+                                echo "<td id='rno_" . $row["rid"] . "'>" . $row["rno"] . "</td>";
+                                echo "<td id='rtype_" . $row["rid"] . "'>" . $row["rtype"] . "</td>";
+                                echo "<td id='rprice_" . $row["rid"] . "'>₹ " . number_format($row["rprice"], 2) . "</td>";
+                                echo "<td class='action-links'>
+                                    <a href='#' id='edit_" . $row["rid"] . "' class='update-link' onclick='enableEdit(" . $row["rid"] . "); return false;'>Edit</a>
+                                    <a href='#' id='save_" . $row["rid"] . "' class='update-link btn-save' onclick='saveEdit(" . $row["rid"] . "); return false;' style='display:none;'>Save</a>
+                                    <a href='?delete=" . $row["rid"] . "' class='delete-link' onclick='return confirm(\"Are you sure you want to delete this room?\");'>Delete</a>
+                                </td>";
+                                echo "</tr>";
+                            }
+                        } else {
+                            echo "<tr><td colspan='4'>No rooms found</td></tr>";
                         }
-                    } else {
-                        echo "<tr><td colspan='4'>No rooms found</td></tr>";
-                    }
-                    ?>
-                </tbody>
-            </table>
+                        ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-function enableEdit(rid) {
-    document.getElementById('rno_' + rid).contentEditable = true;
-    document.getElementById('rtype_' + rid).contentEditable = true;
-    document.getElementById('rprice_' + rid).contentEditable = true;
-    document.getElementById('edit_' + rid).style.display = 'none';
-    document.getElementById('save_' + rid).style.display = 'inline';
-}
-
-function saveEdit(rid) {
-    var rno = document.getElementById('rno_' + rid).innerText;
-    var rtype = document.getElementById('rtype_' + rid).innerText;
-    var rprice = document.getElementById('rprice_' + rid).innerText.replace('₹ ', '').replace(',', '');
-
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '<?php echo $_SERVER["PHP_SELF"]; ?>', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onload = function() {
-        if (this.status == 200) {
-            document.getElementById('rno_' + rid).contentEditable = false;
-            document.getElementById('rtype_' + rid).contentEditable = false;
-            document.getElementById('rprice_' + rid).contentEditable = false;
-            document.getElementById('edit_' + rid).style.display = 'inline';
-            document.getElementById('save_' + rid).style.display = 'none';
-        }
-    };
-    xhr.send('update=1&rid=' + rid + '&rno=' + encodeURIComponent(rno) + '&rtype=' + encodeURIComponent(rtype) + '&rprice=' + encodeURIComponent(rprice));
-}
+    // Auto-dismiss messages after 3 seconds
+    setTimeout(function() {
+        var alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            alert.style.display = 'none';
+        });
+    }, 3000);
 </script>
 
 </body>

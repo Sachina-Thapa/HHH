@@ -38,7 +38,7 @@ if ($result->num_rows > 0) {
 }
 
 // Fetch booking details for the logged-in hosteler
-$stmt = $conn->prepare("SELECT check_in, check_out, rid, bstatus FROM booking WHERE id = ? AND bstatus = 'confirmed'");
+$stmt = $conn->prepare("SELECT check_in, check_out, rno, bstatus FROM booking WHERE id = ? AND bstatus = 'confirmed'");
 if ($stmt === false) {
     die('Query preparation failed: ' . $conn->error);
 }
@@ -52,15 +52,15 @@ if ($result->num_rows === 0) {
     $bookingDetails = null; // No booking found
 } else {
     $bookingDetails = $result->fetch_assoc();
-    $room_id = $bookingDetails['rid'];
+    $room_no = $bookingDetails['rno'];
     
     // Fetch room price
-    $stmt = $conn->prepare("SELECT rprice FROM room WHERE rid = ?");
+    $stmt = $conn->prepare("SELECT rprice FROM room WHERE rno = ?");
     if ($stmt === false) {
         die('Query preparation failed: ' . $conn->error);
     }
     
-    $stmt->bind_param("i", $room_id);
+    $stmt->bind_param("i", $room_no);
     $stmt->execute();
     $roomResult = $stmt->get_result();
     
@@ -190,7 +190,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['upload_voucher'])) {
                         <p>Check-in Date: <?php echo $bookingDetails['check_in']; ?></p>
                         <p>Check-out Date: <?php echo $bookingDetails['check_out']; ?></p>
                         <p>Total Staying Days: <?php echo $days; ?> days</p> <!-- Display staying days -->
-                        <p>Room ID: <?php echo $bookingDetails['rid']; ?></p>
+                        <p>Room ID: <?php echo $bookingDetails['rno']; ?></p>
                         <p>Room Price (30 days): $<?php echo number_format($roomPrice, 2); ?></p>
                         <p>Total Price for Stay: $<?php echo number_format($totalPrice, 2); ?></p>
                         <p>Total Visitor Fees: $<?php echo number_format($totalVisitorFee, 2); ?></p> <!-- Display visitor fees -->

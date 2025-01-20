@@ -9,6 +9,9 @@ if (isset($_SESSION['username'])) {
 } else {
     $username = "Session not set"; // Default message if session is not set
 }
+
+// Fetch room features from session
+$roomFeatures = isset($_SESSION['room_features']) ? $_SESSION['room_features'] : [];
 ?> 
 
 <!DOCTYPE html>
@@ -20,17 +23,14 @@ if (isset($_SESSION['username'])) {
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-    .main-content {
+    <style>
+        .main-content {
             margin-left: 210px; /* Adjust to the sidebar width */
             padding: 20px;
             flex-grow: 1;
             background-color: #f1f1f1;
         }
-    .room-card {
-        margin-bottom: 20px;
-    }
-</style>
+    </style>
 </head>
 <body>
 <div class="main-content">
@@ -64,44 +64,55 @@ if (isset($_SESSION['username'])) {
 
             <!-- Available Rooms Section -->
             <h4 class="mt-4">Available Rooms</h4>
-            <div class="row">
-                <?php
-                // Query to get available rooms
-                $roomQuery = "
-                    SELECT r.rno, r.rtype, r.rprice 
-                    FROM room r 
-                    WHERE r.rno NOT IN (SELECT b.rno FROM booking b)
-                ";
-                $roomResult = mysqli_query($conn, $roomQuery);
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Room Number</th>
+                            <th>Room Type</th>
+                            <th>Room Price</th>
+                            <th>Features</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        // Query to get available rooms
+                        $roomQuery = "
+                            SELECT r.rno, r.rtype, r.rprice 
+                            FROM room r 
+                            WHERE r.rno NOT IN (SELECT b.rno FROM booking b)
+                        ";
+                        $roomResult = mysqli_query($conn, $roomQuery);
 
-                // Check for query errors
-                if (!$roomResult) {
-                    echo "Error: " . mysqli_error($conn);
-                } else {
-                    if (mysqli_num_rows($roomResult) > 0) {
-                        while ($room = mysqli_fetch_assoc($roomResult)) {
-                            echo '<div class="col-md-4 room-card">';
-                            echo '<div class="card">';
-                            echo '<div class="card-body">';
-                            echo '<h5 class="card-title">Room No: ' . htmlspecialchars($room['rno']) . '</h5>';
-                            echo '<p class="card-text">Type: ' . htmlspecialchars($room['rtype']) . '</p>';
-                            echo '<p class="card-text">Price: ' . htmlspecialchars($room['rprice']) . '</p>';
-                            echo '<a href="#" class="btn btn-primary">Book Now</a>'; // Add booking link or button
-                            echo '</div>';
-                            echo '</div>';
-                            echo '</div>';
+                        // Check for query errors
+                        if (!$roomResult) {
+                            echo "<tr><td colspan='4'>Error: " . mysqli_error($conn) . "</td></tr>";
+                        } else {
+                            if (mysqli_num_rows($roomResult) > 0) {
+                                while ($room = mysqli_fetch_assoc($roomResult)) {
+                                    $roomNumber = $room['rno'];
+                                    $roomType = $room['rtype'];
+                                    $roomPrice = number_format($room['rprice'], 2);
+                                    $features = isset($roomFeatures[$roomNumber]) ? implode(", ", $roomFeatures[$roomNumber]) : "No features added";
+
+                                    echo "<tr>
+                                            <td>{$roomNumber}</td>
+                                            <td>{$roomType}</td>
+                                            <td>₹ {$roomPrice}</td>
+                                            <td>{$features}</td>
+                                          </tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='4'>No available rooms</td></tr>";
+                            }
                         }
-                    } else {
-                        echo '<div class="alert alert-warning">No available rooms at the moment.</div>';
-                    }
-                }
-                ?>
+                        ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

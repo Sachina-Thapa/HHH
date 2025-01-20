@@ -1,0 +1,116 @@
+body {
+    background-color: #f8f9fa;
+    font-family: 'Roboto', sans-serif;
+}
+
+h3, h4 {
+    color: #343a40;
+}
+
+.content-wrapper {
+    background: #ffffff;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+form {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+input[type="text"], input[type="number"], select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+input[type="submit"] {
+    background-color: #0d6efd;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+input[type="submit"]:hover {
+    background-color: #0a58ca;
+}
+
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+th {
+    background-color: #343a40;
+    color: #ffffff;
+}
+
+tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.action-links a {
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    margin-right: 5px;
+    color: #ffffff;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.update-link {
+    background-color: #198754;
+}
+
+.update-link:hover {
+    background-color: #157347;
+}
+
+.delete-link {
+    background-color: #dc3545;
+}
+
+.delete-link:hover {
+    background-color: #bb2d3b;
+}
+
+#message {
+    text-align: center;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+.container-fluid {
+    padding: 30px;
+}
+
+.btn-save {
+    display: none;
+    background-color: #0dcaf0;
+}
+
+.btn-save:hover {
+    background-color: #0b97a9;
+}
