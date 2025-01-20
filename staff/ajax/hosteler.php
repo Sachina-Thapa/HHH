@@ -28,7 +28,7 @@ if (isset($_POST['get_hosteler'])) {
         }
         $date = date("d-m-Y", strtotime($row['created_at']));
         $data .= "
-        <tr>
+        <tr data-id='{$row['id']}'>
             <td>$i</td>
             <td>
                 <img src='{$row['picture_path']}' width='55px'>
@@ -42,6 +42,7 @@ if (isset($_POST['get_hosteler'])) {
             <td>$status</td>
             <td>$date</td>
             <td><button onclick='remove_hosteler({$row['id']})' class='btn btn-danger btn-sm shadow-none'>Delete</button></td>
+            <td><button onclick='view_hosteler({$row['id']})' class='btn btn-danger btn-sm shadow-none'>View</button></td>
         </tr>
         ";
         $i++;
@@ -114,10 +115,47 @@ if (isset($_POST['search_hosteler'])) {
             <td>$status</td>
             <td>$date</td>
             <td><button onclick='remove_hosteler({$row['id']})' class='btn btn-danger btn-sm shadow-none'>Delete</button></td>
-        </tr>
+            <td><button onclick='view_hosteler({$row['id']})' class='btn btn-danger btn-sm shadow-none'>View</button></td>
+
+            </tr>
         ";
         $i++;
     }
     echo $data;
 }
+
+// Fetch hosteler details by ID
+// if (isset($_POST['get_hosteler_details'])) {
+//     $frm_data = filteration($_POST);
+//     $stmt = $mysqli->prepare("SELECT * FROM hostelers WHERE id = ?");
+//     $stmt->bind_param('i', $frm_data['get_hosteler_details']);
+//     $stmt->execute();
+//     $res = $stmt->get_result();
+
+//     if ($res->num_rows > 0) {
+//         $hosteler = $res->fetch_assoc();
+//         echo json_encode($hosteler);
+//     } else {
+//         echo json_encode(null);
+//     }
+// }
+
+// Function to fetch hosteler details for the modal
+if (isset($_POST['view_hosteler']) && isset($_POST['id'])) {
+    $id = $_POST['id'];
+
+    $stmt = $mysqli->prepare("SELECT * FROM hostelers WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $data = $result->fetch_assoc();
+        echo json_encode($data);
+    } else {
+        echo json_encode(null);
+    }
+    exit;
+}
+
 ?>
