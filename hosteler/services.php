@@ -26,7 +26,7 @@ if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $hid = $row['id']; // Get the hosteler ID
 } else {
-    $_SESSION['error_message'] = "User not found.";
+    $_SESSION['error_message'] = "User  not found.";
     header("Location: http://localhost/hhh/index.php");
     exit();
 }
@@ -77,6 +77,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $stmt->close();
 }
 
+// Handle status change to accepted
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accept_service'])) {
+    $service_id = $_POST['service_id'] ?? null;
+
+    if ($service_id) {
+        // Update the status to accepted
+        $update_stmt = $conn->prepare("UPDATE hservice SET status = 'accepted' WHERE seid = ? AND hid = ?");
+        $update_stmt->bind_param("ii", $service_id, $hid);
+        if ($update_stmt->execute()) {
+            $success_message = "Service accepted.";
+        } else {
+            $error_message = "Error updating service status: " . $update_stmt->error;
+        }
+        $update_stmt->close();
+    } else {
+        $error_message = "Invalid service ID.";
+    }
+}
+
 // Fetch services from the database for selection
 $services = [];
 $stmt = $conn->prepare("SELECT seid, name, price FROM services");
@@ -105,6 +124,15 @@ if ($result->num_rows > 0) {
     }
 }
 $stmt->close();
+
+// Filter out accepted services for display
+$pending_services = array_filter($requested_services, function($service) {
+    return $service['status'] === 'pending';
+});
+
+$accepted_services = array_filter($requested_services, function($service) {
+    return $service['status'] === 'accepted';
+});
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -114,7 +142,7 @@ $stmt->close();
     <title>Service Submission</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-                body {
+        body {
             margin: 0;
             background-color: #f8f9fa;
             padding: 20px; /* Optional for spacing */
@@ -164,8 +192,8 @@ $stmt->close();
     </form>
 
     <!-- Requested services table -->
-    <h3 class="mt-4">Your Requested Services</h3>
-    <?php if (!empty($requested_services)): ?>
+    <h3 class="mt-4">Your Pending Services</h3>
+    <?php if (!empty($pending_services)): ?>
         <table class="table table-striped">
             <thead>
             <tr>
@@ -176,7 +204,7 @@ $stmt->close();
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($requested_services as $service): ?>
+            <?php foreach ($pending_services as $service): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($service['seid']); ?></td>
                     <td><?php echo htmlspecialchars($service['name']); ?></td>
@@ -187,7 +215,33 @@ $stmt->close();
             </tbody>
         </table>
     <?php else: ?>
-        <p>No services requested yet.</p>
+        <p>No pending services requested yet.</p>
+    <?php endif; ?>
+
+    <h3 class="mt-4">Your Accepted Services</h3>
+    <?php if (!empty($accepted_services)): ?>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Service ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($accepted_services as $service): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($service['seid']); ?></td>
+                    <td><?php echo htmlspecialchars($service['name']); ?></td>
+                    <td>$<?php echo htmlspecialchars($service['price']); ?></td>
+                    <td><?php echo htmlspecialchars(ucfirst($service['status'])); ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php else: ?>
+        <p>No accepted services yet.</p>
     <?php endif; ?>
 </div>
 </body>

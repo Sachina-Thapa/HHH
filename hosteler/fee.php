@@ -9,7 +9,6 @@ $error_message = '';
 
 // Check if user is logged in and retrieve username
 if (!isset($_SESSION['username'])) {
-    // Redirect to login page if not logged in
     header("Location: http://localhost/hhh/index.php");
     exit();
 }
@@ -18,11 +17,6 @@ $username = $_SESSION['username']; // Assuming username is stored in session
 
 // Fetch hosteler ID from the database
 $stmt = $conn->prepare("SELECT id FROM hostelers WHERE username = ?");
-if ($stmt === false) {
-    // Output error message if query preparation fails
-    die('Query preparation failed: ' . $conn->error);
-}
-
 $stmt->bind_param("s", $username);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -31,7 +25,6 @@ if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $hid = $row['id']; // Get the hosteler ID
 } else {
-    // Handle the case where the user is not found in the database
     $_SESSION['error_message'] = "User  not found.";
     header("Location: http://localhost/hhh/index.php");
     exit();
@@ -39,10 +32,6 @@ if ($result->num_rows > 0) {
 
 // Fetch booking details for the logged-in hosteler
 $stmt = $conn->prepare("SELECT check_in, check_out, rno, bstatus FROM booking WHERE id = ? AND bstatus = 'confirmed'");
-if ($stmt === false) {
-    die('Query preparation failed: ' . $conn->error);
-}
-
 $stmt->bind_param("i", $hid);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -56,10 +45,6 @@ if ($result->num_rows === 0) {
     
     // Fetch room price
     $stmt = $conn->prepare("SELECT rprice FROM room WHERE rno = ?");
-    if ($stmt === false) {
-        die('Query preparation failed: ' . $conn->error);
-    }
-    
     $stmt->bind_param("i", $room_no);
     $stmt->execute();
     $roomResult = $stmt->get_result();
@@ -92,6 +77,26 @@ $totalVisitorFee = $visitorRow['total_visitor_fee'] ? $visitorRow['total_visitor
 
 // Calculate the grand total
 $grandTotal = $totalPrice + $totalVisitorFee;
+
+// Fetch accepted services for the logged-in hosteler
+$stmt = $conn->prepare("SELECT name, price FROM hservice WHERE hid = ? AND status = 'accepted'");
+$stmt->bind_param("i", $hid);
+$stmt->execute();
+$serviceResult = $stmt->get_result();
+
+$acceptedServices = [];
+$totalServicePrice = 0;
+
+if ($serviceResult->num_rows > 0) {
+    while ($service = $serviceResult->fetch_assoc()) {
+        $acceptedServices[] = $service;
+        $totalServicePrice += $service['price']; // Calculate total service price
+    }
+}
+$stmt->close();
+
+// Add the total service price to the grand total
+$grandTotal += $totalServicePrice;
 
 // Handle voucher upload
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['upload_voucher'])) {
@@ -189,11 +194,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['upload_voucher'])) {
                     <?php if ($bookingDetails): ?>
                         <p>Check-in Date: <?php echo $bookingDetails['check_in']; ?></p>
                         <p>Check-out Date: <?php echo $bookingDetails['check_out']; ?></p>
-                        <p>Total Staying Days: <?php echo $days; ?> days</p> <!-- Display staying days -->
+                        <p>Total Staying Days: <?php echo $days; ?> days</p>
                         <p>Room ID: <?php echo $bookingDetails['rno']; ?></p>
                         <p>Room Price (30 days): $<?php echo number_format($roomPrice, 2); ?></p>
                         <p>Total Price for Stay: $<?php echo number_format($totalPrice, 2); ?></p>
-                        <p>Total Visitor Fees: $<?php echo number_format($totalVisitorFee, 2); ?></p> <!-- Display visitor fees -->
+                        <p>Total Visitor Fees: $<?php echo number_format($totalVisitorFee, 2); ?></p>
+                        
+                        <!-- Display Accepted Services -->
+                        <h6>Accepted Services:</h6>
+                        <ul>
+                            <?php foreach ($acceptedServices as $service): ?>
+                                <li><?php echo htmlspecialchars($service['name']); ?> - $<?php echo number_format($service['price'], 2); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
                     <?php else: ?>
                         <p>No booking found.</p>
                     <?php endif; ?>
