@@ -28,18 +28,18 @@ if (isset($_POST['load_services'])) {
         $i = 1;
         while ($row = $result->fetch_assoc()) {
             echo <<<HTML
-            <tr id="service-row-{$row['seid']}">
+            <tr id="service-row-{$row['id']}">
                 <td>{$i}</td>
-                <td><span id="name-{$row['seid']}">{$row['name']}</span><input type="text" id="name-input-{$row['seid']}" class="form-control d-none" value="{$row['name']}"></td>
-                <td><span id="price-{$row['seid']}">{$row['price']}</span><input type="text" id="price-input-{$row['seid']}" class="form-control d-none" value="{$row['price']}"></td>
+                <td><span id="name-{$row['id']}">{$row['name']}</span><input type="text" id="name-input-{$row['id']}" class="form-control d-none" value="{$row['name']}"></td>
+                <td><span id="price-{$row['id']}">{$row['price']}</span><input type="text" id="price-input-{$row['id']}" class="form-control d-none" value="{$row['price']}"></td>
                 <td>
-                    <button type="button" onclick="editService({$row['seid']})" class="btn btn-warning btn-sm" id="edit-btn-{$row['seid']}">
+                    <button type="button" onclick="editService({$row['id']})" class="btn btn-warning btn-sm" id="edit-btn-{$row['id']}">
                         <i class="bi bi-pencil"></i> Edit
                     </button>
-                    <button type="button" onclick="saveService({$row['seid']})" class="btn btn-success btn-sm d-none" id="save-btn-{$row['seid']}">
+                    <button type="button" onclick="saveService({$row['id']})" class="btn btn-success btn-sm d-none" id="save-btn-{$row['id']}">
                         <i class="bi bi-save"></i> Save
                     </button>
-                    <button type="button" onclick="deleteService({$row['seid']})" class="btn btn-danger btn-sm">
+                    <button type="button" onclick="deleteService({$row['id']})" class="btn btn-danger btn-sm">
                         <i class="bi bi-trash"></i> Delete
                     </button>
                 </td>
