@@ -1,41 +1,10 @@
 <?php
 require('inc/db.php');
 
-$stmt = $mysqli->prepare("SELECT check_in, check_out, rid, bstatus FROM booking WHERE id = ? AND bstatus = 'confirmed'");
-$stmt->bind_param("i", $hid);
+// Fetch hostelers data
+$stmt = $mysqli->prepare("SELECT * FROM hostelers");
 $stmt->execute();
 $result = $stmt->get_result();
-
-if ($result->num_rows === 0) {
-    $bookingDetails = null; // No booking found
-} else {
-    $bookingDetails = $result->fetch_assoc();
-    $room_id = $bookingDetails['rid'];
-
-    // Fetch room price
-    $stmt = $mysqli->prepare("SELECT rprice FROM room WHERE rid = ?");
-    $stmt->bind_param("i", $room_id);
-    $stmt->execute();
-    $roomResult = $stmt->get_result();
-
-    if ($roomResult->num_rows > 0) {
-        $room = $roomResult->fetch_assoc();
-        $roomPrice = $room['rprice'];
-
-        // Calculate the number of days
-        $check_in = new DateTime($bookingDetails['check_in']);
-        $check_out = new DateTime($bookingDetails['check_out']);
-        $interval = $check_in->diff($check_out);
-        $days = $interval->days;
-
-        // Calculate the total price (room price for 30 days, prorated for the days stayed)
-        $totalPrice = ($roomPrice / 30) * $days;
-    } else {
-        $roomPrice = 0;
-        $totalPrice = 0;
-        $days = 0; // Set default value for days
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -56,17 +25,6 @@ if ($result->num_rows === 0) {
         .main-content {
             margin-left: 220px;
             padding: 20px;
-        }
-        #hosteler-details {
-            margin-top: 20px; /* Space between first and second tables */
-        }
-        #hosteler-details table th {
-            width: 30%;
-            text-align: left;
-            background-color: #f8f9fa;
-        }
-        #hosteler-details table td {
-            text-align: left;
         }
     </style>
 </head>
@@ -92,7 +50,7 @@ if ($result->num_rows === 0) {
                 <div class="card border shadow-sm mb-4">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-hover border text-center" style="min-width: 1300px;">
+                            <table class="table table-hover border text-center">
                                 <thead>
                                     <tr class="bg-dark text-light">
                                         <th scope="col">S.N.</th>
@@ -107,10 +65,27 @@ if ($result->num_rows === 0) {
                                     </tr>
                                 </thead>
                                 <tbody id="hosteler-data">
-                                    <!-- Dynamic data will be populated here by the JavaScript functions -->
-                                    <tr class="no-data">
-                                        <td colspan="9">No hostelers found</td>
-                                    </tr>
+                                    <?php
+                                    $i = 1;
+                                    while ($row = $result->fetch_assoc()) {
+                                        echo "
+                                        <tr>
+                                            <td>$i</td>
+                                            <td>{$row['name']}</td>
+                                            <td>{$row['email']}</td>
+                                            <td>{$row['phone_number']}</td>
+                                            <td>{$row['address']}</td>
+                                            <td>{$row['date_of_birth']}</td>
+                                            <td>{$row['status']}</td>
+                                            <td>{$row['created_at']}</td>
+                                            <td>
+                                                <button onclick='vhosteler({$row['id']})' class='btn btn-info btn-sm'>View</button>
+                                            </td>
+                                        </tr>
+                                        ";
+                                        $i++;
+                                    }
+                                    ?>
                                 </tbody>
                             </table>
                         </div>
@@ -146,9 +121,8 @@ if ($result->num_rows === 0) {
     </div> <!-- End of container-fluid -->
 
     <!-- Include necessary scripts -->
-    <?php @include('inc/scripts.php'); ?>
-    <script src="scripts/hosteler.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="scripts/hosteler.js"></script> <!-- Ensure this path is correct -->
 </body>
 </html>
