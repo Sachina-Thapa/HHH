@@ -49,46 +49,46 @@ $result = $stmt->get_result();
                 <!-- Hosteler Table -->
                 <div class="card border shadow-sm mb-4">
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover border text-center">
-                                <thead>
-                                    <tr class="bg-dark text-light">
-                                        <th scope="col">S.N.</th>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Email</th>
-                                        <th scope="col">Phone No.</th>
-                                        <th scope="col">Location</th>
-                                        <th scope="col">DOB</th>
-                                        <th scope="col">Status</th>
-                                        <th scope="col">Date</th>
-                                        <th scope="col">Action</th>
+                    <div style="overflow-x: auto; white-space: nowrap;">
+                        <table class="table table-hover border text-center">
+                            <thead>
+                                <tr class="bg-dark text-light">
+                                    <th scope="col">S.N.</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Phone No.</th>
+                                    <th scope="col">Location</th>
+                                    <th scope="col">DOB</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hosteler-data">
+                                <?php
+                                $i = 1;
+                                while ($row = $result->fetch_assoc()) {
+                                    echo "
+                                    <tr>
+                                        <td>$i</td>
+                                        <td>{$row['name']}</td>
+                                        <td>{$row['email']}</td>
+                                        <td>{$row['phone_number']}</td>
+                                        <td>{$row['address']}</td>
+                                        <td>{$row['date_of_birth']}</td>
+                                        <td>{$row['status']}</td>
+                                        <td>{$row['created_at']}</td>
+                                        <td>
+                                            <button onclick='vhosteler({$row['id']})' class='btn btn-info btn-sm'>View</button>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody id="hosteler-data">
-                                    <?php
-                                    $i = 1;
-                                    while ($row = $result->fetch_assoc()) {
-                                        echo "
-                                        <tr>
-                                            <td>$i</td>
-                                            <td>{$row['name']}</td>
-                                            <td>{$row['email']}</td>
-                                            <td>{$row['phone_number']}</td>
-                                            <td>{$row['address']}</td>
-                                            <td>{$row['date_of_birth']}</td>
-                                            <td>{$row['status']}</td>
-                                            <td>{$row['created_at']}</td>
-                                            <td>
-                                                <button onclick='vhosteler({$row['id']})' class='btn btn-info btn-sm'>View</button>
-                                            </td>
-                                        </tr>
-                                        ";
-                                        $i++;
-                                    }
-                                    ?>
-                                </tbody>
-                            </table>
-                        </div>
+                                    ";
+                                    $i++;
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
                     </div>
                 </div>
 
@@ -116,9 +116,9 @@ $result = $stmt->get_result();
                         </div>
                     </div>
                 </div>
-            </div> <!-- End of main-content -->
-        </div> <!-- End of row no-gutters -->
-    </div> <!-- End of container-fluid -->
+            </div> 
+        </div>
+    </div> 
 
     <!-- Include necessary scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -8,7 +8,7 @@ function get_hosteler() {
     xhr.send('get_hosteler');
 }
 
-function vhosteler(id) {
+function viewhosteler(id) {
     let xhr = new XMLHttpRequest();
     xhr.open("POST", "ajax/hosteler.php", true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -25,7 +25,7 @@ function vhosteler(id) {
                 document.getElementById('hosteler-status').innerText = data.status ? 'Active' : 'Inactive';
                 document.getElementById('hosteler-date_of_birth').innerText = data.date_of_birth;
                 document.getElementById('hosteler-created_at').innerText = data.created_at;
-                $('#detailsModal').modal('show');
+                $('detailsModal').modal('show');
             } else {
                 alert("Hosteler not found.");
             }
@@ -34,7 +34,7 @@ function vhosteler(id) {
         }
     };
     
-    xhr.send('vhosteler=' + id);
+    xhr.send('viewhosteler=' + id);
 }
 
 function toggle_status(id, val) {
