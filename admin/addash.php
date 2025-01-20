@@ -101,7 +101,6 @@
          <div class="row">
   <!-- Sidebar -->
   <?php 
-  require('inc/sideMenu.php');  
 
         // Query to count total staff
         $sql = "SELECT COUNT(*) as total FROM staff_data;";
@@ -147,6 +146,10 @@
  
                  <!-- Statistics Section -->
                  <div class="row">
+                       <!-- Sidebar -->
+        <div class="sidebar">
+            <?php require('inc/sideMenu.php'); ?>
+        </div>
                      <div class="col-md-4 mb-4">
                          <div class="card stats-card">
                              <h5>Total Hostellers</h5>

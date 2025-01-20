@@ -214,8 +214,10 @@ $result = $conn->query($sql);
                 unset($_SESSION['alert']);
             }
             ?>
-            <!-- Sidebar -->
+               <!-- Sidebar -->
+        <div class="sidebar">
             <?php require('inc/sideMenu.php'); ?>
+        </div>
             <!-- Main Content -->
             <div class="col-md-10 content-wrapper py-4 px-4">
                 <!-- Success Notification -->

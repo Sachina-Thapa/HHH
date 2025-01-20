@@ -10,6 +10,10 @@ $conn = new mysqli($host, $user, $password, $database);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+// Fetch current site settings
+$settings_query = "SELECT * FROM site_settings LIMIT 1";
+$settings_result = mysqli_query($conn, $settings_query);
+$site_settings = mysqli_fetch_assoc($settings_result);
 // Fetch logo from site_settings
 $logo_query = "SELECT logo_path FROM site_settings LIMIT 1";
 $logo_result = mysqli_query($conn, $logo_query);
@@ -29,8 +33,10 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
            alt="Logo" 
            style="filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));">
 
-      <span style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 1.5);"
-      >Her Home Hostel</span>
+           <span style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 1.5);">
+    <?php echo isset($site_settings['site_title']) ? htmlspecialchars($site_settings['site_title']) : 'Her Home Hostel'; ?>
+</span>
+
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>

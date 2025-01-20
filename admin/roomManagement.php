@@ -125,8 +125,10 @@ $result = $conn->query($sql);
 <body>
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar -->
-        <?php require('inc/sideMenu.php'); ?>
+         <!-- Sidebar -->
+         <div class="sidebar">
+            <?php require('inc/sideMenu.php'); ?>
+        </div>
 
         <div class="col-md-10 content-wrapper">
             <h4>Add New Room</h4>

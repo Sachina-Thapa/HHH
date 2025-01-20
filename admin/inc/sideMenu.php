@@ -44,6 +44,7 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
     }
 
     .sidebar a {
+        margin:0px;
         color: #fff;
         padding: 25px;
         display: block;
@@ -51,8 +52,16 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
     }
 
     .sidebar a:hover {
-        background-color: #495057;
+        background-color:rgb(97, 104, 110);
     }
+
+    .sidebar a:focus {
+    background-color: #495057;
+    outline: none;
+    box-shadow: inset 0 0 0 2px #ffffff;
+    transition: all 0.3s ease;
+}
+
 
     .btn {
         margin-top: 0px;
@@ -99,3 +108,17 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
     <hr class="w-full text-white mb-0">
     <button class="btn w-100"><a href="../index.php">LOG OUT</a></button>
 </div>
+
+<script>
+// Add this at the bottom of sideMenu.php
+document.addEventListener('DOMContentLoaded', function() {
+    const currentPage = window.location.pathname.split('/').pop();
+    const sidebarLinks = document.querySelectorAll('.sidebar a');
+    
+    sidebarLinks.forEach(link => {
+        if(link.getAttribute('href') === currentPage) {
+            link.style.backgroundColor = ' #495057';
+        }
+    });
+});
+</script>
