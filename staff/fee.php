@@ -58,7 +58,7 @@
                 <div class="col-md-4">
                     <div class="card">
                         <div class="card-header bg-dark text-white">
-                            <h2 class="mb-0">Stay Duration Calculation</h2>
+                            <h2 class="mb-0">Stay Duration</h2>
                         </div>
                         <div class="card-body">
                             <form>
@@ -102,14 +102,14 @@
                                     <label for="total" class="form-label">Total</label>
                                     <input type="text" class="form-control" id="total" >
                                 </div>
-                                <button type="submit" class="btn btn-dark w-100">Check Out</button>
+                                <!-- <button type="submit" class="btn btn-dark w-100">Check Out</button> -->
                             </form>
                         </div>
                     </div>
                 </div>
 
                 <!-- Right Side - Invoice -->
-                <div class="col-md-8">
+                <!-- <div class="col-md-8">
                     <div class="card">
                         <div class="card-body">
                             <div class="row mb-4">
@@ -204,7 +204,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

@@ -1,6 +1,5 @@
 <?php
-require('../inc/db.php'); // Ensure db.php initializes a $mysqli variable
-
+require('../inc/db.php');
 function filteration($data) {
     // Sanitize each element in the POST data array
     $filtered_data = [];
@@ -49,10 +48,10 @@ if (isset($_POST['get_hosteler'])) {
 }
 
 // Fetch hosteler details by ID
-if (isset($_POST['vhosteler'])) {
+if (isset($_POST['viewhosteler'])) {
     $frm_data = filteration($_POST);
     $stmt = $mysqli->prepare("SELECT * FROM hostelers WHERE id = ?");
-    $stmt->bind_param('i', $frm_data['vhosteler']);
+    $stmt->bind_param('i', $frm_data['viewhosteler']);
     $stmt->execute();
     $res = $stmt->get_result();
 
