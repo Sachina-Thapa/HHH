@@ -116,16 +116,17 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Email Form -->
-                <div id="emailForm" class="form-container">
-                    <form class="form" id="forgotPasswordForm">
-                        <div class="form-group mb-3">
-                            <label for="forgot-email">Email</label>
-                            <input type="email" id="forgot-email" name="email" class="form-control" placeholder="Enter your email" required>
-                        </div>
-                        <button type="button" class="btn btn-primary w-100" onclick="sendForgotPasswordOTP()">Send Email</button>
-                    </form>
-                </div>
+               <!-- Email Form -->
+<div id="emailForm" class="form-container">
+    <form class="form" id="forgotPasswordForm">
+        <div class="form-group mb-3">
+            <label for="forgot-email">Email</label>
+            <input type="email" id="forgot-email" name="email" class="form-control" placeholder="Enter your email" required>
+        </div>
+        <button type="button" class="btn btn-primary w-100" id="sendForgotPasswordBtn" onclick="sendForgotPasswordOTP()">Send Email</button>
+    </form>
+</div>
+
 
                 <!-- OTP Verification Form -->
 <div id="otpVerificationForm" class="form-container" style="display:none;">
@@ -306,7 +307,13 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
 
         function sendForgotPasswordOTP() {
     const email = document.getElementById('forgot-email').value;
+    const sendButton = document.getElementById('sendForgotPasswordBtn');
+    
     if(email) {
+        // Disable button immediately when sending
+        sendButton.disabled = true;
+        sendButton.textContent = 'Sending...';
+        
         fetch('check_and_send_otp.php', {
             method: 'POST',
             headers: {
@@ -328,17 +335,21 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
                 document.getElementById('otpVerificationForm').style.display = 'block';
                 alert('OTP sent successfully! Please check your email.');
             } else {
+                // Re-enable button if email not found
+                sendButton.disabled = false;
+                sendButton.textContent = 'Send Email';
                 alert(data.message || 'Email not found in our system');
             }
         })
         .catch(error => {
+            // Re-enable button on error
+            sendButton.disabled = false;
+            sendButton.textContent = 'Send Email';
             console.error('Error:', error);
             alert('Server error occurred. Please try again.');
         });
     }
 }
-
-
 
 
 
