@@ -727,11 +727,11 @@ $rooms_result = mysqli_query($conn, $query);
     </div>
 </div>
 
-<!-- Map Location Settings -->
+<!-- Contact US Settings -->
 <div class="col-12 mb-4">
     <div class="section-card">
         <div class="card-header">
-            <h5 class="mb-0">Map Location Settings</h5>
+            <h5 class="mb-0">Contact Us Settings</h5>
         </div>
         <div class="content-area">
             <form method="POST" action="" id="mapSettingsForm">
