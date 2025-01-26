@@ -43,49 +43,30 @@ $address = $userInfo['address'];
 $date_of_birth = $userInfo['date_of_birth'];
 $picture_path = $userInfo['picture_path'];
 
-// Fetch room types for the dropdown
-$room_sql = "SELECT rid, rno, rtype, rprice FROM room";
+// Check the latest booking status
+$booking_sql = "SELECT bstatus FROM booking WHERE id = ? ORDER BY bookingdate DESC LIMIT 1"; 
+$stmt = $conn->prepare($booking_sql);
+if (!$stmt) {
+    die("Prepare failed: " . $conn->error); // Error handling
+}
+$stmt->bind_param("i", $hosteler_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$bookingStatus = $result->fetch_assoc()['bstatus'] ?? null; // Get the latest booking status
+
+// Call the JavaScript function to show the booking status message
+echo "<script>showBookingStatusMessage('$bookingStatus');</script>";
+// Fetch available room types (excluding booked rooms)
+$room_sql = "
+    SELECT r.rno, r.rtype, r.rprice 
+    FROM room r 
+    LEFT JOIN booking b ON r.rno = b.rno 
+    WHERE b.rno IS NULL OR b.bstatus = 'declined'";
+     
 $room_result = $conn->query($room_sql);
 if (!$room_result) {
     die("Query failed: " . $conn->error); // Error handling
 }
-
-// Handle form submission
-$message = '';
-$bookingdate = date('Y-m-d'); // Set the booking date to today
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Get the posted data
-    $room_id = $_POST['room_type'];
-    $check_in = $_POST['checkin_date'];
-    $check_out = $_POST['checkout_date'];
-
-    // Insert the data into the booking table
-    $sql = "INSERT INTO booking (id, rid, bookingdate, check_in, check_out) VALUES (?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        die("Prepare failed: " . $conn->error); // Error handling
-    }
-    $stmt->bind_param("iiiss", $hosteler_id, $room_id, $bookingdate, $check_in, $check_out);
-    $stmt->execute();
-
-    // Check if the insertion was successful
-    if ($stmt->affected_rows > 0) {
-        // Redirect to the same page to prevent form resubmission
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    } else {
-        $message = "<div class='alert alert-danger'>Error submitting booking. Please try again.</div>";
-    }
-}
-
-// Check the latest booking status
-$status_sql = "SELECT bstatus FROM booking WHERE id = ? ORDER BY bookingdate DESC LIMIT 1";
-$status_stmt = $conn->prepare($status_sql);
-$status_stmt->bind_param("i", $hosteler_id);
-$status_stmt->execute();
-$status_result = $status_stmt->get_result();
-$status_row = $status_result->fetch_assoc();
-$status = $status_row ? $status_row['bstatus'] : null;
 
 // Close the connection
 $conn->close();
@@ -100,114 +81,72 @@ $conn->close();
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            display: flex;
-            min-height: 100vh; /* Minimum height of 100 % of the viewport */
-            margin: 0; /* Remove default margin */
-            background-color: #f8f9fa; /* Light background color */
-        }
-
-        .content {
-            flex: 1; /* Take the remaining space */
-            padding: 20px; /* Padding inside the content area */
-        }
-
-        .alert {
-            margin-top: 20px; /* Margin for alerts */
-        }
-
-        .booking-form {
-            display: <?= ($status === 'confirmed') ? 'none' : 'block'; ?>; /* Show or hide the booking form based on status */
-        }
-        .main-content {
-            margin-left: 210px; /* Adjust to the sidebar width */
-            padding: 20px;
-            flex-grow: 1;
-            background-color: #f1f1f1;
-        }
-    </style>
+    <link rel="stylesheet" href="css/booking.css">
+    <script src="scripts/booking.js"></script>
 </head>
 <body>
-<div class="main-content">
-        <h1>Booking Form</h1>
-        <?php if ($message) echo $message; ?>
+    <div class="content">
+    <h1>Booking Form</h1>
 
-        <!-- Display user information -->
+    <!-- User Information Box -->
+    <div class="booking-box">
+        <h5>User Information</h5>
         <p><strong>Name:</strong> <?= htmlspecialchars($name); ?></p>
         <p><strong>Email:</strong> <?= htmlspecialchars($email); ?></p>
         <p><strong>Phone Number:</strong> <?= htmlspecialchars($phone_number); ?></p>
         <p><strong>Address:</strong> <?= htmlspecialchars($address); ?></p>
         <p><strong>Date of Birth:</strong> <?= htmlspecialchars($date_of_birth); ?></p>
-        <p><strong>Booking Date:</strong> <?= htmlspecialchars($bookingdate); ?></p>
+    </div>
 
-        <?php if ($status === 'confirmed'): ?>
-            <div class="alert alert-success">Your Booking has been confirmed.</div>
-        <?php elseif ($status === 'canceled'): ?>
-            <div class="alert alert-danger">Your Booking has been declined.</div>
-            <div class="alert alert-warning" id="rebookMessage">Do you wish to book a room again?</div>
-            <button id="yesButton" class="btn btn-success">Yes</button>
-            <button id="noButton" class="btn btn-danger">No</button>
-        <?php endif; ?>
+    <div id="bookingStatusMessage" class="alert hidden" style="display: none;"></div> <!-- Placeholder for booking status -->
+    <!-- Room Selection Box -->
+    <div class="room-selection-box" id="roomSelection">
+        <h5>Select Available Room</h5>
+        <form id="bookingForm" action="ajax/booking_process.php" method="POST" onsubmit="submitBooking(event);">
+            <div class="mb-3">
+                <label for="room_type" class="form-label">Choose Room</label>
+                <select name="room_type" id="room_type" class="form-select" required>
+                    <?php while ($row = $room_result->fetch_assoc()): ?>
+                        <option value="<?= $row['rno']; ?>" data-room-no="<?= $row['rno']; ?>" data-room-type="<?= $row['rtype']; ?>" data-room-price="<?= $row['rprice']; ?>">
+                            <?= htmlspecialchars($row['rno'] . ' - ' . $row['rtype'] . ' - ' . $row['rprice']); ?>
+                        </option>
+                    <?php endwhile; ?>
+                </select>
+            </div>
+            <button id="bookNowButton" type="submit" class="btn btn-primary">Book Now</button>
+            <button type="button" id="cancelButton" class="btn btn-secondary" onclick="cancelBooking();">Cancel</button>
+        </form>
+    </div>
+</div> 
+<!-- Booking Status Message -->
+        <div id="bookingStatusMessage" style="display:none;"></div>
 
-        <div class="booking-form">
-            <form method="POST" action="">
-                <div class="mb-3">
-                    <label for="room_type" class="form-label">Select Room Type</label>
-                    <select name="room_type" id="room_type" class="form-select" required>
-                        <?php while ($row = $room_result->fetch_assoc()): ?>
-                            <option value="<?= $row['rid']; ?>"><?= htmlspecialchars($row['rtype'] . ' - ' . $row['rprice']); ?></option>
-                        <?php endwhile; ?>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="checkin_date" class="form-label">Check-in Date</label>
-                    <input type="date" name="checkin_date" id="checkin_date" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="checkout_date" class="form-label ">Check-out Date</label>
-                    <input type="date" name="checkout_date" id="checkout_date" class="form-control" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Book Now</button>
-                <a href="dashboard.php" class="btn btn-secondary">Cancel</a> <!-- Cancel button -->
-            </form>
+        <!-- Message Box -->
+        <div id="messageBox" class="hidden">
+            <div id="messageContent"></div>
+            <button id="closeMessage">Close</button>
         </div>
     </div>
-  </div>
 
-    <script>
-        // Show or hide the booking form based on the user's choice
-        const yesButton = document.getElementById('yesButton');
-        const noButton = document.getElementById('noButton');
-        const rebookMessage = document.getElementById('rebookMessage');
-        const bookingForm = document.querySelector('.booking-form');
-
-        if (yesButton) {
-            yesButton.onclick = function() {
-                if (bookingForm) {
-                    bookingForm.style.display = 'block'; // Show the booking form
-                }
-                if (rebookMessage) {
-                    rebookMessage.style.display = 'none'; // Hide the rebooking message
-                }
-                this.style.display = 'none'; // Hide the Yes button
-                if (noButton) {
-                    noButton.style.display = 'none'; // Hide the No button
-                }
-            };
-        }
-
-        if (noButton) {
-            noButton.onclick = function() {
-                if (rebookMessage) {
-                    rebookMessage.style.display = 'none'; // Hide the rebooking message
-                }
-                this.style.display = 'none'; // Hide the No button
-                if (yesButton) {
-                    yesButton.style.display = 'none'; // Hide the Yes button
-                }
-            };
-        }
-    </script>
+    <script src="scripts/booking.js"></script>
+    <div id="additionalFieldsContainer" style="display: none;">
+    <h5>Additional Booking Information</h5>
+    <div class="mb-3">
+        <label for="check_in" class="form-label">Check In Date</label>
+        <input type="date" id="check_in" name="check_in" class="form-control">
+    </div>
+    <div class="mb-3">
+        <label for="check_out" class="form-label">Check Out Date</label>
+        <input type="date" id="check_out" name="check_out" class="form-control">
+    </div>
+    <div class="mb-3">
+        <label for="arrival" class="form-label">Arrival Time</label>
+        <input type="time" id="arrival" name="arrival" class="form-control">
+    </div>
+    <div class="mb-3">
+        <label for="number_of_days" class="form-label">Number of Days</label>
+        <input type="number" id="number_of_days" name="number_of_days" class="form-control" min="1">
+    </div>
+</div>
 </body>
 </html>

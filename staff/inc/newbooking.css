@@ -1,0 +1,23 @@
+/* newbooking.css */
+body {
+    display: flex;
+    margin: 0;
+}
+
+.content {
+    margin-left: 200px;
+    padding: 20px;
+    width: calc(100% - 200px);
+}
+
+.confirmed {
+    background-color: #d4edda;
+}
+
+.canceled {
+    opacity: 0.5;
+}
+
+.clickable-row {
+    cursor: pointer;
+}
