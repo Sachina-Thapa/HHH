@@ -96,33 +96,37 @@ if ($stmt->execute()) {
     // Get the last inserted booking ID
     $booking_id = $stmt->insert_id;
 }
-// If booking status is confirmed, allow the user to input additional fields
-if ($bstatus === 'confirmed') {
-    $check_in = $_POST['check_in'] ?? null;
-    $check_out = $_POST['check_out'] ?? null;
-    $arrival = $_POST['arrival'] ?? null;
-    $number_of_days = $_POST['number_of_days'] ?? null;
-
-    // Perform validation if needed
-    if (!$check_in || !$check_out || !$arrival || !$number_of_days) {
-        echo json_encode(['status' => 'error', 'message' => 'Please fill in all the required fields']);
-        exit(); // Stop further execution
-    }
-
-    // Update the booking with the additional fields
-    $update_sql = "UPDATE `booking` SET `st_id` = ?,  `check_in` = ?, `check_out` = ?, `arrival` = ?, `number_of_days` = ? WHERE `id` = ?";
-    $update_stmt = $conn->prepare($update_sql);
-    if (!$update_stmt) {
-        die("Prepare failed: " . $conn->error);
-    }
-
-    $update_stmt->bind_param("issssi", $st_id,$check_in, $check_out, $arrival, $number_of_days, $booking_id);
-    if ($update_stmt->execute()) {
-        echo json_encode(['status' => 'success', 'message' => 'Your booking is confirmed.']);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Update failed']);
+// Insert the booking data into the booking table
+if ($bstatus === 'pending') {
+    $booking_sql = "INSERT INTO `booking` (`id`, `rno`, `bookingdate`, `bstatus`) VALUES (?, ?, NOW(), 'pending')";
+    $stmt = $conn->prepare($booking_sql);
+    $stmt->bind_param("ii", $hosteler_id, $room_no);
+    if ($stmt->execute()) {
+        $booking_id = $stmt->insert_id;
+        echo json_encode(['status' => 'success', 'message' => 'Booking placed successfully with Pending status.']);
+        exit();
     }
 }
+
+// For confirmed bookings
+if ($bstatus === 'confirmed') {
+    // Validate additional fields
+    if (!$check_in || !$check_out || !$arrival || !$number_of_days) {
+        echo json_encode(['status' => 'error', 'message' => 'Please fill in all the required fields']);
+        exit();
+    }
+
+    // Update the booking with additional fields
+    $update_sql = "UPDATE `booking` SET `st_id` = ?, `check_in` = ?, `check_out` = ?, `arrival` = ?, `number_of_days` = ? WHERE `id` = ?";
+    $update_stmt = $conn->prepare($update_sql);
+    $update_stmt->bind_param("issssi", $st_id, $check_in, $check_out, $arrival, $number_of_days, $booking_id);
+    if ($update_stmt->execute()) {
+        echo json_encode(['status' => 'success', 'message' => 'Booking confirmed successfully.']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Update failed.']);
+    }
+}
+
 // Close the connection
 $conn->close();
 ?>

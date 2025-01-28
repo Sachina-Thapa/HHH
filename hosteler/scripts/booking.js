@@ -30,9 +30,16 @@ function showBookingStatusMessage(bstatus) {
     }
 }
 
-// Function to submit the booking form
+// Prevent multiple submissions
+let isSubmitting = false;
+
 function submitBooking(event) {
-    event.preventDefault(); // Prevent the default form submission
+    event.preventDefault();
+
+    if (isSubmitting) {
+        return; // Exit if the form is already submitting
+    }
+    isSubmitting = true;
 
     const roomSelect = document.getElementById('room_type');
     const selectedOption = roomSelect.options[roomSelect.selectedIndex];
@@ -41,37 +48,30 @@ function submitBooking(event) {
     const roomType = selectedOption.getAttribute('data-room-type');
     const roomPrice = selectedOption.getAttribute('data-room-price');
 
-    // Prepare form data to send
     const formData = new FormData();
     formData.append('room_no', roomNo);
     formData.append('room_type', roomType);
     formData.append('room_price', roomPrice);
 
-    // Send the data using fetch
     fetch('ajax/booking_process.php', {
         method: 'POST',
         body: formData,
     })
-        .then(response => {
-            console.log('Response:', response); // Debugging output
-            if (!response.ok) {
-                throw new Error('Network response was not ok: ' + response.statusText);
-            }
-            return response.json(); // Expecting JSON response
-        })
+        .then(response => response.json())
         .then(data => {
-            console.log('Data:', data); // Debugging output
-
             if (data.status === 'success') {
-                showBookingStatusMessage('pending'); // Assuming the initial status is pending
-                document.getElementById('roomSelectionBox').style.display = 'none'; // Hide the room selection box
+                showBookingStatusMessage('pending');
+                document.getElementById('roomSelection').style.display = 'none';
             } else {
-                alert(data.message); // Show error message
+                alert(data.message);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred: ' + error.message); // Alert user about the error
+            alert('An error occurred: ' + error.message);
+        })
+        .finally(() => {
+            isSubmitting = false; // Reset the flag after completion
         });
 }
 
@@ -86,7 +86,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const bookingForm = document.getElementById('bookingForm');
 
     // Handle form submission
-    bookingForm.addEventListener('submit', submitBooking);
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', submitBooking);
+    } else {
+        console.error('Booking form not found.');
+    }
 
     // Initialize message box
     const messageBox = document.getElementById('messageBox');
@@ -95,19 +99,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Show messages
     function showMessage(type, message) {
-        messageContent.textContent = message;
-        messageBox.style.display = 'block';
+        if (messageContent) {
+            messageContent.textContent = message;
+        }
+        if (messageBox) {
+            messageBox.style.display = 'block';
 
-        // Style the message
-        if (type === 'success') {
-            messageBox.style.backgroundColor = 'green';
-        } else {
-            messageBox.style.backgroundColor = 'red';
+            // Style the message
+            if (type === 'success') {
+                messageBox.style.backgroundColor = 'green';
+            } else {
+                messageBox.style.backgroundColor = 'red';
+            }
         }
     }
 
-    // Close message box
-    closeMessage.addEventListener('click', function () {
-        messageBox.style.display = 'none';
-    });
+    // // Close message box
+    // if (closeMessage) {
+    //     closeMessage.addEventListener('click', function () {
+    //         if (messageBox) {
+    //             messageBox.style.display = 'none';
+    //         }
+    //     });
+    // } else {
+    //     console.error('Close message button not found.');
+    // }
 });
