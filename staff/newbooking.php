@@ -56,30 +56,30 @@ if ($result === false) {
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody>
-                    <?php
-                        if ($result->num_rows > 0) {
-                            while ($row = $result->fetch_assoc()) {
-                                echo "<tr class='clickable-row' data-id='" . htmlspecialchars($row["hosteler_id"]) . "'>
-                                        <td>" . htmlspecialchars($row["bid"]) . "</td>
-                                        <td>" . htmlspecialchars($row["hosteler_name"]) . "</td>
-                                        <td>" . htmlspecialchars($row["phone_number"]) . "</td>
-                                        <td>" . htmlspecialchars($row["email"]) . "</td>
-                                        <td>" . htmlspecialchars($row["address"]) . "</td>
-                                        <td>" . htmlspecialchars($row["room_type"]) . "</td>
-                                        <td>" . htmlspecialchars($row["gdate"]) . "</td>
-                                        <td>
-                                            <button onclick='confirmBooking(" . $row["bid"] . ", " . $row["hosteler_id"] . ")' class='btn btn-success'>Confirm</button>
-                                            <button onclick='cancelBooking(" . $row["bid"] . ", " . $row["hosteler_id"] . ")' class='btn btn-danger'>Cancel</button>
-                                        </td>
-                                    </tr>";
-                            }
-                        } else {
-                            echo "<tr><td colspan='8'>No pending bookings found.</td></tr>";
-                        }
-                        $conn->close();
-                    ?>
-                    </tbody>
+                            <tbody>
+            <?php
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    echo "<tr class='clickable-row' data-id='" . htmlspecialchars($row["hosteler_id"]) . "'>
+                            <td>" . htmlspecialchars($row["bid"]) . "</td>
+                            <td>" . htmlspecialchars($row["hosteler_name"]) . "</td>
+                            <td>" . htmlspecialchars($row["phone_number"]) . "</td>
+                            <td>" . htmlspecialchars($row["email"]) . "</td>
+                            <td>" . htmlspecialchars($row["address"]) . "</td>
+                            <td>" . htmlspecialchars($row["room_type"]) . "</td>
+                            <td>" . htmlspecialchars($row["gdate"]) . "</td>
+                            <td>
+                                <button onclick='confirmBooking(" . $row["bid"] . ", " . $row["hosteler_id"] . ")' class='btn btn-success'>Confirm</button>
+                                <button onclick='cancelBooking(" . $row["bid"] . ", " . $row["hosteler_id"] . ")' class='btn btn-danger'>Cancel</button>
+                            </td>
+                        </tr>";
+                }
+            } else {
+                echo "<tr><td colspan='8'>No pending bookings found.</td></tr>";
+            }
+            ?>
+        </tbody>
+
                 </table>
             </div>
         </div>

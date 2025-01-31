@@ -45,6 +45,8 @@ $query = "
     FROM booking b
     JOIN hostelers h ON b.id = h.id
     JOIN room r ON b.rno = r.rno
+    WHERE b.bstatus = 'confirmed' OR b.bstatus = 'canceled';
+
 ";
 
 $result = $conn->query($query);
