@@ -34,7 +34,7 @@ $query = "
         b.bid, 
         b.bookingdate, 
         b.bstatus AS booking_status, 
-        b.rid, 
+        b.rno, 
         h.name AS hosteler_name, 
         h.phone_number, 
         h.email, 
@@ -44,7 +44,9 @@ $query = "
         h.id AS hosteler_id
     FROM booking b
     JOIN hostelers h ON b.id = h.id
-    JOIN room r ON b.rid = r.rid
+    JOIN room r ON b.rno = r.rno
+    WHERE b.bstatus = 'confirmed' OR b.bstatus = 'canceled';
+
 ";
 
 $result = $conn->query($query);

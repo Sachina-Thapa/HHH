@@ -99,13 +99,69 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
 
                         <div class="d-flex align-items-center justify-content-between mb-2"> 
                             <button type="submit" class="btn btn-primary">LOGIN</button>
-                            <a href="javascript: void(0)" class="text-secondary text-decoration-none ms-auto">Forgot Password?</a>
-                        </div>
+                            <a href="#" class="text-secondary text-decoration-none ms-auto" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal" data-bs-dismiss="modal">Forgot Password?</a>
+                            </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
+ <!-- Forgot Password Modal -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="forgotPasswordModalLabel">Forgot Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <!-- Email Form -->
+<div id="emailForm" class="form-container">
+    <form class="form" id="forgotPasswordForm">
+        <div class="form-group mb-3">
+            <label for="forgot-email">Email</label>
+            <input type="email" id="forgot-email" name="email" class="form-control" placeholder="Enter your email" required>
+        </div>
+        <button type="button" class="btn btn-primary w-100" id="sendForgotPasswordBtn" onclick="sendForgotPasswordOTP()">Send Email</button>
+    </form>
+</div>
+
+
+                <!-- OTP Verification Form -->
+<div id="otpVerificationForm" class="form-container" style="display:none;">
+    <div class="title text-center">OTP Verification Code</div>
+    <p class="message text-center">We have sent a verification code to your email</p>
+    <div class="inputs d-flex justify-content-center gap-2 mb-3">
+        <input id="input1" type="text" maxlength="1" class="form-control">
+        <input id="input2" type="text" maxlength="1" class="form-control">
+        <input id="input3" type="text" maxlength="1" class="form-control">
+        <input id="input4" type="text" maxlength="1" class="form-control">
+        <input id="input5" type="text" maxlength="1" class="form-control">
+        <input id="input6" type="text" maxlength="1" class="form-control">
+    </div>
+    <button class="btn btn-primary w-100" onclick="verifyForgotPasswordOTP()">Verify</button>
+</div>
+
+
+                <!-- New Password Form -->
+                <div id="newPasswordForm" class="form-container" style="display:none;">
+                    <form class="form" id="changePasswordForm">
+                        <div class="form-group mb-3">
+                            <label for="new-password">New Password</label>
+                            <input type="password" id="new-password" name="password" class="form-control" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="confirm-password">Confirm Password</label>
+                            <input type="password" id="confirm-password" name="confirm_password" class="form-control" required>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100" onclick="changePassword()">Change Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
         <!-- Register Modal -->
         <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
@@ -127,10 +183,10 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
                         <label class="form-label">Phone Number</label>
                         <input type="tel" pattern="(\+977?)?[9][6-9]\d{8}" maxLength="10" name="phone" class="form-control shadow-none" required>
                       </div>
-                      <div class="col-md-6 mb-3">
+                      <!-- <div class="col-md-6 mb-3">
                         <label class="form-label">Picture</label>
                         <input type="file" name="picture" class="form-control shadow-none" required>
-                      </div>
+                      </div> -->
                       <div class="col-md-12 mb-3">
                         <label class="form-label">Address</label>
                         <textarea name="address" class="form-control shadow-none" rows="2" required></textarea>
@@ -248,6 +304,114 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
                 alert('Please verify your email first');
             }
         });
+
+        function sendForgotPasswordOTP() {
+    const email = document.getElementById('forgot-email').value;
+    const sendButton = document.getElementById('sendForgotPasswordBtn');
+    
+    if(email) {
+        // Disable button immediately when sending
+        sendButton.disabled = true;
+        sendButton.textContent = 'Sending...';
+        
+        fetch('check_and_send_otp.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if(data.success) {
+                document.getElementById('emailForm').style.display = 'none';
+                document.getElementById('otpVerificationForm').style.display = 'block';
+                alert('OTP sent successfully! Please check your email.');
+            } else {
+                // Re-enable button if email not found
+                sendButton.disabled = false;
+                sendButton.textContent = 'Send Email';
+                alert(data.message || 'Email not found in our system');
+            }
+        })
+        .catch(error => {
+            // Re-enable button on error
+            sendButton.disabled = false;
+            sendButton.textContent = 'Send Email';
+            console.error('Error:', error);
+            alert('Server error occurred. Please try again.');
+        });
+    }
+}
+
+
+
+function verifyForgotPasswordOTP() {
+    const otp = Array.from({length: 6}, (_, i) => document.getElementById(`input${i+1}`).value).join('');
+    const email = document.getElementById('forgot-email').value;
+
+    fetch('verify_otp.php', {
+        method: 'POST',
+        body: JSON.stringify({ email, otp }),
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            document.getElementById('otpVerificationForm').style.display = 'none';
+            document.getElementById('newPasswordForm').style.display = 'block';
+        } else {
+            alert('Invalid OTP');
+        }
+    });
+}
+
+
+function changePassword() {
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    const email = document.getElementById('forgot-email').value;
+
+    if(newPassword !== confirmPassword) {
+        alert('Passwords do not match');
+        return;
+    }
+
+    fetch('change_password.php', {
+        method: 'POST',
+        body: JSON.stringify({
+            email,
+            password: newPassword
+        }),
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            alert('Password changed successfully');
+            document.getElementById('forgotPasswordModal').style.display = 'none';
+            // Remove modal backdrop
+            document.querySelector('.modal-backdrop').remove();        } else {
+            alert(data.message || 'Failed to change password');
+        }
+    });
+}
+
+// Auto-focus next input in OTP verification
+document.querySelectorAll('#otpVerificationForm input').forEach((input, index) => {
+    input.addEventListener('input', function() {
+        if(this.value && index < 3) {
+            document.getElementById(`input${index + 2}`).focus();
+        }
+    });
+});
         </script>
 
 

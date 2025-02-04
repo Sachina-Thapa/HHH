@@ -1,0 +1,99 @@
+/* Align the content with the side menu */
+.content {
+    margin-left: 200px; /* Adjust the margin to match the width of your side menu */
+    padding: 20px;
+}
+
+/* Style the booking boxes */
+.booking-box, .room-selection-box {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.booking-box h5, .room-selection-box h5 {
+    margin-bottom: 15px;
+}
+
+/* Style the form elements */
+.form-label {
+    font-weight: bold;
+}
+
+.form-select {
+    margin-bottom: 10px;
+}
+
+/* Style the buttons */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004a9b;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.alert {
+    display: none; /* Initially hidden */
+    margin-top: 20px; /* Space above the alert */
+    padding: 15px; /* Padding inside the alert */
+    border-radius: 5px; /* Rounded corners */
+}
+
+.alert-warning {
+    background-color: #fff3cd; /* Light yellow background */
+    color: #856404; /* Dark yellow text */
+}
+
+.alert-success {
+    background-color: #d4edda; /* Light green background */
+    color: #155724; /* Dark green text */
+}
+
+.alert-danger {
+    background-color: #f8d7da; /* Light red background */
+    color: #721c24; /* Dark red text */
+}
+
+#bookingStatusMessage {
+    margin-top: 20px;
+    text-align: center;
+    padding: 10px;
+    color: white;
+}
+
+#messageBox {
+    display: none;
+    background-color: #f1f1f1;
+    color: black;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#closeMessage {
+    margin-top: 10px;
+    background-color: #ff4747;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
