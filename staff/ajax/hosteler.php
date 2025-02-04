@@ -36,7 +36,7 @@ if (isset($_POST['get_hosteler'])) {
             <td>$status</td>
             <td>{$row['created_at']}</td>
             <td>
-                <button onclick='vhosteler({$row['id']})' class='btn btn-info btn-sm'>View</button>
+                <button onclick='viewhosteler({$row['id']})' class='btn btn-info btn-sm'>View</button>
                 <button onclick='remove_hosteler({$row['id']})' class='btn btn-danger btn-sm'>Remove</button>
             </td>
         </tr>
@@ -112,7 +112,7 @@ if (isset($_POST['search_hosteler'])) {
             <td>$status</td>
             <td>{$row['created_at']}</td>
             <td>
-              <button onclick='vhosteler({$row['id']})' class='btn btn-info btn-sm'>View</button>
+              <button onclick='viewhosteler({$row['id']})' class='btn btn-info btn-sm'>View</button>
               <button onclick='remove_hosteler({$row['id']})' class='btn btn-danger btn-sm'>Remove</button>
             </td>
         </tr>

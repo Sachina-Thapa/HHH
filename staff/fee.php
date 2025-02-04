@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fee</title>
+    <title>Hosteler Fee Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Sidebar styling */
         .sidebar {
@@ -11,10 +12,9 @@
             top: 0;
             left: 0;
             height: 100vh;
-            width: 200px; /* Width of the sidebar */
+            width: 200px;
             background-color: #343a40;
             padding-top: 20px;
-            z-index: 1000; /* Ensures the sidebar stays above other content */
         }
 
         .sidebar a {
@@ -28,187 +28,117 @@
             background-color: #495057;
         }
 
-        /* Main content styling */
         .main-content {
-            margin-left: 200px; /* Matches the width of the sidebar */
+            margin-left: 200px;
             padding: 20px;
         }
-
-        /* Card styling inside the main content */
-        .card {
-            margin-bottom: 20px;
-        }
-
-        /* Invoice table styling */
-        .table {
-            width: 100%;
-        }
     </style>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        function fetchHostelerDetails() {
+            const id = document.getElementById('idno').value.trim();
+
+            if (id) {
+                // AJAX call to fetch hosteler details
+                fetch(`ajax/fee.php?id=${id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data) {
+                            // Populate fields with received data
+                            document.getElementById('name').value = data.name || '';
+                            document.getElementById('roomtype').value = data.room_type || '';
+                            document.getElementById('roomno').value = data.room_no || '';
+                            document.getElementById('checkIn').value = data.check_in || '';
+                            document.getElementById('checkOut').value = data.check_out || '';
+                            document.getElementById('days').value = calculateDays(data.check_in, data.check_out);
+                            document.getElementById('roomPrice').value = data.room_price || '';
+                            document.getElementById('services').value = data.services || '';
+                            document.getElementById('total').value = calculateTotal(data.room_price, document.getElementById('days').value);
+                        } else {
+                            alert('No details found for this ID.');
+                        }
+                    })
+                    .catch(error => console.error('Error fetching details:', error));
+            } else {
+                alert('Please enter a valid ID.');
+            }
+        }
+
+        function calculateDays(checkIn, checkOut) {
+            const inDate = new Date(checkIn);
+            const outDate = new Date(checkOut);
+            if (!isNaN(inDate) && !isNaN(outDate)) {
+                const diffTime = Math.abs(outDate - inDate);
+                return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Convert milliseconds to days
+            }
+            return '';
+        }
+
+        function calculateTotal(roomPrice, days) {
+            if (roomPrice && days) {
+                return parseFloat(roomPrice) * parseInt(days);
+            }
+            return '';
+        }
+    </script>
 </head>
 <body>
     <?php require('inc/sidemenu.php'); ?>
-    <!-- Main Content -->
     <div class="main-content">
-    <?php 
-    require('inc/db.php'); ?>
-        <div class="container-fluid p-4" id="main-content">
+        <div class="container-fluid p-4">
             <div class="row g-4">
-                <!-- Left Side - Stay Duration Calculation -->
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="card">
                         <div class="card-header bg-dark text-white">
-                            <h2 class="mb-0">Stay Duration</h2>
+                            <h2>Hosteler Details</h2>
                         </div>
                         <div class="card-body">
                             <form>
                                 <div class="mb-3">
-                                    <label for="id" class="form-label">ID No.</label>
-                                    <input type="text" class="form-control" id="idNo">
+                                    <label for="id no" class="form-label">Hosteler ID</label>
+                                    <input type="text" class="form-control" id="idno" onblur="fetchHostelerDetails()">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="hostelername" class="form-label">Hosteler Name</label>
-                                    <input type="text" class="form-control" id="hostelername">
+                                    <label for="name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="name" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="roomtype" class="form-label">Room Type</label>
-                                    <input type="text" class="form-control" id="roomtype">
+                                    <input type="text" class="form-control" id="roomtype" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="roomno" class="form-label">Room No</label>
-                                    <input type="text" class="form-control" id="roomno">
+                                    <input type="text" class="form-control" id="roomno" readonly>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="checkIn" class="form-label">Check In</label>
-                                    <input type="text" class="form-control" id="checkIn">
+                                    <label for="checkIn" class="form-label">Check-In</label>
+                                    <input type="text" class="form-control" id="checkIn" readonly>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="checkOut" class="form-label">Check Out</label>
-                                    <input type="text" class="form-control" id="checkOut">
+                                    <label for="checkOut" class="form-label">Check-Out</label>
+                                    <input type="text" class="form-control" id="checkOut" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="days" class="form-label">No. of Days</label>
-                                    <input type="text" class="form-control" id="days" >
+                                    <input type="text" class="form-control" id="days" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="roomPrice" class="form-label">Room Price</label>
-                                    <input type="text" class="form-control" id="roomPrice" >
+                                    <input type="text" class="form-control" id="roomPrice" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="services" class="form-label">Services</label>
-                                    <input type="text" class="form-control" id="foodOrders" >
+                                    <input type="text" class="form-control" id="services" readonly>
                                 </div>
                                 <div class="mb-3">
                                     <label for="total" class="form-label">Total</label>
-                                    <input type="text" class="form-control" id="total" >
+                                    <input type="text" class="form-control" id="total" readonly>
                                 </div>
-                                <!-- <button type="submit" class="btn btn-dark w-100">Check Out</button> -->
                             </form>
                         </div>
                     </div>
                 </div>
-
-                <!-- Right Side - Invoice -->
-                <!-- <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row mb-4">
-                                <div class="col">
-                                    <h1 class="hotel-name display-4 mb-2">Her Home Hostel</h1>
-                                    <p class="mb-0">Gandaki, Nepal</p>
-                                    <p class="mb-0">Damauli, Tanahun</p>
-                                    <p class="mb-0">33900, Vyas-2</p>
-                                    <p class="mb-0">Phone: 065-560000</p>
-                                    <p>Website: www.herhomehostel.com</p>
-                                </div>
-                                <div class="col-auto">
-                                    <label for="date" class="form-label">Date:</label>
-                                    <input type="date" id="date" class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="row mb-4">
-                                <div class="col-md-4">
-                                    <label for="invoiceNo" class="form-label">Invoice No:</label>
-                                    <input type="text" id="invoiceNo" class="form-control" placeholder="Invoice No">
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="form-label">Billed To:</label>
-                                <input type="text" class="form-control mb-2" placeholder="Customer Name">
-                                <input type="text" class="form-control" placeholder="Customer Address">
-                            </div>
-
-                            <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <label class="form-label">Check In:</label>
-                                    <input type="date" id="date" class="form-control">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Check Out:</label>
-                                    <input type="date" id="date" class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="table-responsive mb-4">
-                                <table class="table table-bordered">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th>Type</th>
-                                            <th>Item/Service</th>
-                                            <th>Quantity</th>
-                                            <th>Rate</th>
-                                            <th>Amount</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>&nbsp;</td>
-                                            <td>&nbsp;</td>
-                                            <td>&nbsp;</td>
-                                            <td>&nbsp;</td>
-                                            <td>&nbsp;</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="row justify-content-end">
-                                <div class="col-md-5">
-                                    <div class="mb-2 row">
-                                        <label class="col-sm-4 col-form-label">Sub Total:</label>
-                                        <div class="col-sm-8">
-                                            <input type="text" class="form-control" placeholder="Sub Total">
-                                        </div>
-                                    </div>
-                                    <div class="mb-2 row">
-                                        <label class="col-sm-4 col-form-label">Discount:</label>
-                                        <div class="col-sm-8">
-                                            <input type="text" class="form-control" placeholder="Discount">
-                                        </div>
-                                    </div>
-                                    <div class="mb-2 row">
-                                        <label class="col-sm-4 col-form-label">VAT (13%):</label>
-                                        <div class="col-sm-8">
-                                            <input type="text" class="form-control" placeholder="VAT 13%">
-                                        </div>
-                                    </div>
-                                    <div class="mb-2 row">
-                                        <label class="col-sm-4 col-form-label">Total:</label>
-                                        <div class="col-sm-8">
-                                            <input type="text" class="form-control" placeholder="Total">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

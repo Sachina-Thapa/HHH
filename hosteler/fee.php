@@ -38,7 +38,7 @@ if ($result->num_rows > 0) {
 }
 
 // Fetch booking details for the logged-in hosteler
-$stmt = $conn->prepare("SELECT check_in, check_out, rno, bstatus FROM booking WHERE id = ? AND bstatus = 'confirmed'");
+$stmt = $conn->prepare("SELECT check_in, check_out, rid, bstatus FROM booking WHERE id = ? AND bstatus = 'confirmed'");
 if ($stmt === false) {
     die('Query preparation failed: ' . $conn->error);
 }
@@ -52,7 +52,7 @@ if ($result->num_rows === 0) {
     $bookingDetails = null; // No booking found
 } else {
     $bookingDetails = $result->fetch_assoc();
-    $room_no = $bookingDetails['rno'];
+    $room_no = $bookingDetails['rid'];
     
     // Fetch room price
     $stmt = $conn->prepare("SELECT rprice FROM room WHERE rno = ?");

@@ -143,120 +143,119 @@
 
     <!-- Hosteler Service Requests Table -->
     <h3 class="mt-4">Hosteler Service Requests</h3>
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Hosteler Name</th>
-                    <th>Service ID</th>
-                    <th>Service Name</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php
-            // Query to fetch only pending services
-            $stmt = $mysqli->query("SELECT hservice.id, hservice.seid, hservice.name, hservice.price, hservice.hid, hservice.status, hostelers.name AS hosteler_name 
-                                     FROM hservice 
-                                     JOIN hostelers ON hservice.hid = hostelers.id
-                                     WHERE hservice.status = 'Pending'");
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Hosteler Name</th>
+                <th>Service ID</th>
+                <th>Service Name</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php
+        // Include database connection
+        include __DIR__ . '/inc/db.php';
+        // Query to fetch only pending services
+        $stmt = $mysqli->query("SELECT hservice.id, hservice.seid, hservice.name, hservice.price, hservice.hid, hservice.status, hostelers.name AS hosteler_name 
+                                 FROM hservice 
+                                 JOIN hostelers ON hservice.hid = hostelers.id
+                                 WHERE hservice.status = 'Pending'");
 
-            if (!$stmt) {
-                die("Query failed: " . $mysqli->error);
-            }
+        if (!$stmt) {
+            die("Query failed: " . $mysqli->error);
+        }
 
-            $count = 1;
-            while ($row = $stmt->fetch_assoc()) {
-                echo "<tr id='row-{$row['id']}'>
-                        <td>{$count}</td>
-                        <td>{$row['hosteler_name']}</td>
-                        <td>{$row['seid']}</td>
-                        <td>{$row['name']}</td>
-                        <td>{$row['price']}</td>
-                        <td>{$row['status']}</td>
-                        <td>
-                            <form method='post' action='ajax_handler.php' class='action-form'>
-                                <input type='hidden' name='id' value='{$row['id']}'>
-                                <button type='button' name='action' value='accept' class='btn btn-success btn-sm accept-btn'>Accept</button>
-                                <button type='button' name='action' value='decline' class='btn btn-danger btn-sm decline-btn'>Decline</button>
-                            </form>
-                            <div class='message' id='message-{$row['id']}'></div>
-                        </td>
-                      </tr>";
-                $count++;
-            }
-            ?>
-            </tbody>
-        </table>
-    </div>
+        $count = 1;
+        while ($row = $stmt->fetch_assoc()) {
+            echo "<tr data-id='{$row['id']}'>
+                    <td>{$count}</td>
+                    <td>{$row['hosteler_name']}</td>
+                    <td>{$row['seid']}</td>
+                    <td>{$row['name']}</td>
+                    <td>{$row['price']}</td>
+                    <td>{$row['status']}</td>
+                    <td>
+                        <button type='button' class='btn btn-success btn-sm accept-btn' onclick='confirmservice({$row['id']}, {$row['seid']})'>Accept</button>
+                        <button type='button' class='btn btn-danger btn-sm decline-btn' onclick='cancelservice({$row['id']}, {$row['seid']})'>Decline</button>
+                        <div class='message' id='message-{$row['id']}'></div>
+                    </td>
+                  </tr>";
+            $count++;
+        }
+        ?>
+        </tbody>
+    </table>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.querySelectorAll('.action-form').forEach(form => {
-        // Extract the buttons
-        const acceptButton = form.querySelector('.accept-btn');
-        const declineButton = form.querySelector('.decline-btn');
-        const messageDiv = form.querySelector('.message');
+function confirmservice(id, seid) {
 
-        acceptButton.addEventListener('click', function() {
-            handleFormSubmit(form, 'accept');
-        });
+    if (confirm("Are you sure you want to confirm this booking?")) {
+        let formData = new FormData();
+        formData.append('action', 'confirm');
+        formData.append('id', id);
+        formData.append('seid', seid); // Include seid
 
-        declineButton.addEventListener('click', function() {
-            handleFormSubmit(form, 'decline');
-        });
-    });
-
-    function handleFormSubmit(form, action) {
-        const formData = new FormData(form);
-        formData.append('action', action); // Append action manually
-        const id = formData.get('id');
-        const row = document.getElementById(`row-${id}`);
-        const messageDiv = form.querySelector('.message');
-
-        // Disable both buttons after one is clicked
-        form.querySelectorAll('button').forEach(button => {
-            button.disabled = true;
-        });
-
-        // Send the form data using fetch
-        fetch('staffdash.php', {
+        fetch('../ajax/staffdash.php', {
             method: 'POST',
-            body: formData
+            body: formData,
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok: ' + response.statusText);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Show the message based on the action
-                if (data.action === 'accept') {
-                    messageDiv.textContent = `You have accepted the service: ${row.cells[3].textContent} for ${row.cells[1].textContent}`;
-                } else if (data.action === 'decline') {
-                    messageDiv.textContent = `You have declined the service: ${row.cells[3].textContent} for ${row.cells[1].textContent}`;
+        .then((response) => response.text())
+        .then((data) => {
+            if (data === '1') {
+                alert("Booking confirmed!");
+                const row = document.querySelector(`tr[data-id='${id}']`);
+                if (row) {
+                    row.remove();
                 }
-                messageDiv.style.display = 'block';
-
-                // Remove the row immediately
-                row.remove();
-
-                // Set a timeout to remove the message after 3 seconds
-                setTimeout(() => {
-                    messageDiv.style.display = 'none'; // Hide the message after 3 seconds
-                }, 3000);
             } else {
-                console.error(data.message); // Log the error message if any
+                console.error("Error confirming booking: " + data);
+                alert("Failed to confirm booking: " + data);
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch((error) => {
+            console.error("Error confirming booking:", error);
+            alert("An error occurred while confirming the booking. Please try again.");
+        });
     }
+}
+
+function cancelservice(id, seid) {
+    if (confirm("Are you sure you want to cancel this booking?")) {
+        let formData = new FormData();
+        formData.append('action', 'cancel');
+        formData.append('id', id);
+        formData.append('seid', seid); // Include seid
+
+        fetch('../ajax/staffdash.php', {
+            method: 'POST',
+            body: formData,
+        })
+        .then((response) => response.text())
+        .then((data) => {
+            if (data === '1') {
+                alert("Booking canceled!");
+                const row = document.querySelector(`tr[data-id='${id}']`);
+                if (row) {
+                    row.remove();
+                }
+            } else {
+                console.error("Error canceling booking: " + data);
+                alert("Failed to cancel booking: " + data);
+            }
+        })
+        .catch((error) => {
+            console.error("Error canceling booking:", error);
+            alert("An error occurred while canceling the booking. Please try again.");
+        });
+    }
+}
 </script>
 </body>
 </html>
