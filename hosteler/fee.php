@@ -31,15 +31,7 @@ if ($result->num_rows > 0) {
 }
 
 // Fetch booking details for the logged-in hosteler
-<<<<<<< HEAD
-$stmt = $conn->prepare("SELECT check_in, check_out, rid, bstatus FROM booking WHERE id = ? AND bstatus = 'confirmed'");
-if ($stmt === false) {
-    die('Query preparation failed: ' . $conn->error);
-}
-
-=======
 $stmt = $conn->prepare("SELECT check_in, check_out, rno, bstatus FROM booking WHERE id = ? AND bstatus = 'confirmed'");
->>>>>>> a29816059b9761239e125e7e3471ccbaca55a045
 $stmt->bind_param("i", $hid);
 $stmt->execute();
 $result = $stmt->get_result();
