@@ -26,7 +26,7 @@ if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $hid = $row['id']; // Get the hosteler ID
 } else {
-    $_SESSION['error_message'] = "User  not found.";
+    $_SESSION['error_message'] = "User not found.";
     header("Location: http://localhost/hhh/index.php");
     exit();
 }
@@ -77,41 +77,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $stmt->close();
 }
 
-// Handle status change to accepted
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accept_service'])) {
-    $service_id = $_POST['service_id'] ?? null;
-
-    if ($service_id) {
-        // Update the status to accepted
-        $update_stmt = $conn->prepare("UPDATE hservice SET status = 'accepted' WHERE seid = ? AND hid = ?");
-        $update_stmt->bind_param("ii", $service_id, $hid);
-        if ($update_stmt->execute()) {
-            $success_message = "Service accepted.";
-        } else {
-            $error_message = "Error updating service status: " . $update_stmt->error;
-        }
-        $update_stmt->close();
-    } else {
-        $error_message = "Invalid service ID.";
-    }
-}
-
-// Fetch services from the database for selection
-$services = [];
+// Fetch all services from the database
+$all_services = [];
 $stmt = $conn->prepare("SELECT seid, name, price FROM services");
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        $services[] = $row;
+        $all_services[] = $row;
     }
-} else {
-    $error_message = "No services found.";
 }
 $stmt->close();
 
-// Fetch services requested by the logged-in hosteler
+// Fetch all requested services by the logged-in hosteler
 $requested_services = [];
 $stmt = $conn->prepare("SELECT seid, name, price, status FROM hservice WHERE hid = ?");
 $stmt->bind_param("i", $hid);
@@ -125,14 +104,33 @@ if ($result->num_rows > 0) {
 }
 $stmt->close();
 
-// Filter out accepted services for display
-$pending_services = array_filter($requested_services, function($service) {
-    return $service['status'] === 'pending';
+// Create arrays for pending and accepted services
+$pending_services = [];
+$accepted_services = [];
+$accepted_service_ids = []; // Track accepted service IDs
+
+foreach ($requested_services as $service) {
+    if ($service['status'] === 'pending') {
+        $pending_services[] = $service;
+    } elseif ($service['status'] === 'accepted') {
+        $accepted_services[] = $service;
+        $accepted_service_ids[] = $service['seid'];
+    }
+}
+
+// Filter available services to exclude those that are pending or accepted
+$available_services = array_filter($all_services, function($service) use ($pending_services, $accepted_service_ids) {
+    // Check if service is not in pending or accepted state
+    $is_pending = false;
+    foreach ($pending_services as $pending) {
+        if ($pending['seid'] == $service['seid']) {
+            $is_pending = true;
+            break;
+        }
+    }
+    return !$is_pending && !in_array($service['seid'], $accepted_service_ids);
 });
 
-$accepted_services = array_filter($requested_services, function($service) {
-    return $service['status'] === 'accepted';
-});
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -145,8 +143,8 @@ $accepted_services = array_filter($requested_services, function($service) {
         body {
             margin: 0;
             background-color: #f8f9fa;
-            padding: 20px; /* Optional for spacing */
-            overflow-y: auto; /* Ensures vertical scrolling */
+            padding: 20px;
+            overflow-y: auto;
         }
 
         .signup-card {
@@ -157,12 +155,43 @@ $accepted_services = array_filter($requested_services, function($service) {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 30px;
             box-sizing: border-box;
-            margin: 0 auto; /* Center horizontally */
+            margin: 0 auto;
         }
 
         table {
             width: 100%;
             margin-top: 20px;
+        }
+
+        .service-item {
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background-color: #fff;
+        }
+
+        .service-item.accepted {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .service-status {
+            font-size: 0.9em;
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .status-accepted {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-pending {
+            background-color: #ffc107;
+            color: #000;
         }
     </style>
 </head>
@@ -180,69 +209,62 @@ $accepted_services = array_filter($requested_services, function($service) {
 
     <!-- Service selection form -->
     <form method="POST" action="">
-        <?php foreach ($services as $service): ?>
-            <div class="mb-3 form-check">
-                <input class="form-check-input" type="checkbox" name="services[]" value="<?php echo htmlspecialchars($service['seid']); ?>" id="service_<?php echo htmlspecialchars($service['seid']); ?>">
-                <label class="form-check-label" for="service_<?php echo htmlspecialchars($service['seid']); ?>">
-                    <?php echo htmlspecialchars($service['name']); ?> ($<?php echo htmlspecialchars($service['price']); ?>)
-                </label>
-            </div>
-        <?php endforeach; ?>
-        <button type="submit" name="submit" class="btn btn-primary">Request Services</button>
+        <!-- Display Available Services -->
+        <?php if (!empty($available_services)): ?>
+            <h4 class="mt-4 mb-3">Available Services</h4>
+            <?php foreach ($available_services as $service): ?>
+                <div class="service-item">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="services[]" 
+                               value="<?php echo htmlspecialchars($service['seid']); ?>" 
+                               id="service_<?php echo htmlspecialchars($service['seid']); ?>">
+                        <label class="form-check-label" for="service_<?php echo htmlspecialchars($service['seid']); ?>">
+                            <?php echo htmlspecialchars($service['name']); ?> 
+                            (Rs <?php echo htmlspecialchars($service['price']); ?>)
+                        </label>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
+        <!-- Display Accepted Services -->
+        <?php if (!empty($accepted_services)): ?>
+            <h4 class="mt-4 mb-3">Your Active Services</h4>
+            <?php foreach ($accepted_services as $service): ?>
+                <div class="service-item accepted">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>
+                            <?php echo htmlspecialchars($service['name']); ?> 
+                            (Rs <?php echo htmlspecialchars($service['price']); ?>)
+                            <span class="service-status status-accepted">Active</span>
+                        </span>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
+        <?php if (!empty($available_services)): ?>
+            <button type="submit" name="submit" class="btn btn-primary mt-4">Request Selected Services</button>
+        <?php endif; ?>
     </form>
 
-    <!-- Requested services table -->
-    <h3 class="mt-4">Your Pending Services</h3>
+    <!-- Pending Services Section -->
     <?php if (!empty($pending_services)): ?>
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>Service ID</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Status</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($pending_services as $service): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($service['seid']); ?></td>
-                    <td><?php echo htmlspecialchars($service['name']); ?></td>
-                    <td>$<?php echo htmlspecialchars($service['price']); ?></td>
-                    <td><?php echo htmlspecialchars(ucfirst($service['status'])); ?></td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php else: ?>
-        <p>No pending services requested yet.</p>
-    <?php endif; ?>
-
-    <h3 class="mt-4">Your Accepted Services</h3>
-    <?php if (!empty($accepted_services)): ?>
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>Service ID</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Status</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($accepted_services as $service): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($service['seid']); ?></td>
-                    <td><?php echo htmlspecialchars($service['name']); ?></td>
-                    <td>$<?php echo htmlspecialchars($service['price']); ?></td>
-                    <td><?php echo htmlspecialchars(ucfirst($service['status'])); ?></td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php else: ?>
-        <p>No accepted services yet.</p>
+        <h4 class="mt-4 mb-3">Pending Service Requests</h4>
+        <?php foreach ($pending_services as $service): ?>
+            <div class="service-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>
+                        <?php echo htmlspecialchars($service['name']); ?> 
+                        ($<?php echo htmlspecialchars($service['price']); ?>)
+                        <span class="service-status status-pending">Pending</span>
+                    </span>
+                </div>
+            </div>
+        <?php endforeach; ?>
     <?php endif; ?>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

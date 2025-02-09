@@ -1,132 +1,99 @@
 <?php
-session_start(); // Start the session
-
+session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Include your database connection file
 require('../inc/db.php');
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 
-// Check if the request method is POST
+// Check request method
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo "error: Invalid request method";
-    exit(); // Stop further execution
+    echo json_encode(['status' => 'error', 'message' => 'Invalid request method']);
+    exit();
 }
 
-// Check if the user is logged in
+// Check login status
 if (!isset($_SESSION['username'])) {
-    echo "error: User not logged in";
-    exit(); // Stop further execution
+    echo json_encode(['status' => 'error', 'message' => 'User not logged in']);
+    exit();
 }
 
-$username = $_SESSION['username']; // Get the logged-in username
-
-// Fetch the user information
-$sql = "SELECT id FROM hostelers WHERE username = ?";
-$stmt = $conn->prepare($sql);
-if (!$stmt) {
-    die("Prepare failed: " . $conn->error);
-}
+// Get user info
+$username = $_SESSION['username'];
+$stmt = $conn->prepare("SELECT id FROM hostelers WHERE username = ?");
 $stmt->bind_param("s", $username);
 $stmt->execute();
 $userInfo = $stmt->get_result()->fetch_assoc();
 
 if (!$userInfo) {
-    echo "error: User not found";
-    exit(); // Stop further execution
+    echo json_encode(['status' => 'error', 'message' => 'User not found']);
+    exit();
 }
 
+// Get form data
 $hosteler_id = $userInfo['id'];
-$room_no = $_POST['room_no'] ?? null; // This should be the room number
-$st_id = $_POST['st_id'] ?? null; // Assuming you have this in your form
-$check_in = $_POST['check_in'] ?? null; // Assuming you have this in your form
-$check_out = $_POST['check_out'] ?? null; // Assuming you have this in your form
-$arrival = $_POST['arrival'] ?? null; // Assuming you have this in your form
-$number_of_days = $_POST['number_of_days'] ?? null; // Assuming you have this in your form
+$room_no = $_POST['rno'] ?? null;
+$arrival = (int)($_POST['arrival'] ?? 0);
 
-// Check if required fields are set
+// Debug log
+error_log("Received POST data: " . print_r($_POST, true));
+
+// Validate fields
 if (!$room_no) {
-    echo "error: Missing required fields";
-    exit(); // Stop further execution
+    echo json_encode(['status' => 'error', 'message' => 'Room number is required']);
+    exit();
 }
 
-// Check if the room exists
-$room_check_sql = "SELECT rno FROM room WHERE rno = ?"; // Ensure using rno
-$room_check_stmt = $conn->prepare($room_check_sql);
-if (!$room_check_stmt) {
-    die("Prepare failed: " . $conn->error);
-}
-$room_check_stmt->bind_param("i", $room_no);
-$room_check_stmt->execute();
-$room_check_result = $room_check_stmt->get_result();
-
-if ($room_check_result->num_rows === 0) {
-    echo "error: Room does not exist";
-    exit(); // Stop further execution
+if (!$arrival) {
+    echo json_encode(['status' => 'error', 'message' => 'Arrival time is required']);
+    exit();
 }
 
-// Insert the booking data into the booking table
-$booking_sql = "INSERT INTO `booking` (`id`, `rno`, `bookingdate`, `bstatus`) VALUES (?, ?, NOW(), 'pending')";
+// Validate arrival time value
+if (!in_array($arrival, [1, 2, 3, 4])) {
+    echo json_encode(['status' => 'error', 'message' => 'Invalid arrival time']);
+    exit();
+}
+
+// Check room availability
+$room_check_sql = "SELECT rno FROM room WHERE rno = ? AND rno NOT IN (
+    SELECT rno FROM booking 
+    WHERE bstatus = 'pending')";
+
+$stmt = $conn->prepare($room_check_sql);
+$stmt->bind_param("i", $room_no);
+$stmt->execute();
+if ($stmt->get_result()->num_rows === 0) {
+    echo json_encode(['status' => 'error', 'message' => 'Room is not available']);
+    exit();
+}
+
+// Begin transaction
+$conn->begin_transaction();
+
+try {
+
+// Set current date for bookingdate
+$current_date = date('Y-m-d');
+
+// Insert booking with NULL for check_in and check_out
+$booking_sql = "INSERT INTO booking (id, rno, bookingdate, check_in, check_out, arrival, bstatus, number_of_days) 
+                VALUES (?, ?, NOW(), NULL, NULL, ?, 'pending', 1)";
 $stmt = $conn->prepare($booking_sql);
-if (!$stmt) {
-    die("Prepare failed: " . $conn->error);
-    // Responding with success or error
-    $response = [
-        'status' => 'success', // You can dynamically set this to 'error' based on conditions
-        'message' => 'Your booking has been successfully placed. You selected ' . $roomType . ' for ' . $roomNo . '.'
-    ];
+$stmt->bind_param("iis", $hosteler_id, $room_no, $arrival);
 
-    // Output JSON response
-    echo json_encode($response);
-} else {
-    // Handle GET or other methods if necessary
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Invalid request method.'
-    ]);
+if (!$stmt->execute()) {
+    throw new Exception($stmt->error);
 }
 
-
-
-$stmt->bind_param("ii", $hosteler_id, $room_no); // Ensure using rno
-if ($stmt->execute()) {
-    // Get the last inserted booking ID
-    $booking_id = $stmt->insert_id;
-}
-// Insert the booking data into the booking table
-if ($bstatus === 'pending') {
-    $booking_sql = "INSERT INTO `booking` (`id`, `rno`, `bookingdate`, `bstatus`) VALUES (?, ?, NOW(), 'pending')";
-    $stmt = $conn->prepare($booking_sql);
-    $stmt->bind_param("ii", $hosteler_id, $room_no);
-    if ($stmt->execute()) {
-        $booking_id = $stmt->insert_id;
-        echo json_encode(['status' => 'success', 'message' => 'Booking placed successfully with Pending status.']);
-        exit();
-    }
+// Commit transaction
+$conn->commit();
+echo json_encode(['status' => 'success', 'message' => 'Booking placed successfully']);
+} catch (Exception $e) {
+    // Rollback transaction on error
+    $conn->rollback();
+    error_log("Booking error: " . $e->getMessage()); // Add error logging
+    echo json_encode(['status' => 'error', 'message' => 'Booking failed: ' . $e->getMessage()]);
 }
 
-// For confirmed bookings
-if ($bstatus === 'confirmed') {
-    // Validate additional fields
-    if (!$check_in || !$check_out || !$arrival || !$number_of_days) {
-        echo json_encode(['status' => 'error', 'message' => 'Please fill in all the required fields']);
-        exit();
-    }
-
-    // Update the booking with additional fields
-    $update_sql = "UPDATE `booking` SET `st_id` = ?, `check_in` = ?, `check_out` = ?, `arrival` = ?, `number_of_days` = ? WHERE `id` = ?";
-    $update_stmt = $conn->prepare($update_sql);
-    $update_stmt->bind_param("issssi", $st_id, $check_in, $check_out, $arrival, $number_of_days, $booking_id);
-    if ($update_stmt->execute()) {
-        echo json_encode(['status' => 'success', 'message' => 'Booking confirmed successfully.']);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Update failed.']);
-    }
-}
-
-// Close the connection
 $conn->close();
 ?>

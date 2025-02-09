@@ -1,40 +1,75 @@
 <?php
-require('../inc/db.php'); // Correct path to your DB connection
+header('Content-Type: application/json');
+
+require('../../admin/inc/db.php'); 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get POST data
-    $bid = $_POST['bid'];
-    $hosteler_id = $_POST['hosteler_id'];
-    $action = $_POST['action']; // Can be 'confirm' or 'cancel'
-
-    // Determine the new status based on the action
-    if ($action === 'confirm') {
-        $new_status = 'confirmed';
-    } elseif ($action === 'cancel') {
-        $new_status = 'canceled';
-    } else {
-        echo "Invalid action!";
-        exit();
+    // Validate input data
+    if (!isset($_POST['bid']) || !isset($_POST['hosteler_id']) || !isset($_POST['action'])) {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Missing required parameters'
+        ]);
+        exit;
     }
 
-    // Prepare the SQL statement to update the status
-    $sql = "UPDATE booking SET bstatus = ? WHERE bid = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("si", $new_status, $bid);
+    // Sanitize inputs
+    $bid = intval($_POST['bid']);
+    $hosteler_id = intval($_POST['hosteler_id']);
+    $action = $_POST['action'];
 
-    // Execute the statement
-    if ($stmt->execute()) {
-        echo json_encode(['status' => 'success', 'message' => 'Booking status updated successfully.']);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Error updating booking status.']);
+    // Validate action
+    if (!in_array($action, ['confirm', 'cancel'])) {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Invalid action specified'
+        ]);
+        exit;
     }
 
-    // Close the statement
-    $stmt->close();
-}
+    // Set the new status based on action
+    $new_status = ($action === 'confirm') ? 'confirmed' : 'canceled';
 
-// Close the connection
-if (isset($conn)) {
+    try {
+        // Prepare and execute the update
+        $sql = "UPDATE booking SET bstatus = ? WHERE bid = ? AND id = ?";
+        $stmt = $conn->prepare($sql);
+        
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
+
+        $stmt->bind_param("sii", $new_status, $bid, $hosteler_id);
+        
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+
+        if ($stmt->affected_rows > 0) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Booking status updated successfully to ' . $new_status
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'No booking found with the provided ID'
+            ]);
+        }
+
+        $stmt->close();
+    } catch (Exception $e) {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Database error: ' . $e->getMessage()
+        ]);
+    }
+
+    // Close the connection
     $conn->close();
+} else {
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Invalid request method'
+    ]);
 }
-?>

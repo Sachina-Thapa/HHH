@@ -1,9 +1,52 @@
+<?php
+// Check if it's an AJAX request
+if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+    require_once('inc/db.php');
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $action = $_POST['action'] ?? '';
+        $id = $_POST['id'] ?? '';
+        $seid = $_POST['seid'] ?? '';
+
+        if (empty($id) || empty($action) || empty($seid)) {
+            echo "Missing required parameters";
+            exit;
+        }
+
+        // Prepare the new status based on the action
+        $status = ($action === 'confirm') ? 'accepted' : 'cancelled';
+
+        // Update the status in the hservice table
+        $stmt = $mysqli->prepare("UPDATE hservice SET status = ? WHERE id = ? AND seid = ?");
+        
+        if (!$stmt) {
+            echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+            exit;
+        }
+
+        $stmt->bind_param("sii", $status, $id, $seid);
+        
+        if ($stmt->execute()) {
+            if ($stmt->affected_rows > 0) {
+                echo "1"; // Success
+            } else {
+                echo "No rows were updated";
+            }
+        } else {
+            echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+        }
+
+        $stmt->close();
+        exit;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Staff Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
@@ -32,7 +75,7 @@
 
         /* Main content styling */
         .main-content {
-            margin-left: 210px; /* Adjust to be a bit more than sidebar width */
+            margin-left: 210px;
             padding: 20px;
         }
 
@@ -55,207 +98,217 @@
             color: #6c757d;
         }
 
-        .message {
-            display: none;
-            margin-top: 20px;
-            font-size: 16px;
-            color: #28a745;
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+        .status-pending {
+            background-color: #ffc107;
+            color: #000;
         }
     </style>
 </head>
 <body>
-<?php require('inc/sidemenu.php'); ?>
+    <?php require('inc/sidemenu.php'); ?>
 
-<div class="main-content">
-    <?php 
-    require('inc/db.php');
+    <div class="main-content">
+        <?php 
+        require('inc/db.php');
 
-    // Enable error reporting for debugging
-    error_reporting(E_ALL);
-    ini_set('display_errors', 1);
+        // Enable error reporting for debugging
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
 
-    // Query for Total Bookings
-    $stmt = $mysqli->query("SELECT COUNT(*) FROM booking");
-    $totalbooking = $stmt->fetch_row()[0];
-    
-    // Query for Available Rooms
-    $stmt = $mysqli->query("SELECT COUNT(*) FROM room");
-    $totalroom = $stmt->fetch_row()[0];
-    
-    // Query for Enquiries
-    $stmt = $mysqli->query("SELECT COUNT(*) FROM feedback");
-    $feedback = $stmt->fetch_row()[0];
-    
-    // Query for Hostelers
-    $stmt = $mysqli->query("SELECT COUNT(*) FROM hostelers");
-    $totalhosteler = $stmt->fetch_row()[0];
-    
-    // Query for Visitor Forms
-    $stmt = $mysqli->query("SELECT COUNT(*) FROM visitorform");
-    $visitorform = $stmt->fetch_row()[0];
-
-    // Check for messages
-    $message = '';
-    if (isset($_GET['action']) && isset($_GET['status'])) {
-        $action = $_GET['action'];
-        $message = "You have $action the service request.";
-    }
-    ?>
+        // Query for dashboard statistics
+        $stats = [
+            'rooms' => $mysqli->query("SELECT COUNT(*) FROM room")->fetch_row()[0],
+            'bookings' => $mysqli->query("SELECT COUNT(*) FROM booking")->fetch_row()[0],
+            'feedback' => $mysqli->query("SELECT COUNT(*) FROM feedback")->fetch_row()[0],
+            'hostelers' => $mysqli->query("SELECT COUNT(*) FROM hostelers")->fetch_row()[0],
+            'visitors' => $mysqli->query("SELECT COUNT(*) FROM visitorform")->fetch_row()[0]
+        ];
+        ?>
         
-    <!-- Display the stats in a row -->
-    <div class="row">
-        <div class="col-md-4">
-            <div class="stat-card">
-                <h2><?php echo $totalroom; ?></h2>
-                <p>Total Room</p>
+        <!-- Statistics Cards -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <h2><?php echo $stats['rooms']; ?></h2>
+                    <p>Total Rooms</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <h2><?php echo $stats['bookings']; ?></h2>
+                    <p>New Bookings</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <h2><?php echo $stats['feedback']; ?></h2>
+                    <p>Feedback Count</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <h2><?php echo $stats['hostelers']; ?></h2>
+                    <p>Total Hostelers</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <h2><?php echo $stats['visitors']; ?></h2>
+                    <p>Visitor Forms</p>
+                </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="stat-card">
-                <h2><?php echo $totalbooking; ?></h2>
-                <p>New Booking</p>
+
+        <!-- Service Requests Section -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="mb-0">Pending Service Requests</h3>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stat-card">
-                <h2><?php echo $feedback; ?></h2>
-                <p>Feedback</p>
-            </div>
-        </div>
-        <div class ="col-md-4">
-            <div class="stat-card">
-                <h2><?php echo $totalhosteler; ?></h2>
-                <p>Total Hosteler</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stat-card">
-                <h2><?php echo $visitorform; ?></h2>
-                <p>Visitor Form</p>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Hosteler Name</th>
+                                <th>Service ID</th>
+                                <th>Service Name</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            // Fetch pending service requests
+                            $stmt = $mysqli->query("SELECT 
+                                hservice.id, 
+                                hservice.seid, 
+                                hservice.name AS service_name, 
+                                hservice.price, 
+                                hservice.hid, 
+                                hservice.status, 
+                                hostelers.name AS hosteler_name 
+                            FROM hservice 
+                            JOIN hostelers ON hservice.hid = hostelers.id 
+                            WHERE hservice.status = 'pending'
+                            ORDER BY hservice.id DESC");
+
+                            if (!$stmt) {
+                                echo "<tr><td colspan='7' class='text-center text-danger'>Error fetching service requests</td></tr>";
+                            } else {
+                                $count = 1;
+                                while ($row = $stmt->fetch_assoc()) {
+                                    echo "<tr data-id='{$row['id']}'>
+                                            <td>{$count}</td>
+                                            <td>{$row['hosteler_name']}</td>
+                                            <td>{$row['seid']}</td>
+                                            <td>{$row['service_name']}</td>
+                                            <td>\${$row['price']}</td>
+                                            <td>
+                                                <span class='status-badge status-pending'>
+                                                    {$row['status']}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button type='button' class='btn btn-success btn-sm' 
+                                                    onclick='confirmservice({$row['id']}, {$row['seid']})'>
+                                                    <i class='bi bi-check-circle'></i> Accept
+                                                </button>
+                                                <button type='button' class='btn btn-danger btn-sm ms-2' 
+                                                    onclick='cancelservice({$row['id']}, {$row['seid']})'>
+                                                    <i class='bi bi-x-circle'></i> Decline
+                                                </button>
+                                            </td>
+                                        </tr>";
+                                    $count++;
+                                }
+                                if ($count === 1) {
+                                    echo "<tr><td colspan='7' class='text-center'>No pending service requests</td></tr>";
+                                }
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Display message if exists -->
-    <?php if ($message): ?>
-        <div class="alert alert-success"><?php echo $message; ?></div>
-    <?php endif; ?>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+    function showMessage(message, type = 'success') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.querySelector('.main-content').insertBefore(alertDiv, document.querySelector('.card'));
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
 
-    <!-- Hosteler Service Requests Table -->
-    <h3 class="mt-4">Hosteler Service Requests</h3>
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Hosteler Name</th>
-                <th>Service ID</th>
-                <th>Service Name</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        <?php
-        // Include database connection
-        include __DIR__ . '/inc/db.php';
-        // Query to fetch only pending services
-        $stmt = $mysqli->query("SELECT hservice.id, hservice.seid, hservice.name, hservice.price, hservice.hid, hservice.status, hostelers.name AS hosteler_name 
-                                 FROM hservice 
-                                 JOIN hostelers ON hservice.hid = hostelers.id
-                                 WHERE hservice.status = 'Pending'");
-
-        if (!$stmt) {
-            die("Query failed: " . $mysqli->error);
+    function confirmservice(id, seid) {
+        if (confirm("Are you sure you want to accept this service request?")) {
+            updateService(id, seid, 'confirm');
         }
+    }
 
-        $count = 1;
-        while ($row = $stmt->fetch_assoc()) {
-            echo "<tr data-id='{$row['id']}'>
-                    <td>{$count}</td>
-                    <td>{$row['hosteler_name']}</td>
-                    <td>{$row['seid']}</td>
-                    <td>{$row['name']}</td>
-                    <td>{$row['price']}</td>
-                    <td>{$row['status']}</td>
-                    <td>
-                        <button type='button' class='btn btn-success btn-sm accept-btn' onclick='confirmservice({$row['id']}, {$row['seid']})'>Accept</button>
-                        <button type='button' class='btn btn-danger btn-sm decline-btn' onclick='cancelservice({$row['id']}, {$row['seid']})'>Decline</button>
-                        <div class='message' id='message-{$row['id']}'></div>
-                    </td>
-                  </tr>";
-            $count++;
+    function cancelservice(id, seid) {
+        if (confirm("Are you sure you want to decline this service request?")) {
+            updateService(id, seid, 'cancel');
         }
-        ?>
-        </tbody>
-    </table>
-</div>
+    }
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
-<script>
-function confirmservice(id, seid) {
-
-    if (confirm("Are you sure you want to confirm this booking?")) {
-        let formData = new FormData();
-        formData.append('action', 'confirm');
+    function updateService(id, seid, action) {
+        const formData = new FormData();
+        formData.append('action', action);
         formData.append('id', id);
-        formData.append('seid', seid); // Include seid
+        formData.append('seid', seid);
 
-        fetch('../ajax/staffdash.php', {
+        fetch(window.location.href, {
             method: 'POST',
             body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         })
-        .then((response) => response.text())
-        .then((data) => {
+        .then(response => response.text())
+        .then(data => {
             if (data === '1') {
-                alert("Booking confirmed!");
+                // Remove the row from the table
                 const row = document.querySelector(`tr[data-id='${id}']`);
                 if (row) {
                     row.remove();
                 }
-            } else {
-                console.error("Error confirming booking: " + data);
-                alert("Failed to confirm booking: " + data);
-            }
-        })
-        .catch((error) => {
-            console.error("Error confirming booking:", error);
-            alert("An error occurred while confirming the booking. Please try again.");
-        });
-    }
-}
-
-function cancelservice(id, seid) {
-    if (confirm("Are you sure you want to cancel this booking?")) {
-        let formData = new FormData();
-        formData.append('action', 'cancel');
-        formData.append('id', id);
-        formData.append('seid', seid); // Include seid
-
-        fetch('../ajax/staffdash.php', {
-            method: 'POST',
-            body: formData,
-        })
-        .then((response) => response.text())
-        .then((data) => {
-            if (data === '1') {
-                alert("Booking canceled!");
-                const row = document.querySelector(`tr[data-id='${id}']`);
-                if (row) {
-                    row.remove();
+                
+                // Show success message
+                showMessage(`Service request ${action === 'confirm' ? 'accepted' : 'declined'} successfully!`);
+                
+                // Check if table is empty after removal
+                const tbody = document.querySelector('tbody');
+                if (!tbody.querySelector('tr')) {
+                    tbody.innerHTML = "<tr><td colspan='7' class='text-center'>No pending service requests</td></tr>";
                 }
             } else {
-                console.error("Error canceling booking: " + data);
-                alert("Failed to cancel booking: " + data);
+                throw new Error(data);
             }
         })
-        .catch((error) => {
-            console.error("Error canceling booking:", error);
-            alert("An error occurred while canceling the booking. Please try again.");
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('Failed to update service request: ' + error.message, 'danger');
         });
     }
-}
-</script>
+    </script>
 </body>
 </html>

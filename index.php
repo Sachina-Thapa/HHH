@@ -46,7 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     break;
                 case 'Hosteler':
                     $table = 'hostelers';
-                    $dashboard = 'hosteler/hostelerdash.php';
+                    // Check if there's a pending booking
+                    $dashboard = isset($_SESSION['booking_pending']) ? 'hosteler/bookNow.php' : 'hosteler/hostelerdash.php';
                     break;
                 default:
                     $errorMessage = "Invalid user type selected";
@@ -63,15 +64,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $row = $result->fetch_assoc();
                     if ($row['status'] == '1') {
                         $_SESSION['username'] = $username;
+                        $_SESSION['user_type'] = $userType;
+                        
+                        // Clear booking_pending session if it exists
+                        if(isset($_SESSION['booking_pending'])) {
+                            unset($_SESSION['booking_pending']);
+                        }
+                        
                         header("Location: $dashboard");
                         exit();
                     } else {
                         $errorMessage = "Account is not active.";
-              
                     }
                 } else {
                     $errorMessage = "Invalid username or password.";
-              
                 }
                 $stmt->close();
             }
@@ -227,10 +233,10 @@ $conn->close();
     </div>
     <div class="position-absolute top-0 bottom-0 start-0 end-0 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center">
       <div class="text-center text-white">
-      <h1 class="display-3 fw-bold mb-4">Welcome to <?php echo isset($site_settings['site_title']) ? htmlspecialchars($site_settings['site_title']) : 'Her Home Hostel'; ?></h1>
-      <p class="fs-4 mb-4">Experience comfort and community in our modern hostels</p>
-        <button class="btn btn-primary btn-lg">Book Now</button>
-      </div>
+  <h1 class="display-3 fw-bold mb-4">Welcome to <?php echo isset($site_settings['site_title']) ? htmlspecialchars($site_settings['site_title']) : 'Her Home Hostel'; ?></h1>
+  <p class="fs-4 mb-4">Experience comfort and community in our modern hostels</p>
+  <button onclick="checkLoginAndBook()" class="btn btn-primary btn-lg">Book Now</button>
+</div>
     </div>
     <button id="prevSlide" class="position-absolute start-0 top-50 translate-middle-y btn btn-outline-light">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -425,6 +431,19 @@ $conn->close();
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // Carousel Logic
+function checkLoginAndBook() {
+    <?php if (!isset($_SESSION['username'])): ?>
+        // If not logged in, show login modal
+        const loginModal = document.getElementById('loginModal');
+        if (loginModal) {
+            new bootstrap.Modal(loginModal).show();
+        }
+    <?php else: ?>
+        // If logged in, redirect to booking page
+        window.location.href = 'hosteler/bookNow.php';
+    <?php endif; ?>
+}
+
     const slides = document.querySelectorAll('.carousel-img');
     let currentSlide = 0;
 

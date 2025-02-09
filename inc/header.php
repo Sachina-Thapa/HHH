@@ -10,6 +10,29 @@ $conn = new mysqli($host, $user, $password, $database);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+if (!isset($_SESSION)) {
+    session_start();
+}
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    if ($row['status'] == '1') {
+        $_SESSION['username'] = $username;
+        $_SESSION['user_type'] = $userType;
+        
+        // If there was a pending booking attempt
+        if (isset($_SESSION['booking_pending']) && $_SESSION['booking_pending']) {
+            unset($_SESSION['booking_pending']);
+            echo "<script>window.location.href = 'hosteler/bookNow.php';</script>";
+            exit();
+        }
+        
+        header("Location: $dashboard");
+        exit();
+    } else {
+        $errorMessage = "Account is not active.";
+    }
+}
 // Fetch current site settings
 $settings_query = "SELECT * FROM site_settings LIMIT 1";
 $settings_result = mysqli_query($conn, $settings_query);
@@ -96,6 +119,7 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
                             <option value="Hosteler">Hosteler</option>
                         </select>
                         <input type="hidden" name="form_type" value="login">
+                           <input type="hidden" name="booking_redirect" value="<?php echo isset($_SESSION['booking_pending']) ? '1' : '0'; ?>">
 
                         <div class="d-flex align-items-center justify-content-between mb-2"> 
                             <button type="submit" class="btn btn-primary">LOGIN</button>
