@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 require('inc/db.php');
 require('inc/essentials.php'); // Include the essentials file
 
@@ -23,8 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add'])) {
         $error_message = "This username already exists. Please choose another username.";
     } else {
         // Proceed to insert the new staff
-        $stmt = $conn->prepare("INSERT INTO staff_data (name, email, phoneno, username, password) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssss", $staff_name, $staff_email, $staff_phoneno, $staff_uname, $staff_pass);
+       // After your initial POST checks, modify the prepare statement:
+$stmt = $conn->prepare("INSERT INTO staff_data (name, email, phoneno, username, password, status) VALUES (?, ?, ?, ?, ?, ?)");
+$default_status = 1;
+// Note: all parameters are now strings ("s") except status which is integer ("i")
+$stmt->bind_param("sssssi", $staff_name, $staff_email, $staff_phoneno, $staff_uname, $staff_pass, $default_status);
 
         if ($stmt->execute()) {
             redirect($_SERVER['PHP_SELF']); // Redirect to the same page

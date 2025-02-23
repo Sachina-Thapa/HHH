@@ -510,8 +510,8 @@ if (!$confirmed_booking) {
         const diffTime = Math.abs(checkOut - checkIn);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         
-        if (diffDays < 1) {
-            alert('Minimum stay is 1 day');
+        if (diffDays < 15) {
+            alert('You cannot book for less than 15 days');
             return false;
         }
 

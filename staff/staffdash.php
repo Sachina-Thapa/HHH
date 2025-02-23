@@ -15,16 +15,24 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
 
         // Prepare the new status based on the action
         $status = ($action === 'confirm') ? 'accepted' : 'cancelled';
-
-        // Update the status in the hservice table
-        $stmt = $mysqli->prepare("UPDATE hservice SET status = ? WHERE id = ? AND seid = ?");
+        $payment_status = ($action === 'confirm') ? 'confirmed' : 'rejected';
+        
+        // Update the status in the hservice table including payment_status and payment_date
+        $stmt = $mysqli->prepare("UPDATE hservice 
+                                SET status = ?, 
+                                    payment_status = ?,
+                                    payment_date = CASE 
+                                        WHEN ? = 'confirmed' THEN CURRENT_TIMESTAMP 
+                                        ELSE NULL 
+                                    END 
+                                WHERE id = ? AND seid = ?");
         
         if (!$stmt) {
             echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
             exit;
         }
 
-        $stmt->bind_param("sii", $status, $id, $seid);
+        $stmt->bind_param("sssii", $status, $payment_status, $payment_status, $id, $seid);
         
         if ($stmt->execute()) {
             if ($stmt->affected_rows > 0) {
@@ -49,7 +57,6 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
     <title>Staff Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-
     <style>
         /* Sidebar styling */
         .sidebar {
@@ -60,42 +67,41 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
             width: 200px;
             background-color: #343a40;
             padding-top: 20px;
+            z-index: 1000;
         }
         
-        .sidebar a {
-            color: #fff;
-            padding: 15px;
-            display: block;
-            text-decoration: none;
-        }
-
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-
         /* Main content styling */
         .main-content {
-            margin-left: 210px;
+            margin-left: 200px; /* Match sidebar width */
             padding: 20px;
+            width: calc(100% - 200px);
+            min-height: 100vh;
         }
 
-        /* Stat card styling */
+        /* Stat cards styling */
         .stat-card {
             background-color: #f8f9fa;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            color: #28a745;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
+
         .stat-card h2 {
-            font-size: 36px;
+            font-size: 28px;
             margin: 0;
+            color: #28a745;
         }
+
         .stat-card p {
             margin: 5px 0 0;
             color: #6c757d;
+        }
+
+        /* Table styling */
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 1rem;
         }
 
         .status-badge {
@@ -103,14 +109,29 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
             border-radius: 15px;
             font-size: 0.9em;
         }
+
         .status-pending {
             background-color: #ffc107;
             color: #000;
         }
+
+        /* Voucher preview styling */
+        .voucher-preview {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+        }
+        .modal-body .voucher-preview {
+            max-height: 70vh;
+            width: auto;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
-    <?php require('inc/sidemenu.php'); ?>
+    <div class="sidebar">
+        <?php require('inc/sidemenu.php'); ?>
+    </div>
 
     <div class="main-content">
         <?php 
@@ -130,7 +151,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         ];
         ?>
         
-        <!-- Statistics Cards -->
+        <!-- Statistics Cards - Remain unchanged -->
         <div class="row">
             <div class="col-md-4">
                 <div class="stat-card">
@@ -180,19 +201,24 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                                 <th>Service Name</th>
                                 <th>Price</th>
                                 <th>Status</th>
+                                <th>Payment Status</th>
+                                <th>Payment Date</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
-                            // Fetch pending service requests
+                            // Fetch pending service requests with updated query
                             $stmt = $mysqli->query("SELECT 
                                 hservice.id, 
                                 hservice.seid, 
                                 hservice.name AS service_name, 
                                 hservice.price, 
-                                hservice.hid, 
-                                hservice.status, 
+                                hservice.hid,
+                                hservice.status,
+                                hservice.payment_status,
+                                hservice.payment_date,
+                                hservice.voucher,
                                 hostelers.name AS hosteler_name 
                             FROM hservice 
                             JOIN hostelers ON hservice.hid = hostelers.id 
@@ -200,7 +226,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                             ORDER BY hservice.id DESC");
 
                             if (!$stmt) {
-                                echo "<tr><td colspan='7' class='text-center text-danger'>Error fetching service requests</td></tr>";
+                                echo "<tr><td colspan='9' class='text-center text-danger'>Error fetching service requests</td></tr>";
                             } else {
                                 $count = 1;
                                 while ($row = $stmt->fetch_assoc()) {
@@ -209,27 +235,39 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                                             <td>{$row['hosteler_name']}</td>
                                             <td>{$row['seid']}</td>
                                             <td>{$row['service_name']}</td>
-                                            <td>\${$row['price']}</td>
+                                            <td>Rs{$row['price']}</td>
                                             <td>
                                                 <span class='status-badge status-pending'>
                                                     {$row['status']}
                                                 </span>
                                             </td>
-                                            <td>
-                                                <button type='button' class='btn btn-success btn-sm' 
-                                                    onclick='confirmservice({$row['id']}, {$row['seid']})'>
-                                                    <i class='bi bi-check-circle'></i> Accept
-                                                </button>
-                                                <button type='button' class='btn btn-danger btn-sm ms-2' 
-                                                    onclick='cancelservice({$row['id']}, {$row['seid']})'>
-                                                    <i class='bi bi-x-circle'></i> Decline
-                                                </button>
-                                            </td>
-                                        </tr>";
+                                            <td>{$row['payment_status']}</td>
+                                            <td>" . ($row['payment_date'] ? date('Y-m-d H:i:s', strtotime($row['payment_date'])) : '-') . "</td>
+                                            <td>";
+                                    
+                                    // Add voucher preview button if voucher exists
+                                    if (!empty($row['voucher'])) {
+                                        echo "<button type='button' class='btn btn-info btn-sm mb-2' 
+                                                onclick=\"showVoucherPreview('" . htmlspecialchars($row['voucher']) . "', '" . 
+                                                htmlspecialchars($row['service_name']) . "')\">
+                                                <i class='bi bi-eye'></i> View Voucher
+                                            </button><br>";
+                                    }
+                                    
+                                    echo "<button type='button' class='btn btn-success btn-sm' 
+                                            onclick='confirmservice({$row['id']}, {$row['seid']})'>
+                                            <i class='bi bi-check-circle'></i> Accept
+                                        </button>
+                                        <button type='button' class='btn btn-danger btn-sm ms-2' 
+                                            onclick='cancelservice({$row['id']}, {$row['seid']})'>
+                                            <i class='bi bi-x-circle'></i> Decline
+                                        </button>
+                                    </td>
+                                    </tr>";
                                     $count++;
                                 }
                                 if ($count === 1) {
-                                    echo "<tr><td colspan='7' class='text-center'>No pending service requests</td></tr>";
+                                    echo "<tr><td colspan='9' class='text-center'>No pending service requests</td></tr>";
                                 }
                             }
                             ?>
@@ -240,8 +278,78 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         </div>
     </div>
 
+    <!-- Voucher Preview Modal -->
+    <div class="modal fade" id="voucherPreviewModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Service Voucher Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="voucherPreviewContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <script>
+    let voucherModal;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        voucherModal = new bootstrap.Modal(document.getElementById('voucherPreviewModal'));
+    });
+
+    function showVoucherPreview(voucherPath, serviceName) {
+        const previewContainer = document.getElementById('voucherPreviewContent');
+        const fileExtension = voucherPath.split('.').pop().toLowerCase();
+        
+        previewContainer.innerHTML = '<div class="text-center p-4">Loading voucher...</div>';
+        voucherModal.show();
+
+        if (['jpg', 'jpeg', 'png'].includes(fileExtension)) {
+            const img = new Image();
+            const imagePath = `/HHH/hosteler/uploads/service_vouchers/${voucherPath}`;
+            
+            img.onload = function() {
+                previewContainer.innerHTML = `
+                    <img src="${imagePath}" 
+                         alt="Payment Voucher for ${serviceName}"
+                         class="voucher-preview img-fluid">`;
+            };
+            
+            img.onerror = function(e) {
+                previewContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <p>Error loading image.</p>
+                        <p>File details:</p>
+                        <ul>
+                            <li>Attempted path: ${imagePath}</li>
+                            <li>Original filename: ${voucherPath}</li>
+                        </ul>
+                    </div>`;
+            };
+            
+            img.src = imagePath;
+        } else if (fileExtension === 'pdf') {
+            previewContainer.innerHTML = `
+                <div class="alert alert-info">
+                    <p>PDF file detected. Please click below to view:</p>
+                    <a href="/HHH/hosteler/uploads/service_vouchers/${voucherPath}" 
+                       target="_blank" 
+                       class="btn btn-primary">
+                        View PDF Voucher
+                    </a>
+                </div>`;
+        } else {
+            previewContainer.innerHTML = `
+                <div class="alert alert-warning">
+                    <p>Unsupported file type: ${fileExtension}</p>
+                </div>`;
+        }
+    }
+
     function showMessage(message, type = 'success') {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
@@ -252,7 +360,6 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         `;
         document.querySelector('.main-content').insertBefore(alertDiv, document.querySelector('.card'));
         
-        // Auto-dismiss after 5 seconds
         setTimeout(() => {
             alertDiv.remove();
         }, 5000);
@@ -286,19 +393,15 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         .then(response => response.text())
         .then(data => {
             if (data === '1') {
-                // Remove the row from the table
                 const row = document.querySelector(`tr[data-id='${id}']`);
                 if (row) {
                     row.remove();
                 }
-                
-                // Show success message
                 showMessage(`Service request ${action === 'confirm' ? 'accepted' : 'declined'} successfully!`);
                 
-                // Check if table is empty after removal
                 const tbody = document.querySelector('tbody');
                 if (!tbody.querySelector('tr')) {
-                    tbody.innerHTML = "<tr><td colspan='7' class='text-center'>No pending service requests</td></tr>";
+                    tbody.innerHTML = "<tr><td colspan='9' class='text-center'>No pending service requests</td></tr>";
                 }
             } else {
                 throw new Error(data);

@@ -7,7 +7,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $action = $_POST['action'];
 
     // Determine the new status based on the action
-    $new_status = ($action === 'confirm') ? 'confirmed' : 'canceled';
+    $new_status = ($action === 'confirmed') ? 'confirmed' : 'canceled';
 
     // Prepare the SQL statement to update the status
     $sql = "UPDATE booking SET bstatus = ? WHERE bid = ?";
@@ -136,7 +136,7 @@ $result = $conn->query($query);
                                     } else {
                                         echo "<form method='post' action=''>
                                                 <input type='hidden' name='bid' value='" . htmlspecialchars($row['bid']) . "'>
-                                                <button type='submit' name='action' value='confirm' class='btn btn-success'>Confirm</button>
+                                                <button type='submit' name='action' value='confirmed' class='btn btn-success'>confirmed</button>
                                                 <button type='submit' name='action' value='cancel' class='btn btn-danger'>Cancel</button>
                                             </form>";
                                     }

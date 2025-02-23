@@ -1,4 +1,3 @@
-
 <?php 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -36,6 +35,25 @@ try {
     $name = $userDetails['name'] ?? "User not found";
     $userId = $userDetails['id'] ?? null;
 
+    // Check payment status
+    $paymentStatusQuery = "
+        SELECT status 
+        FROM fee 
+        WHERE hid = ? 
+        ORDER BY feeid DESC 
+        LIMIT 1";
+    
+    $stmt = mysqli_prepare($conn, $paymentStatusQuery);
+    if (!$stmt) {
+        throw new Exception("Error preparing payment status query: " . mysqli_error($conn));
+    }
+    
+    mysqli_stmt_bind_param($stmt, "i", $userId);
+    mysqli_stmt_execute($stmt);
+    $paymentResult = mysqli_stmt_get_result($stmt);
+    $paymentStatus = mysqli_fetch_assoc($paymentResult);
+    $lastPaymentStatus = $paymentStatus['status'] ?? null;
+
     // Check user's booking status
     $bookingStatusQuery = "
         SELECT bstatus 
@@ -56,15 +74,14 @@ try {
     $lastStatus = $lastBooking['bstatus'] ?? null;
 
     // Determine if we should show available rooms
-    // Show rooms if user is new, has canceled booking, or has pending booking
-    $showRooms = ($lastStatus === null || $lastStatus === 'canceled' || $lastStatus === 'pending');
+    $showRooms = ($lastStatus === null || $lastStatus === 'canceled' || $lastStatus === 'pending' || $lastStatus === 'completed');
 
     // Initialize filter variables
     $roomTypeFilter = isset($_GET['room_type']) ? mysqli_real_escape_string($conn, $_GET['room_type']) : '';
     $minPriceFilter = isset($_GET['min_price']) ? (float)$_GET['min_price'] : 0;
     $maxPriceFilter = isset($_GET['max_price']) ? (float)$_GET['max_price'] : 100000;
 
-    // Fetch all user's bookings
+    // Fetch all user's bookings with check_in and check_out dates
     $bookingsQuery = "
         SELECT 
             b.bid,
@@ -72,6 +89,8 @@ try {
             b.bookingdate,
             b.arrival,
             b.bstatus,
+            b.check_in,
+            b.check_out,
             r.rtype,
             r.rprice
         FROM booking b 
@@ -98,9 +117,13 @@ try {
             'room_price' => $booking['rprice'],
             'booking_date' => $booking['bookingdate'],
             'arrival_time' => $booking['arrival'],
-            'bstatus' => $booking['bstatus']
+            'bstatus' => $booking['bstatus'],
+            'check_in' => $booking['check_in'],
+            'check_out' => $booking['check_out']
         ];
     }
+
+
 
     // Fetch available rooms if needed
     $rooms = [];
@@ -269,8 +292,6 @@ try {
             gap: 1.5rem;
         }
 
-        
-
         .booking-main-info {
             display: flex;
             align-items: center;
@@ -349,7 +370,7 @@ try {
             color: #991b1b;
         }
 
-         .join-action {
+        .join-action {
             margin-top: 1rem;
             padding: 1rem;
             background-color: #f0f9ff;
@@ -401,8 +422,6 @@ try {
             box-shadow: var(--shadow-sm);
             transition: transform 0.2s ease;
         }
-
-        
 
         .rooms-grid {
             display: grid;
@@ -462,88 +481,208 @@ try {
                         </p>
                     </div>
                 </div>
-                <!-- <?php if ($showRooms): ?>
-                    <a href="booking.php" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> New Booking
-                    </a>
-                <?php endif; ?> -->
             </div>
 
             <!-- Current Bookings Section -->
-             <section class="bookings-section fade-in">
-            <h2 class="section-title">
-                Your Bookings
-            </h2>
-            <?php if (!empty($userBookings)): ?>
-                <div class="booking-cards">
-                    <?php foreach ($userBookings as $booking): ?>
-                        <div class="booking-card">
-                            <div class="booking-main-info">
-                                <div class="booking-details">
-                                    <div class="booking-room-title">
-                                        Room <?php echo htmlspecialchars($booking['room_number']); ?> - <?php echo htmlspecialchars($booking['room_type']); ?>
-                                    </div>
-                                    <div class="booking-meta">
-                                        <span>
-                                            <i class="fas fa-calendar"></i>
-                                            <?php echo date('d M Y', strtotime($booking['booking_date'])); ?>
-                                        </span>
-                                        <span>
-                                            <i class="fas fa-clock"></i>
-                                            <?php 
-                                                $arrivalTimes = [
-                                                    1 => 'Morning',
-                                                    2 => 'Afternoon',
-                                                    3 => 'Evening',
-                                                    4 => 'Night'
-                                                ];
-                                                echo $arrivalTimes[$booking['arrival_time']] ?? 'Not specified';
-                                            ?>
-                                        </span>
-                                        <span class="booking-price">
-                                            <i class="fas fa-rupee-sign"></i>
-                                            <?php echo number_format($booking['room_price'], 2); ?>
-                                        </span>
-                                    </div>
-                                </div>
+           <section class="bookings-section fade-in">
+    <h2 class="section-title">
+        Your Bookings
+    </h2>
+    <?php if (!empty($userBookings)): ?>
+        <div class="booking-cards">
+            <?php foreach ($userBookings as $booking): ?>
+                <div class="booking-card">
+                    <div class="booking-main-info">
+                        <div class="room-icon">
+                            <i class="fas fa-bed"></i>
+                        </div>
+                        <div class="booking-details">
+                            <div class="booking-room-title">
+                                Room <?php echo htmlspecialchars($booking['room_number']); ?> - <?php echo htmlspecialchars($booking['room_type']); ?>
                             </div>
-                            <div class="status-badge status-<?php echo strtolower($booking['bstatus']); ?>">
-                                <i class="fas <?php 
-                                    echo match($booking['bstatus']) {
-                                        'confirmed' => 'fa-check',
-                                        'pending' => 'fa-clock',
-                                        'canceled' => 'fa-times',
-                                        default => 'fa-question'
-                                    };
-                                ?>"></i>
-                                <?php echo ucfirst($booking['bstatus']); ?>
+                            <div class="booking-meta">
+                                <span>
+                                    <i class="fas fa-calendar"></i>
+                                    <?php echo date('d M Y', strtotime($booking['booking_date'])); ?>
+                                </span>
+                                <span>
+                                    <i class="fas fa-clock"></i>
+                                    <?php 
+                                        $arrivalTimes = [
+                                            1 => 'Morning',
+                                            2 => 'Afternoon',
+                                            3 => 'Evening',
+                                            4 => 'Night'
+                                        ];
+                                        echo $arrivalTimes[$booking['arrival_time']] ?? 'Not specified';
+                                    ?>
+                                </span>
+                                <span class="booking-price">
+                                    <i class="fas fa-rupee-sign"></i>
+                                    <?php echo number_format($booking['room_price'], 2); ?>
+                                </span>
                             </div>
                         </div>
-                          <?php if ($booking['bstatus'] === 'confirmed'): ?>
-                                    <div class="join-action">
-                                        <p class="join-message">
-                                            <i class="fas fa-info-circle"></i>
-                                            Ready to join the hostel? Click here to schedule your arrival
-                                        </p>
-                                        <a href="booking.php?action=join&bid=<?php echo htmlspecialchars($booking['bid']); ?>" class="join-button">
-                                            <i class="fas fa-sign-in-alt"></i>
-                                            Schedule Join Date
-                                        </a>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                    <?php endforeach; ?>
+                    </div>
+                    <div class="status-badge status-<?php echo strtolower($booking['bstatus']); ?>">
+                        <i class="fas <?php 
+                            echo match($booking['bstatus']) {
+                                'confirmed' => 'fa-check',
+                                'pending' => 'fa-clock',
+                                'canceled' => 'fa-times',
+                                'completed' => 'fa-check-double',
+                                default => 'fa-question'
+                            };
+                        ?>"></i>
+                        <?php echo ucfirst($booking['bstatus']); ?>
+                    </div>
                 </div>
+                <?php if ($booking['bstatus'] === 'confirmed'): ?>
+                    <?php if (empty($booking['check_in']) && empty($booking['check_out'])): ?>
+                        <div class="join-action">
+                            <p class="join-message">
+                                <i class="fas fa-info-circle"></i>
+                                Ready to join the hostel? Click here to schedule your arrival
+                            </p>
+                            <a href="booking.php?action=join&bid=<?php echo htmlspecialchars($booking['bid']); ?>" class="join-button">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Schedule Join Date
+                            </a>
+                        </div>
+                    <?php elseif (!empty($booking['check_in']) && !empty($booking['check_out'])): ?>
+                        <?php if ($lastPaymentStatus === 'confirmed'): ?>
+    <?php
+        $today = new DateTime();
+        $checkOut = new DateTime($booking['check_out']);
+        $remainingDays = $today > $checkOut ? 0 : $today->diff($checkOut)->days;
+    ?>
+    <div class="join-action" style="background-color: <?php echo $remainingDays === 0 ? '#fff3cd' : '#d4edda'; ?>; 
+                                  border-color: <?php echo $remainingDays === 0 ? '#ffeeba' : '#c3e6cb'; ?>;">
+    <div class="d-flex justify-content-between align-items-center w-100">
+        <div class="join-message" style="color: <?php echo $remainingDays === 0 ? '#856404' : '#155724'; ?>;">
+            <?php if ($remainingDays === 0): ?>
+                <p class="mb-1">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Your stay period has ended
+                </p>
+                <p class="mb-0">
+                    <i class="fas fa-calendar-alt"></i>
+                    Check-out Date: <?php echo date('d M Y', strtotime($booking['check_out'])); ?>
+                </p>
             <?php else: ?>
-                <div class="no-bookings fade-in">
-                    <h3>No Bookings Found</h3>
-                    <p class="text-secondary">Ready to start your journey? Book a room now!</p>
-                    <a href="booking.php" class="btn btn-primary mt-3">
-                        <i class="fas fa-plus me-2"></i>Book a Room
-                    </a>
-                </div>
+                <p class="mb-1">
+                    <i class="fas fa-calendar-check"></i>
+                    Check-in: <?php echo date('d M Y', strtotime($booking['check_in'])); ?>
+                    | Check-out: <?php echo date('d M Y', strtotime($booking['check_out'])); ?>
+                </p>
+                <p class="mb-0">
+                    <i class="fas fa-clock"></i>
+                    Remaining Days: <?php echo $remainingDays; ?> days
+                </p>
             <?php endif; ?>
-        </section>
+        </div>
+        <?php if ($remainingDays === 0): ?>
+            <button type="button" class="btn btn-danger" onclick="processCheckout(<?php echo $booking['bid']; ?>)">
+                <i class="fas fa-sign-out-alt"></i> Check Out
+            </button>
+        <?php endif; ?>
+    </div>
+</div>
+                        <?php elseif ($lastPaymentStatus === 'canceled' || $lastPaymentStatus === null || $lastPaymentStatus === 'pending'): ?>
+                            <div class="join-action" style="background-color: #fff3cd; border-color: #ffeeba;">
+                                <p class="join-message" style="color: #856404;">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Your payment is pending. Please proceed to complete your payment.
+                                </p>
+                                <a href="fee.php" class="join-button" style="background-color: #ffc107; color: #000;">
+                                    <i class="fas fa-credit-card"></i>
+                                    Pay Now
+                                </a>
+                            </div>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+    <?php else: ?>
+        <div class="no-bookings fade-in">
+            <h3>No Bookings Found</h3>
+            <p class="text-secondary">Ready to start your journey? Book a room now!</p>
+            <a href="booking.php" class="btn btn-primary mt-3">
+                <i class="fas fa-plus me-2"></i>Book a Room
+            </a>
+        </div>
+    <?php endif; ?>
+</section>
+
+<!-- Extension Modal -->
+<div class="modal fade" id="extendStayModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Extend Your Stay</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="extendStayForm">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="extend">
+                        <input type="hidden" name="booking_id" value="<?php echo $booking['bid']; ?>">
+                        <input type="hidden" name="current_checkout" value="<?php echo $booking['check_out']; ?>">
+                        <input type="hidden" name="room_price" value="<?php echo $booking['rprice']; ?>">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Number of Days to Extend</label>
+                            <input type="number" class="form-control" name="extension_days" 
+                                   min="1" max="30" required>
+                            <small class="text-muted">Maximum extension period is 30 days</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">New Check-out Date</label>
+                            <input type="text" class="form-control" id="newCheckout" readonly>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Additional Cost</label>
+                            <input type="text" class="form-control" id="additionalCost" readonly>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Confirm Extension</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Confirmation Modal -->
+    <div class="modal fade" id="checkoutModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Checkout</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to check out? This will:</p>
+                    <ul>
+                        <li>Mark your current stay as completed</li>
+                        <li>Make the room available for others</li>
+                        <li>Complete all current service requests</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="checkoutForm">
+                        <input type="hidden" name="action" value="checkout">
+                        <input type="hidden" name="booking_id" value="<?php echo $booking['bid']; ?>">
+                        <button type="submit" class="btn btn-danger">Confirm Checkout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
             <?php if ($showRooms): ?>
             <!-- Available Rooms Section -->
@@ -599,7 +738,7 @@ try {
                                         <strong>Type:</strong> <?php echo htmlspecialchars($room['type']); ?>
                                     </p>
                                     <p class="mb-2">
-                                        <strong>Price:</strong> ₹<?php echo htmlspecialchars($room['price']); ?>/night
+                                        <strong>Price:</strong> Rs <?php echo htmlspecialchars($room['price']); ?>/night
                                     </p>
                                     
                                     <div class="d-grid">
@@ -629,6 +768,33 @@ try {
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
-</body>
-</html>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+ <script>
+   function processCheckout(bookingId) {
+    if (confirm('Are you sure you want to check out? This will make the room available for others.')) {
+        const formData = new FormData();
+        formData.append('booking_id', bookingId);
+        formData.append('confirm_early_checkout', 'yes');
+
+        fetch('ajax/checkout_process.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message);
+                window.location.href = 'hostelerdash.php';
+            } else {
+                // Show error message
+                alert(data.message || 'An error occurred during checkout');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred during checkout. Please try again.');
+        });
+    }
+}
+    </script>

@@ -106,7 +106,7 @@ $result = $conn->query($sql);
             // Get the updated values
             var rno = document.getElementById('rno_' + rid).innerText;
             var rtype = document.getElementById('rtype_' + rid).innerText;
-            var rprice = document.getElementById('rprice_' + rid).innerText.replace('₹ ', '');
+            var rprice = document.getElementById('rprice_' + rid).innerText.replace('Rs  ', '');
 
             // Send the updated values to the server using AJAX
             var xhr = new XMLHttpRequest();
@@ -188,7 +188,7 @@ $result = $conn->query($sql);
                                 echo "<tr>";
                                 echo "<td id='rno_" . $row["rid"] . "'>" . $row["rno"] . "</td>";
                                 echo "<td id='rtype_" . $row["rid"] . "'>" . $row["rtype"] . "</td>";
-                                echo "<td id='rprice_" . $row["rid"] . "'>₹ " . number_format($row["rprice"], 2) . "</td>";
+                                echo "<td id='rprice_" . $row["rid"] . "'>Rs  " . number_format($row["rprice"], 2) . "</td>";
                                 echo "<td class='action-links'>
                                     <a href='#' id='edit_" . $row["rid"] . "' class='update-link' onclick='enableEdit(" . $row["rid"] . "); return false;'>Edit</a>
                                     <a href='#' id='save_" . $row["rid"] . "' class='update-link btn-save' onclick='saveEdit(" . $row["rid"] . "); return false;' style='display:none;'>Save</a>
