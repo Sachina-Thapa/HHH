@@ -159,14 +159,6 @@ $result = $conn->query($sql);
 
                 <input type="number" name="room_price" step="0.01" placeholder="Room Price" required value="<?php echo isset($room_to_update) ? $room_to_update['rprice'] : ''; ?>">
 
-                <!-- Optional Features Checkboxes -->
-                <h5>Optional Features:</h5>
-                <label><input type="checkbox" name="features[]" value="Attached T.V."> Attached T.V.</label><br>
-                <label><input type="checkbox" name="features[]" value="AC"> AC</label><br>
-                <label><input type="checkbox" name="features[]" value="Fan"> Fan</label><br>
-                <label><input type="checkbox" name="features[]" value="Sofa and Study Table"> Sofa and Study Table</label><br>
-                <label><input type="checkbox" name="features[]" value="Locker/Wardrobe"> Locker/Wardrobe</label><br>
-
                 <input type="submit" name="add" value="Add Room">
             </form>
 

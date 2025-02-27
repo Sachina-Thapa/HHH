@@ -14,7 +14,31 @@ if (!isset($_SESSION)) {
     session_start();
 }
 
-if ($result->num_rows > 0) {
+$result = null;
+if (isset($_POST['form_type']) && $_POST['form_type'] === 'login') {
+    $username = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
+    $userType = $_POST['user_type'] ?? '';
+    
+    // Set dashboard based on user type
+    $dashboard = '';
+    if ($userType === 'Admin') {
+        $dashboard = 'admin/dashboard.php';
+    } else if ($userType === 'Staff') {
+        $dashboard = 'staff/dashboard.php';
+    } else if ($userType === 'Hosteler') {
+        $dashboard = 'hosteler/dashboard.php';
+    }
+    
+    // Query to check user credentials
+    $sql = "SELECT * FROM users WHERE username = ? AND password = ? AND user_type = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sss", $username, $password, $userType);
+    $stmt->execute();
+    $result = $stmt->get_result();
+}
+
+if ($result && $result->num_rows > 0) {
     $row = $result->fetch_assoc();
     if ($row['status'] == '1') {
         $_SESSION['username'] = $username;
@@ -431,13 +455,9 @@ function changePassword() {
 // Auto-focus next input in OTP verification
 document.querySelectorAll('#otpVerificationForm input').forEach((input, index) => {
     input.addEventListener('input', function() {
-        if(this.value && index < 3) {
+        if(this.value && index < 5) {
             document.getElementById(`input${index + 2}`).focus();
         }
     });
 });
         </script>
-
-
-
-

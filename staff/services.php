@@ -175,8 +175,8 @@ require('inc/db.php');
             xhr.send(data);
         }
 
-        // Delete service
-        function deleteService(id) {
+        // Delete service by ID
+        function deleteService(seid) {
             if (confirm("Are you sure you want to delete this service?")) {
                 let xhr = new XMLHttpRequest();
                 xhr.open("POST", "ajax/services.php", true);
