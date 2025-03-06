@@ -14,7 +14,7 @@ $username = $_SESSION['username']; // Get the logged-in username
 
 // Function to get user information by username
 function getUserInfoByUsername($conn, $username) {
-    $sql = "SELECT id, name, email, phone_number, picture_path, address, date_of_birth, username, password FROM hostelers WHERE username = ?";
+    $sql = "SELECT id, name, email, phone_number, picture_path, address, date_of_birth, username FROM hostelers WHERE username = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $username);
     $stmt->execute();
@@ -25,12 +25,7 @@ function getUserInfoByUsername($conn, $username) {
 if (isset($_POST['update'])) {
     $id = $_POST['id'];
     $name = $_POST['name'];
-    $email = $_POST['email'];
-    $phone_number = $_POST['phone_number'];
     $address = $_POST['address'];
-    $date_of_birth = $_POST['date_of_birth'];
-    $username = $_POST['username'];
-    $password = $_POST['password'];
 
     // Handle file upload
     $target_dir = 'uploads/'; // Specify your uploads folder
@@ -45,10 +40,10 @@ if (isset($_POST['update'])) {
         }
     }
 
-    // Prepare the update SQL statement
-    $update_sql = "UPDATE hostelers SET name = ?, email = ?, phone_number = ?, picture_path = ?, address = ?, date_of_birth=?, username=?, password=? WHERE id = ?";
+    // Prepare the update SQL statement - only updating name and address
+    $update_sql = "UPDATE hostelers SET name = ?, address = ? WHERE id = ?";
     $update_stmt = $conn->prepare($update_sql);
-    $update_stmt->bind_param("ssisssssi", $name, $email, $phone_number, $picture_path, $address, $date_of_birth, $username, $password, $id);
+    $update_stmt->bind_param("ssi", $name, $address, $id);
     
     if ($update_stmt->execute()) {
         header("Location: accounts.php?updated=1"); // Redirect after successful update
@@ -70,115 +65,181 @@ if (!$result) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=1024">
     <title>My Account</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
-            background-color: #f5f5f5;
-            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container-wrapper {
+            width: 800px;
+            margin: 40px auto;
+            position: absolute;
+            left: calc(50% + 135px); 
+            transform: translateX(-50%);
         }
         .user-info {
             background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             margin-bottom: 20px;
-            text-align: center; /* Center text */
         }
-        .user-info img {
-            border-radius: 50%; /* Make the image circular */
-            width: 100px; /* Set a fixed width */
-            height: 100px; /* Set a fixed height */
-            object-fit: cover; /* Maintain aspect ratio */
-            margin-bottom: 20px; /* Space below the image */
+        .profile-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .profile-header img {
+            border-radius: 50%;
+            width: 130px;
+            height: 130px;
+            object-fit: cover;
+            border: 5px solid #f8f9fa;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .profile-name {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 15px;
+            color: #333;
         }
         .info-line {
-            margin: 15px 0; /* Add vertical spacing */
-            padding: 10px 0; /* Add padding */
-            border-bottom: 1px solid #ddd; /* Add a bottom border */
-            text-align: left; /* Align text to the left */
+            display: flex;
+            margin: 20px 0;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
         }
-        .action-links a {
-            display: inline-block;
+        .info-line label {
+            width: 140px;
+            font-weight: 600;
+            color: #555;
+        }
+        .info-line span {
+            flex: 1;
+            color: #333;
+        }
+        .editable {
             padding: 5px 10px;
-            margin: 2px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .editable[contenteditable="true"] {
+            background-color: #f0f7ff;
+            border: 1px solid #cce5ff;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .action-button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 5px;
             text-decoration: none;
             color: #fff;
-            border-radius: 3px;
-            transition: background-color 0.3s;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
         }
-        .update-link {
-            background-color: #2ecc71;
+        .update-button {
+            background-color: #4CAF50;
         }
-        .update-link:hover {
-            background-color: #27ae60;
+        .update-button:hover {
+            background-color: #3d8b40;
         }
-        .delete-link {
-            background-color: #e74c3c;
+        .save-button {
+            background-color: #2196F3;
         }
-        .delete-link:hover {
-            background-color: #c0392b;
+        .save-button:hover {
+            background-color: #0b7dda;
         }
-        #message {
+        .message {
             text-align: center;
-            font-size: 1.2em;
+            font-size: 1.1em;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .editable-icon {
+            margin-left: 10px;
+            color: #777;
+            visibility: hidden;
+        }
+        .info-line:hover .editable-icon {
+            visibility: visible;
         }
     </style>
 </head>
 <body>
 
-<div class="container-fluid col-md-6 offset-md-3 p-4">
-    <h2 class="mt-3 text-center">My Account</h2>
+<div class="container-wrapper">
+    <h2 class="text-center mb-4">My Account Profile</h2>
 
-    <div id="message">
-        <?php
-        if (isset($_GET['updated']) && $_GET['updated'] == 1) {
-            echo "<p style='color: green;'>Information updated successfully</p>";
-        }
-        ?>
+    <?php if (isset($_GET['updated']) && $_GET['updated'] == 1): ?>
+    <div class="message success-message">
+        <i class="fas fa-check-circle"></i> Your information has been updated successfully!
     </div>
+    <?php endif; ?>
 
     <div class="user-info">
         <?php
         if ($result && $result->num_rows > 0) {
             $row = $result->fetch_assoc(); // Fetch the single row for the logged-in user
-            ?>
+        ?>
+        <div class="profile-header">
             <img src="<?php echo htmlspecialchars($row['picture_path']); ?>" alt="Profile Picture">
-            
-            <div class="info-line">
-                <label>ID:</label> <span><?php echo htmlspecialchars($row['id']); ?></span>
-            </div>
-            <div class="info-line">
-                <label>Name:</label> <span id="name"><?php echo htmlspecialchars($row['name']); ?></span>
-            </div>
-            <div class="info-line">
-                <label>Email:</label> <span id="email"><?php echo htmlspecialchars($row['email']); ?></span>
-            </div>
-            <div class="info-line">
-                <label>Phone Number:</label> <span id="phone_number"><?php echo htmlspecialchars($row['phone_number']); ?></span>
-            </div>
-            <div class="info-line">
-                <label>Address:</label> <span id="address"><?php echo htmlspecialchars($row['address']); ?></span>
-            </div>
-            <div class="info-line">
-                <label>Date of Birth:</label> <span id="dob"><?php echo htmlspecialchars($row['date_of_birth']); ?></span>
-            </div>
-            <div class="info-line">
-                <label>Username:</label> <span id="username"><?php echo htmlspecialchars($row['username']); ?></span>
-            </div>
-            <div class="info-line">
-                <label>Password:</label> <span id="password"><?php echo htmlspecialchars($row['password']); ?></span>
-            </div>
-            <div class="action-links">
-                <a href="#" id="edit" class="update-link">Edit</a>
-                <a href="#" id="save" class="update-link" style="display:none;">Save</a>
-                <a href="?delete=<?php echo $row['id']; ?>" class="delete-link" onclick="return confirm('Are you sure you want to delete your ID?');">Delete</a>
-            </div>
-            <?php
+            <div class="profile-name"><?php echo htmlspecialchars($row['name']); ?></div>
+        </div>
+        
+        <div class="info-line">
+            <label>Name:</label> 
+            <span id="name" class="editable"><?php echo htmlspecialchars($row['name']); ?></span>
+            <i class="fas fa-pencil-alt editable-icon"></i>
+        </div>
+        <div class="info-line">
+            <label>Email:</label> 
+            <span><?php echo htmlspecialchars($row['email']); ?></span>
+        </div>
+        <div class="info-line">
+            <label>Phone Number:</label> 
+            <span><?php echo htmlspecialchars($row['phone_number']); ?></span>
+        </div>
+        <div class="info-line">
+            <label>Address:</label> 
+            <span id="address" class="editable"><?php echo htmlspecialchars($row['address']); ?></span>
+            <i class="fas fa-pencil-alt editable-icon"></i>
+        </div>
+        <div class="info-line">
+            <label>Date of Birth:</label> 
+            <span><?php echo htmlspecialchars($row['date_of_birth']); ?></span>
+        </div>
+        <div class="info-line">
+            <label>Username:</label> 
+            <span><?php echo htmlspecialchars($row['username']); ?></span>
+        </div>
+
+        <div class="text-center mt-4">
+            <button id="edit" class="action-button update-button">
+                <i class="fas fa-edit"></i> Edit Profile
+            </button>
+            <button id="save" class="action-button save-button" style="display:none;">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+        </div>
+        <?php
         } else {
-            echo "<p>No information found.</p>";
+            echo "<p class='text-center'>No information found.</p>";
         }
         ?>
     </div>
@@ -187,36 +248,31 @@ if (!$result) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.getElementById('edit').addEventListener('click', function(event) {
-    event.preventDefault(); // Prevent the default anchor behavior
+    event.preventDefault();
     enableEdit();
 });
 
 document.getElementById('save').addEventListener('click', function(event) {
-    event.preventDefault(); // Prevent the default anchor behavior
+    event.preventDefault();
     saveEdit();
 });
 
 function enableEdit() {
     document.getElementById('name').contentEditable = true;
-    document.getElementById('email').contentEditable = true;
-    document.getElementById('phone_number').contentEditable = true;
     document.getElementById('address').contentEditable = true;
-    document.getElementById('dob').contentEditable = true;
-    document.getElementById('username').contentEditable = true;
-    document.getElementById('password').contentEditable = true;
+    
+    document.getElementById('name').focus();
+    document.getElementById('name').classList.add('editable-active');
+    document.getElementById('address').classList.add('editable-active');
+    
     document.getElementById('edit').style.display = 'none';
-    document.getElementById('save').style.display = 'inline';
+    document.getElementById('save').style.display = 'inline-block';
 }
 
 function saveEdit() {
     var id = <?php echo json_encode($row['id']); ?>;
     var name = document.getElementById('name').innerText;
-    var email = document.getElementById('email').innerText;
- var phone_number = document.getElementById('phone_number').innerText;
     var address = document.getElementById('address').innerText;
-    var date_of_birth = document.getElementById('dob').innerText;
-    var username = document.getElementById('username').innerText;
-    var password = document.getElementById('password').innerText;
 
     // Send AJAX request to update the user information
     var xhr = new XMLHttpRequest();
@@ -224,11 +280,10 @@ function saveEdit() {
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.onload = function() {
         if (this.status == 200) {
-            alert("Information updated successfully");
-            location.reload(); // Reload the page to see the changes
+            window.location.href = 'accounts.php?updated=1';
         }
     };
-    xhr.send('update=1&id=' + id + '&name=' + encodeURIComponent(name) + '&email=' + encodeURIComponent(email) + '&phone_number=' + encodeURIComponent(phone_number) + '&address=' + encodeURIComponent(address) + '&date_of_birth=' + encodeURIComponent(date_of_birth) + '&username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password));
+    xhr.send('update=1&id=' + id + '&name=' + encodeURIComponent(name) + '&address=' + encodeURIComponent(address));
 }
 </script>
 </body>

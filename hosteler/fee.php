@@ -285,6 +285,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['voucher']) && isset($
             color: #ffffff;
         }
 
+        .status-canceled {
+            background-color: #dc3545;
+            color: #ffffff;
+        }
+
         .voucher-preview-container {
             display: flex;
             justify-content: center;
@@ -503,7 +508,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['voucher']) && isset($
                     <?php endif; ?>
                 </div>
 
-                <?php if ($existing_fee && $existing_fee['voucher']): ?>
+                <?php if ($existing_fee && $existing_fee['voucher'] && $existing_fee['status'] != 'canceled'): ?>
                     <?php
                     $voucher_path = 'uploads/vouchers/' . $existing_fee['voucher'];
                     $file_extension = strtolower(pathinfo($existing_fee['voucher'], PATHINFO_EXTENSION));
@@ -531,6 +536,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['voucher']) && isset($
                         <?php endif; ?>
                     </div>
                 <?php else: ?>
+                    <?php if ($existing_fee && $existing_fee['status'] == 'canceled'): ?>
+                        <div class="alert alert-danger mb-4">
+                            <h5 class="alert-heading"><i class="bi bi-exclamation-triangle me-2"></i>Your payment was canceled</h5>
+                            <p>Please upload a new payment voucher using the form below.</p>
+                        </div>
+                    <?php endif; ?>
                     <div class="upload-section">
                         <form action="" method="POST" enctype="multipart/form-data">
                             <div class="mb-3">

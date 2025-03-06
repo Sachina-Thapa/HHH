@@ -25,17 +25,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "Error updating status: " . $stmt->error;
     }
 
-    if ($result->num_rows > 0) {
-        while($row = $result->fetch_assoc()) {
+    $checkSql = "SELECT reason, voucher FROM visitorform WHERE vid = ?";
+    $checkStmt = $conn->prepare($checkSql);
+    $checkStmt->bind_param("i", $vid);
+    $checkStmt->execute();
+    $checkResult = $checkStmt->get_result();
+    
+    if ($checkResult->num_rows > 0) {
+        while($row = $checkResult->fetch_assoc()) {
             if ($row['reason'] === 'stay' && !empty($row['voucher'])) {
                 $voucherPath = "uploads/visitorVouchers/" . $row['voucher'];
                 echo "<!-- Debug: Full path: " . realpath($voucherPath) . " -->";
                 echo "<!-- Debug: File exists: " . (file_exists($voucherPath) ? 'Yes' : 'No') . " -->";
-                
-                echo "<button type='button'...";
             }
         }
     }
+    $checkStmt->close();
     $stmt->close();
 }
 

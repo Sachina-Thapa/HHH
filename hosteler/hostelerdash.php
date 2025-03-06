@@ -588,18 +588,26 @@ try {
         <?php endif; ?>
     </div>
 </div>
-                        <?php elseif ($lastPaymentStatus === 'canceled' || $lastPaymentStatus === null || $lastPaymentStatus === 'pending'): ?>
-                            <div class="join-action" style="background-color: #fff3cd; border-color: #ffeeba;">
-                                <p class="join-message" style="color: #856404;">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    Your payment is pending. Please proceed to complete your payment.
-                                </p>
-                                <a href="fee.php" class="join-button" style="background-color: #ffc107; color: #000;">
-                                    <i class="fas fa-credit-card"></i>
-                                    Pay Now
-                                </a>
-                            </div>
+            <?php elseif ($lastPaymentStatus === 'canceled' || $lastPaymentStatus === null || $lastPaymentStatus === 'pending'): ?>
+                <div class="join-action" style="background-color: <?php echo $lastPaymentStatus === 'canceled' ? '#f8d7da' : '#fff3cd'; ?>; 
+                                                border-color: <?php echo $lastPaymentStatus === 'canceled' ? '#f5c6cb' : '#ffeeba'; ?>;">
+                    <p class="join-message" style="color: <?php echo $lastPaymentStatus === 'canceled' ? '#721c24' : '#856404'; ?>;">
+                        <i class="fas fa-<?php echo $lastPaymentStatus === 'canceled' ? 'exclamation-circle' : 'exclamation-triangle'; ?>"></i>
+                        <?php if($lastPaymentStatus === 'canceled'): ?>
+                            Your payment was canceled. Please upload a new payment voucher.
+                        <?php elseif($lastPaymentStatus === 'pending'): ?>
+                            Your payment is pending. Please proceed to complete your payment.
+                        <?php else: ?>
+                            Payment required. Please complete your payment to confirm your stay.
                         <?php endif; ?>
+                    </p>
+                    <a href="fee.php" class="join-button" style="background-color: <?php echo $lastPaymentStatus === 'canceled' ? '#dc3545' : '#ffc107'; ?>; 
+                                                                color: <?php echo $lastPaymentStatus === 'canceled' ? '#fff' : '#000'; ?>;">
+                        <i class="fas fa-<?php echo $lastPaymentStatus === 'canceled' ? 'upload' : 'credit-card'; ?>"></i>
+                        <?php echo $lastPaymentStatus === 'canceled' ? 'Upload New Voucher' : 'Pay Now'; ?>
+                    </a>
+                </div>
+            <?php endif; ?>
                     <?php endif; ?>
                 <?php endif; ?>
             <?php endforeach; ?>
