@@ -258,9 +258,13 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
                       <div class="col-md-12 mb-3">
                         <label class="form-label">Email</label>
                         <div class="input-group">
-                          <input type="email" name="email" id="register-email" class="form-control shadow-none" required>
-                          <button type="button" class="btn btn-primary" id="sendOtpBtn" onclick="sendOTP()">Send OTP</button>
-                        </div>
+    <input type="email" name="email" id="register-email" class="form-control shadow-none" required>
+    <button type="button" class="btn btn-primary" id="sendOtpBtn" onclick="sendOTP()">
+        <span class="button-text">Send OTP</span>
+        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+    </button>
+</div>
+
                       </div>
                       <div class="col-md-12 mb-3" id="otpSection" style="display:none;">
                         <label class="form-label">Enter OTP</label>
@@ -286,7 +290,16 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
 
         function sendOTP() {
             const email = document.getElementById('register-email').value;
+    const button = document.getElementById('sendOtpBtn');
+    const buttonText = button.querySelector('.button-text');
+    const spinner = button.querySelector('.spinner-border');
+    
             if(email) {
+
+                button.disabled = true;
+        buttonText.textContent = 'Sending...';
+        spinner.classList.remove('d-none');
+
                 const formData = new FormData();
                 formData.append('email', email);
                 
@@ -314,7 +327,13 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
                 .catch(error => {
                     console.error('Fetch error:', error);
                     alert('Network error occurred');
-                });
+                })
+                .finally(() => {
+            // Reset button state
+            button.disabled = false;
+            buttonText.textContent = 'Send OTP';
+            spinner.classList.add('d-none');
+        });
             } else {
                 alert('Please enter a valid email address');
             }
