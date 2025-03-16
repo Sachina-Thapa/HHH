@@ -284,53 +284,22 @@ $conn->close();
   <!-- Facilities Section -->
   <section id="Facilities" class="py-5 bg-light">
     <div class="container">
-      <h2 class="text-center fs-2 fw-bold mb-4">Our Facilities</h2>
-      <div class="row g-4">
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h3 class="card-title fs-5">Budget-Friendly Stays</h3>
-              <p class="card-text text-muted">Enjoy a cozy stay without breaking the bank.</p>
-              <a href="#" class="btn btn-outline-primary w-100">Learn More</a>
-            </div>
-          </div>
+        <h2 class="text-center fs-2 fw-bold mb-4">Our Facilities</h2>
+        <div class="row g-4">
+            <?php while ($facility = mysqli_fetch_assoc($facilities_result)) : ?>
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h3 class="card-title fs-5"><?php echo htmlspecialchars($facility['title']); ?></h3>
+                            <p class="card-text text-muted"><?php echo htmlspecialchars($facility['description']); ?></p>
+                        </div>
+                    </div>
+                </div>
+            <?php endwhile; ?>
         </div>
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h3 class="card-title fs-5">Healthy Food</h3>
-              <p class="card-text text-muted">Healthy meals to keep you energized at the hostel.</p>
-              <a href="#" class="btn btn-outline-primary w-100">Learn More</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h3 class="card-title fs-5">Peaceful Environment</h3>
-              <p class="card-text text-muted">Experience a peaceful stay with comfort and calm all around.</p>
-              <a href="#" class="btn btn-outline-primary w-100">Learn More</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h3 class="card-title fs-5">Laundry</h3>
-              <p class="card-text text-muted">Quick and easy laundry right at the hostel.</p>
-              <a href="#" class="btn btn-outline-primary w-100">Learn More</a>
-      </div>
-    </div>      
-   </div>
-   <div class="col-md-4">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h3 class="card-title fs-5">Wi-fi</h3>
-              <p class="card-text text-muted">Stay connected with fast, free Wi-Fi at the hostel.</p>
-              <a href="#" class="btn btn-outline-primary w-100">Learn More</a>
-   </div>
-   </div>  
-  </section>
+    </div>
+</section>
+
 
 
   <section id="rooms" class="py-5 bg-white">

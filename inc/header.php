@@ -225,8 +225,8 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
                     <div class="row">
                       <div class="col-md-6 mb-3">
                         <label class="form-label">Name</label>
-                        <input type="text" name="name" class="form-control shadow-none" required>
-                      </div>
+                        <input type="text" name="name" class="form-control shadow-none" pattern="^[A-Za-z\s]+$" title="Only alphabets and spaces are allowed" required>                      
+                        </div>
                       <div class="col-md-6 mb-3">
                         <label class="form-label">Phone Number</label>
                         <input type="tel" pattern="(\+977?)?[9][6-9]\d{8}" maxLength="10" name="phone" class="form-control shadow-none" required>
@@ -245,11 +245,11 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
                       </div>
                       <div class="col-md-6 mb-3">
                         <label class="form-label">Username</label>
-                        <input type="text" name="username" class="form-control shadow-none" required>
-                      </div>
-                      <div class="col-md-6 mb-3">
+                        <input type="text" name="username" class="form-control shadow-none" pattern="^[A-Za-z0-9]+$" title="Only alphabets and numbers are allowed" required>                      
+                       </div>
+                        <div class="col-md-6 mb-3">
                         <label class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control shadow-none" required>
+                        <input type="password" name="password" class="form-control shadow-none" pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"  title="Password must be at least 8 characters long and include a letter, a number, and a special character" required>
                       </div>
                       <div class="col-md-6 mb-3">
                         <label class="form-label">Confirm Password</label>

@@ -50,7 +50,7 @@ if (isset($_GET['action'])) {
         $hid = intval($_GET['id']);
         
         try {
-            // Use the correct table name "fee" instead of "hostelerService"
+            // Use the correct table name "fee" 
             $stmt = $mysqli->prepare("SELECT feeid, hid, rid, seid, vid, sid, bid, total, status, confirmed_date FROM fee WHERE hid = ?");
             
             if (!$stmt) {
@@ -212,10 +212,6 @@ if (isset($_GET['action'])) {
                 throw new Exception("Cannot delete hosteler with pending requests");
             }
             
-            // If we get here, it's safe to delete
-            
-            // Delete related records first 
-            // Note: In a real application, you might want to archive these rather than delete
             
             // Delete from visitorform
             $stmt = $mysqli->prepare("DELETE FROM visitorform WHERE hid = ?");

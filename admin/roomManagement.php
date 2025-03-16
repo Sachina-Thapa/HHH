@@ -29,6 +29,8 @@ if (isset($_GET['delete'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
     // Check if the room number already exists
     $room_number = $_POST['room_number'];
+    $room_price = $_POST['room_price'];
+
     $check_sql = "SELECT * FROM room WHERE rno = ?";
     $check_stmt = $conn->prepare($check_sql);
 
@@ -91,6 +93,41 @@ $result = $conn->query($sql);
 
     <script src="js/roommanagement.js" defer></script> <!-- Link to external JavaScript -->
     <script>
+        function validateNumberInput(input) {
+    var messageDiv = document.getElementById('room_check_message');
+    input.value = input.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+
+    if (input.value === '') {
+        messageDiv.innerText = "Room Number must contain only numbers.";
+    } else {
+        messageDiv.innerText = "";
+    }
+}
+        // function validateRoomNumber() {
+        //     var roomNumber = document.getElementById('room_number').value;
+        //     var messageDiv = document.getElementById('room_check_message');
+
+        //     if (roomNumber === '') {
+        //         messageDiv.innerText = "Room Number must contain only numbers.";
+        //         return false; // Prevent form submission
+        //     }
+
+        //     return true;
+        // }
+        // // Function to validate Room Price (1 to 5 digits only)
+        // function validateRoomPrice(input) {
+        //     const roomPrice = input.value;
+        //     const roomPriceMessage = document.getElementById('room_check_message');
+
+        //     if (!/^\d{1,5}$/.test(roomPrice)) {
+        //         roomPriceMessage.textContent = "Room price must be a number between 1 and 99,999 with no symbols or characters.";
+        //         return false;
+        //     } else {
+        //         roomPriceMessage.textContent = "";
+        //         return true;
+        //     }
+        // }
+
         function enableEdit(rid) {
             // Enable editing for the selected room
             document.getElementById('rno_' + rid).contentEditable = true;
@@ -144,9 +181,9 @@ $result = $conn->query($sql);
                 unset($_SESSION['error_message']); // Clear the message after displaying
             }
             ?>
-            <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+            <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>" onsubmit="return validateRoomNumber()">
                 <label for="room_number">Room Number</label>
-                <input type="text" id="room_number" name="room_number" placeholder="Room Number" required value="<?php echo isset($room_to_update) ? $room_to_update['rno'] : ''; ?>" onkeyup="checkRoomNumber()">
+                <input type="text" id="room_number" name="room_number" placeholder="Room Number" required oninput="validateNumberInput(this)">
                 <div id="room_check_message" style="color: red; font-size: small;"></div>
 
                 <!-- Dropdown for Room Type -->

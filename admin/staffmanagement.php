@@ -283,9 +283,8 @@ $result = $conn->query($sql);
                         <h4>ADD New Staff</h4>
                         <form id="staffFormContent" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
                             <div class="mb-3">
-                                <label for="staff_name" class="form-label">Name *</label>
-                                <input type="text" class="form-control" id="staff_name" name="name"
-                                    placeholder="Enter name" required>
+                            <label for="staff_name" class="form-label">Name *</label>
+                            <input type="text" class="form-control" id="staff_name" name="name" placeholder="Enter name" pattern="^[A-Za-z\s]+$" title="Only alphabets and spaces are allowed" required>
                             </div>
                             <div class="mb-3">
                                 <label for="staff_email" class="form-label">Email *</label>
@@ -293,20 +292,17 @@ $result = $conn->query($sql);
                                     placeholder="Enter email" required>
                             </div>
                             <div class="mb-3">
-                                <label for="staff_phoneno" class="form-label">Phone no *</label>
-                                <input type="text" class="form-control" id="staff_phoneno" name="phoneno"
-                                    placeholder="Enter Phone no" required>
+                                <label for="staff_phoneno" class="form-label" >Phone no *</label>
+                                <input type="tel" class="form-control" pattern="(\+977?)?[9][6-9]\d{8}" maxLength="10" id="staff_phoneno" name="phoneno" placeholder="Enter Phone no" required>
                             </div>
                             <div class="mb-3">
                                 <label for="staff_uname" class="form-label">Username *</label>
-                                <input type="text" class="form-control" id="staff_uname" name="username"
-                                    placeholder="Enter Username" required>
+                                <input type="text" class="form-control" id="staff_uname" name="username" maxlength="20" pattern="^[A-Za-z]+$" title="Only alphabetic characters are allowed" placeholder="Enter Username" required>
                                 <span id="usernameError" class="text-danger" style="display: none;"></span>
                             </div>
                             <div class="mb-3">
                                 <label for="staff_pass" class="form-label">Password *</label>
-                                <input type="password" class="form-control" id="staff_pass" name="password"
-                                    placeholder="Enter password" required>
+                                <input type="password" class="form-control" id="staff_pass" name="password" placeholder="Enter password" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$" title="Password must be at least 8 characters long and contain both letters and numbers" required>
                             </div>
                             <button type="submit" class="button-link" name="add">Save</button>
                             <button type="button" class="button-link" id="cancelstBtn">Cancel</button>

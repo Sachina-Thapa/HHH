@@ -185,6 +185,7 @@ require('inc/db.php');
                 xhr.onload = function () {
                     if (this.responseText == 1) {
                         alert('Success', 'Service deleted!');
+                        
                         loadServices();
                     } else {
                         alert('Error', 'Server Down!');

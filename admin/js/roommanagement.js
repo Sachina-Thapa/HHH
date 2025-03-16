@@ -1,3 +1,4 @@
+
 function checkRoomNumber() {
     var roomNumber = document.getElementById('room_number').value;
     var xhr = new XMLHttpRequest();
@@ -15,6 +16,7 @@ function checkRoomNumber() {
     };
     xhr.send('room_number=' + encodeURIComponent(roomNumber));
 }
+
 
 function enableEdit(rid) {
     document.getElementById('rno_' + rid).contentEditable = true;
