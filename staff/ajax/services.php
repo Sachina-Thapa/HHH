@@ -6,7 +6,7 @@ if (isset($_POST['add_service'])) {
     $name = $_POST['name'];
     $price = $_POST['price'];
 
-    $query = "INSERT INTO `services` (`name`, `price`) VALUES (?, ?)";
+    $query = "INSERT INTO services (name, price) VALUES (?, ?)";
     $stmt = $mysqli->prepare($query);
 
     if ($stmt) {
@@ -21,7 +21,7 @@ if (isset($_POST['add_service'])) {
 
 // Load all services
 if (isset($_POST['load_services'])) {
-    $query = "SELECT * FROM `services`";
+    $query = "SELECT * FROM services";
     $result = $mysqli->query($query);
 
     if ($result) {
@@ -57,7 +57,7 @@ if (isset($_POST['update_service'])) {
     $name = $_POST['name'];
     $price = $_POST['price'];
 
-    $query = "UPDATE `services` SET `name` = ?, `price` = ? WHERE `seid` = ?";
+    $query = "UPDATE services SET name = ?, price = ? WHERE seid = ?";
     $stmt = $mysqli->prepare($query);
 
     if ($stmt) {
@@ -74,7 +74,7 @@ if (isset($_POST['update_service'])) {
 if (isset($_POST['delete_service'])) {
     $id = $_POST['seid'];
 
-    $query = "DELETE FROM `services` WHERE `seid` = ?";
+    $query = "DELETE FROM services WHERE seid = ?";
     $stmt = $mysqli->prepare($query);
 
     if ($stmt) {

@@ -195,7 +195,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th>S.N.</th>
                                 <th>Hosteler Name</th>
                                 <th>Service ID</th>
                                 <th>Service Name</th>

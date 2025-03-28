@@ -238,7 +238,7 @@ $conn->close();
       <div class="text-center text-white">
   <h1 class="display-3 fw-bold mb-4">Welcome to <?php echo isset($site_settings['site_title']) ? htmlspecialchars($site_settings['site_title']) : 'Her Home Hostel'; ?></h1>
   <p class="fs-4 mb-4">Experience comfort and community in our modern hostels</p>
-  <button onclick="checkLoginAndBook()" class="btn btn-primary btn-lg">Book Now</button>
+  <button  class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#loginModal">Book Now</button>
 </div>
     </div>
     <button id="prevSlide" class="position-absolute start-0 top-50 translate-middle-y btn btn-outline-light">

@@ -61,11 +61,11 @@ require('inc/db.php');
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Name</label>
-                            <input type="text" name="name" class="form-control shadow-none">
+                            <input type="text" name="name" class="form-control shadow-none" pattern="^[A-Za-z]+$" title="Only alphabets are allowed" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Price</label>
-                            <input type="text" name="price" class="form-control shadow-none">
+                            <input type="number" name="price" class="form-control shadow-none">
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -185,7 +185,6 @@ require('inc/db.php');
                 xhr.onload = function () {
                     if (this.responseText == 1) {
                         alert('Success', 'Service deleted!');
-                        
                         loadServices();
                     } else {
                         alert('Error', 'Server Down!');

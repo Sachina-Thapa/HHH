@@ -46,7 +46,7 @@ $username = $_SESSION['username'];
 
 // Fetch user information
 function getUserInfoByUsername($conn, $username) {
-    $sql = "SELECT id, name, email, phone_number, picture_path, address, date_of_birth, username FROM hostelers WHERE username = ?";
+    $sql = "SELECT id, name, email, phone_number, address, date_of_birth, username FROM hostelers WHERE username = ?";
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         die("Prepare failed: " . $conn->error);
@@ -68,7 +68,7 @@ $email = $userInfo['email'];
 $phone_number = $userInfo['phone_number'];
 $address = $userInfo['address'];
 $date_of_birth = $userInfo['date_of_birth'];
-$picture_path = $userInfo['picture_path'];
+// $picture_path = $userInfo['picture_path'];
 
 // Check if user has a confirmed booking
 $check_booking_sql = "

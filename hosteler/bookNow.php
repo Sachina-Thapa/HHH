@@ -1,4 +1,4 @@
-<?php
+<!-- <?php
 session_start();
 $host = 'localhost';
 $user = 'root'; 
@@ -10,12 +10,12 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-session_start();
-if (!isset($_SESSION['username'])) {
-    $_SESSION['booking_pending'] = true;
-    header("Location: ../index.php");
-    exit();
-}
+// session_start();
+// if (!isset($_SESSION['username'])) {
+//     $_SESSION['booking_pending'] = true;
+//     header("Location: ../index.php");
+//     exit();
+// }
 
 // Update room status to available if checkout date is less than current date
 $currentDate = date('Y-m-d');
@@ -457,4 +457,4 @@ $conn->close();
     }
 </script>
 </body>
-</html>
+</html> -->

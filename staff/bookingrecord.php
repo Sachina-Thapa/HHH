@@ -89,7 +89,7 @@ $result = $conn->query($query);
 
     <div class="content">
         <div class="container mt-4">
-            <h3>New Bookings</h3>
+            <h3>Booking Record</h3>
             <div class="table-responsive">
                 <table class="table table-hover text-center">
                     <thead class="table-dark">

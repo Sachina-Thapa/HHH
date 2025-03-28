@@ -103,30 +103,6 @@ $result = $conn->query($sql);
         messageDiv.innerText = "";
     }
 }
-        // function validateRoomNumber() {
-        //     var roomNumber = document.getElementById('room_number').value;
-        //     var messageDiv = document.getElementById('room_check_message');
-
-        //     if (roomNumber === '') {
-        //         messageDiv.innerText = "Room Number must contain only numbers.";
-        //         return false; // Prevent form submission
-        //     }
-
-        //     return true;
-        // }
-        // // Function to validate Room Price (1 to 5 digits only)
-        // function validateRoomPrice(input) {
-        //     const roomPrice = input.value;
-        //     const roomPriceMessage = document.getElementById('room_check_message');
-
-        //     if (!/^\d{1,5}$/.test(roomPrice)) {
-        //         roomPriceMessage.textContent = "Room price must be a number between 1 and 99,999 with no symbols or characters.";
-        //         return false;
-        //     } else {
-        //         roomPriceMessage.textContent = "";
-        //         return true;
-        //     }
-        // }
 
         function enableEdit(rid) {
             // Enable editing for the selected room

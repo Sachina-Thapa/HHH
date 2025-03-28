@@ -29,7 +29,7 @@ function enableEdit(rid) {
 function saveEdit(rid) {
     var rno = document.getElementById('rno_' + rid).innerText;
     var rtype = document.getElementById('rtype_' + rid).innerText;
-    var rprice = document.getElementById('rprice_' + rid).innerText.replace('₹ ', '').replace(',', '');
+    var rprice = document.getElementById('rprice_' + rid).innerText.replace('Rs', '').replace(',', '');
 
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'roommanagement.php', true);

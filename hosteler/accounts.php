@@ -14,7 +14,7 @@ $username = $_SESSION['username']; // Get the logged-in username
 
 // Function to get user information by username
 function getUserInfoByUsername($conn, $username) {
-    $sql = "SELECT id, name, email, phone_number, picture_path, address, date_of_birth, username FROM hostelers WHERE username = ?";
+    $sql = "SELECT id, name, email, phone_number, address, date_of_birth, username FROM hostelers WHERE username = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $username);
     $stmt->execute();
@@ -197,10 +197,6 @@ if (!$result) {
         if ($result && $result->num_rows > 0) {
             $row = $result->fetch_assoc(); // Fetch the single row for the logged-in user
         ?>
-        <div class="profile-header">
-            <img src="<?php echo htmlspecialchars($row['picture_path']); ?>" alt="Profile Picture">
-            <div class="profile-name"><?php echo htmlspecialchars($row['name']); ?></div>
-        </div>
         
         <div class="info-line">
             <label>Name:</label> 

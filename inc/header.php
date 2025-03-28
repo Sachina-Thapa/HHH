@@ -1,4 +1,4 @@
-<?php
+  <?php
 
 $host = 'localhost';
 $user = 'root'; 
@@ -6,67 +6,78 @@ $password = '';
 $database = 'hhh'; 
 $errorMessage = '';
 
-$conn = new mysqli($host, $user, $password, $database);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-if (!isset($_SESSION)) {
-    session_start();
-}
-
-$result = null;
-if (isset($_POST['form_type']) && $_POST['form_type'] === 'login') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-    $userType = $_POST['user_type'] ?? '';
-    
-    // Set dashboard based on user type
-    $dashboard = '';
-    if ($userType === 'Admin') {
-        $dashboard = 'admin/dashboard.php';
-    } else if ($userType === 'Staff') {
-        $dashboard = 'staff/dashboard.php';
-    } else if ($userType === 'Hosteler') {
-        $dashboard = 'hosteler/dashboard.php';
+try {
+    $conn = new mysqli($host, $user, $password, $database);
+    if ($conn->connect_error) {
+        throw new Exception("Connection failed: " . $conn->connect_error);
     }
-    
-    // Query to check user credentials
-    $sql = "SELECT * FROM users WHERE username = ? AND password = ? AND user_type = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sss", $username, $password, $userType);
-    $stmt->execute();
-    $result = $stmt->get_result();
-}
+    if (!isset($_SESSION)) {
+        session_start();
+    }
 
-if ($result && $result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    if ($row['status'] == '1') {
-        $_SESSION['username'] = $username;
-        $_SESSION['user_type'] = $userType;
+    $result = null;
+    if (isset($_POST['form_type']) && $_POST['form_type'] === 'login') {
+        $username = $_POST['username'] ?? '';
+        $password = $_POST['password'] ?? '';
+        $userType = $_POST['user_type'] ?? '';
         
-        // If there was a pending booking attempt
-        if (isset($_SESSION['booking_pending']) && $_SESSION['booking_pending']) {
-            unset($_SESSION['booking_pending']);
-            echo "<script>window.location.href = 'hosteler/bookNow.php';</script>";
-            exit();
+        // Set dashboard based on user type
+        $dashboard = '';
+        if ($userType === 'Admin') {
+            $dashboard = 'admin/dashboard.php';
+        } else if ($userType === 'Staff') {
+            $dashboard = 'staff/dashboard.php';
+        } else if ($userType === 'Hosteler') {
+            $dashboard = 'hosteler/dashboard.php';
         }
         
-        header("Location: $dashboard");
-        exit();
-    } else {
-        $errorMessage = "Account is not active.";
+        // Query to check user credentials
+        $sql = "SELECT * FROM users WHERE username = ? AND password = ? AND user_type = ?";
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("An error occurred while preparing the query.");
+        }
+        $stmt->bind_param("sss", $username, $password, $userType);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            if ($row['status'] == '1') {
+                $_SESSION['username'] = $username;
+                $_SESSION['user_type'] = $userType;
+                
+                // If there was a pending booking attempt
+                if (isset($_SESSION['booking_pending']) && $_SESSION['booking_pending']) {
+                    unset($_SESSION['booking_pending']);
+                    echo "<script>window.location.href = 'hosteler/bookNow.php';</script>";
+                    exit();
+                }
+                
+                header("Location: $dashboard");
+                exit();
+            } else {
+                $errorMessage = "Account is not active.";
+            }
+        } else {
+            $errorMessage = "Invalid username, password, or user type.";
+        }
     }
+
+    // Fetch current site settings
+    $settings_query = "SELECT * FROM site_settings LIMIT 1";
+    $settings_result = mysqli_query($conn, $settings_query);
+    $site_settings = mysqli_fetch_assoc($settings_result);
+    // Fetch logo from site_settings
+    $logo_query = "SELECT logo_path FROM site_settings LIMIT 1";
+    $logo_result = mysqli_query($conn, $logo_query);
+    $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0 
+        ? mysqli_fetch_assoc($logo_result)['logo_path'] 
+        : '../images/logoo.png';
+} catch (Exception $e) {
+    $errorMessage = "Invalid Credentials.";
+    error_log($e->getMessage()); 
 }
-// Fetch current site settings
-$settings_query = "SELECT * FROM site_settings LIMIT 1";
-$settings_result = mysqli_query($conn, $settings_query);
-$site_settings = mysqli_fetch_assoc($settings_result);
-// Fetch logo from site_settings
-$logo_query = "SELECT logo_path FROM site_settings LIMIT 1";
-$logo_result = mysqli_query($conn, $logo_query);
-$logo_path = $logo_result && mysqli_num_rows($logo_result) > 0 
-    ? mysqli_fetch_assoc($logo_result)['logo_path'] 
-    : '../images/logoo.png'; // Fallback to default logo if no logo in database
 ?>
 
  <!-- NAVIGATION BAR -->
@@ -145,15 +156,21 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
                         <input type="hidden" name="form_type" value="login">
                            <input type="hidden" name="booking_redirect" value="<?php echo isset($_SESSION['booking_pending']) ? '1' : '0'; ?>">
 
-                        <div class="d-flex align-items-center justify-content-between mb-2"> 
-                            <button type="submit" class="btn btn-primary">LOGIN</button>
-                            <a href="#" class="text-secondary text-decoration-none ms-auto" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal" data-bs-dismiss="modal">Forgot Password?</a>
+                           <div class="d-flex flex-column align-items-center mb-2"> 
+                            <button type="submit" class="btn btn-primary w-100">LOGIN</button>
+                            <div class="text-center mt-3">
+                                <span>Don't have an account? </span>
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal" data-bs-dismiss="modal">Register Now</a>
                             </div>
+                        </div>
+                        <a href="#" class="text-secondary text-decoration-none ms-auto" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal" data-bs-dismiss="modal">Forgot Password?</a>
+
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
 
  <!-- Forgot Password Modal -->
 <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
@@ -249,7 +266,7 @@ $logo_path = $logo_result && mysqli_num_rows($logo_result) > 0
                        </div>
                         <div class="col-md-6 mb-3">
                         <label class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control shadow-none" pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"  title="Password must be at least 8 characters long and include a letter, a number, and a special character" required>
+                        <input type="password" name="password" class="form-control shadow-none" pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"  title="Password must be at least 8 characters long and include letter, number, and special character" required>
                       </div>
                       <div class="col-md-6 mb-3">
                         <label class="form-label">Confirm Password</label>
@@ -480,3 +497,5 @@ document.querySelectorAll('#otpVerificationForm input').forEach((input, index) =
     });
 });
         </script>
+        
+      

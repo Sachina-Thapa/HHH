@@ -302,8 +302,8 @@ $result = $conn->query($sql);
                             </div>
                             <div class="mb-3">
                                 <label for="staff_pass" class="form-label">Password *</label>
-                                <input type="password" class="form-control" id="staff_pass" name="password" placeholder="Enter password" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$" title="Password must be at least 8 characters long and contain both letters and numbers" required>
-                            </div>
+                                <input type="password" name="password" class="form-control shadow-none" pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"  title="Password must be at least 8 characters long and include letter, number, and special character" required>
+                                </div>
                             <button type="submit" class="button-link" name="add">Save</button>
                             <button type="button" class="button-link" id="cancelstBtn">Cancel</button>
                         </form>
